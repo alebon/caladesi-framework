@@ -5,11 +5,8 @@ Hence it uses some parts of it (lift-json, ...).
 
 ##What you'll find here in future:
 
-caladesi-record
-caladesi-orientdb
-caladesi-orientdb-record
-caladesi-lift
-caladesi-web
+caladesi-orientdb,
+caladesi-web, and more to come later
 
 ###Maven:
 
