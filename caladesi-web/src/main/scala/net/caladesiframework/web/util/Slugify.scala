@@ -44,7 +44,6 @@ object Slugify {
     val slug = removeNotLatin (normalize(removeSpecialChars(removeWhiteSpaces(phrase))))
     
     // Restricted to maxLength (in future versions)
-    //slug.toLowerCase.take(maxLength)
-    slug.toLowerCase
+    slug.toLowerCase.take(maxLength)
   }
 }

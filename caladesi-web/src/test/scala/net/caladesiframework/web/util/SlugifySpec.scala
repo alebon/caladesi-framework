@@ -38,5 +38,11 @@ class SlugifySpec extends SpecificationWithJUnit {
 
       slug must_==("--")
     }
+
+    "take only the specified size of the string into slug" in {
+      val slug = Slugify.string("A Small rabbit", 5)
+
+      slug must_==("a-sma")
+    }
   }
 }
