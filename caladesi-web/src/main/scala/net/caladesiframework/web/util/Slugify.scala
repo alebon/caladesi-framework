@@ -19,13 +19,12 @@ package net.caladesiframework.web.util
 import java.util.regex.Pattern
 import java.text.Normalizer
 import java.text.Normalizer.Form
-import java.util.Locale
 
 
 object Slugify {
-  
-  private lazy val NonLatin = "[^\\w-]".r
-  private lazy val Whitespace = "[\\s]".r
+
+  private lazy val NonLatin : Pattern = Pattern.compile("[^\\w-]")
+  private lazy val Whitespace : Pattern = Pattern.compile("[\\s]")
 
   def string(phrase : String, maxLength : Int = 50) : String = {
     def removeSpecialChars(phrase : String) =
@@ -44,7 +43,8 @@ object Slugify {
 
     val slug = removeNotLatin (normalize(removeSpecialChars(removeWhiteSpaces(phrase))))
     
-    // Restricted to maxLength
-    slug.toLowerCase.take(maxLength)
+    // Restricted to maxLength (in future versions)
+    //slug.toLowerCase.take(maxLength)
+    slug.toLowerCase
   }
 }

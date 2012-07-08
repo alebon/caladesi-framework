@@ -36,8 +36,10 @@ object Dependencies {
 
   // Test scope:
   // Scope available only in test classpath, non-transitive by default.
-  lazy val mockito_all = "org.mockito"     % "mockito-all"                % "1.8.5"      % "test"
-  lazy val scalacheck  = "org.scalacheck"  % "scalacheck_$scalaVersion"   % "1.9"        % "test"
-  lazy val specs2      = "org.specs2"      % "specs2_$scalaVersion"   	  % "1.11"       % "test"
+  lazy val mockito_all = "org.mockito"     % "mockito-all"        % "1.8.5"      % "test"
+  //lazy val scalatest   = "org.scalatest "  % "scalatest_2.9.1"    % "1.8"      % "test"
+  lazy val scalacheck  = "org.scalacheck"  % "scalacheck_2.9.1"   % "1.9"        % "test"
+  lazy val specs2      = "org.specs2"      % "specs2_2.9.1"   	  % "1.11"       % "test"
+  lazy val junit       = "junit"           % "junit"              % "4.5"        % "test"
 
 }
