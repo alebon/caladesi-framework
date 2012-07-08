@@ -24,7 +24,14 @@ object BuildDef extends Build {
   val scalaToolsReleases = "Scala-Tools Releases Repository" at "http://scala-tools.org/repo-releases/"
 
   lazy val root = Project(id = "caladesi-framework",
-                          base = file(".")) aggregate(web)
+                          base = file(".")) aggregate(common, web, orientdb)
+
+  lazy val common =
+    Project(id = "caladesi-framework-common",
+      base = file("caladesi-common"),
+      settings = Project.defaultSettings)
+      .settings(description := "Caladesi Framework Common Utilities‚",
+      libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit))
 
   lazy val web =
      Project(id = "caladesi-framework-web",
@@ -32,4 +39,11 @@ object BuildDef extends Build {
              settings = Project.defaultSettings)
        .settings(description := "Caladesi Framework Web Utilities",
                  libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit))
+
+  lazy val orientdb =
+    Project(id = "caladesi-framework-orientdb",
+            base = file("caladesi-orientdb"),
+            settings = Project.defaultSettings)
+      .settings(description := "Caladesi Framework OrientDB",
+                libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit))
 }

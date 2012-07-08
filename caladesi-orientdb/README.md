@@ -59,7 +59,7 @@ Add the framework to your pom.xml:
 </dependency>
 ```
 
-###Gralde
+###Gradle
 ```groovy
 dependencies {
     // Caladesi Framework
