@@ -59,6 +59,7 @@ test-output
 *.ipr
 *.iws
 .idea
+.gradle
 
 # Pax Runner (for easy OSGi launching)
 runner
