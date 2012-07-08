@@ -8,15 +8,39 @@ Hence it uses some parts of it (lift-json, ...).
 caladesi-orientdb,
 caladesi-web, and more to come later
 
+##Getting Started with Caladesi Framework
+You can use the caladesi framework by adding the dependency to your project:
+
+### SBT 0.11.3 (Simple Build Tool)
+Modify your build.sbt
+
+    libraryDependencies += "net.caladesiframework" % "caladesi-web_2.9.1" % "0.1.0" % "compile"
+
 ###Maven:
+Add the framework to your pom.xml:
 
 ```xml
 <dependency>
   <groupId>net.caladesiframework</groupId>
-  <artifactId>caladesi-orientdb_${scala.version}</artifactId>
+  <artifactId>caladesi-web_${scala.version}</artifactId>
   <version>0.1.0</version>
 </dependency>
 ```
+
+###Gralde
+```groovy
+dependencies {
+    // Caladesi Framework
+    compile "net.caladesiframework:caladesi-web_$scalaVersion:0.1.0"
+}
+```
+
+## Building Caladesi Framework
+To build the caladesi framework from source, checkout this repository and use the included `caladesi` script.
+
+    git clone https://github.com/alebon/caladesi-framework.git
+    cd caladesi-framework
+    ./caladesi
 
 ##Licence
 
