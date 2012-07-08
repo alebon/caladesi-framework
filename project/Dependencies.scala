@@ -19,15 +19,20 @@ import Keys._
 
 object Dependencies {
 
-  lazy val scalaVersion = "2.9.1"
-  lazy val slf4jVersion = "1.6.4"
-  lazy val liftVersion  = "2.4"
+  lazy val scalaVersion  = "2.9.1"
+  lazy val slf4jVersion  = "1.6.4"
+  lazy val liftVersion   = "2.4"
+  lazy val orientVersion = "1.0.1"
 
   // Compile scope:
   // Scope available in all classpath, transitive by default.
-  lazy val scalaLib  	    	  = "org.scala-lang" % "scala-library"	           % scalaVersion
-  lazy val slf4j_api              = "org.slf4j"      % "slf4j-api"                 % slf4jVersion
-  lazy val lift_common            = "net.liftweb"    % "lift-common_$scalaVersion" % liftVersion
+  lazy val scalaLib             = "org.scala-lang" % "scala-library"	           % scalaVersion
+  lazy val slf4j_api            = "org.slf4j"      % "slf4j-api"                 % slf4jVersion
+  lazy val lift_common          = "net.liftweb"    % "lift-common_$scalaVersion" % liftVersion
+
+  // OrientDB
+  lazy val orient_commons       = "com.orientechnologies" % "orient-commons" % orientVersion
+  lazy val orientdb_core        = "com.orientechnologies" % "orientdb-core" % orientVersion
 
   // Provided scope:
 

@@ -22,6 +22,7 @@ import Dependencies._
 object BuildDef extends Build {
 
   val scalaToolsReleases = "Scala-Tools Releases Repository" at "http://scala-tools.org/repo-releases/"
+  val orientRepositories = "Orient Technologies Maven2 Repository" at "https://oss.sonatype.org/content/repositories/releases/com/orientechnologies/"
 
   lazy val root = Project(id = "caladesi-framework",
                           base = file(".")) aggregate(common, web, orientdb)
@@ -45,5 +46,5 @@ object BuildDef extends Build {
             base = file("caladesi-orientdb"),
             settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework OrientDB",
-                libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit))
+                libraryDependencies ++= Seq(orient_commons, orientdb_core, slf4j_api, scalacheck, specs2, junit))
 }
