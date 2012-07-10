@@ -61,4 +61,13 @@ abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect
     throw new Exception("Not implemented yet")
   }
 
+  /**
+   * Returns the overall count of the entities in this repository
+   *
+   * @return
+   */
+  def count = {
+    throw new Exception("Not implemented yet")
+  }
+
 }
