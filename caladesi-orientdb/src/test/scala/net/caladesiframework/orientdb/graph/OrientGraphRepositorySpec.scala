@@ -42,7 +42,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
       db.begin(TXTYPE.NOTX)
       db.declareIntent(new OIntentMassiveInsert())
       var countSize = 0
-      val maxItems = 1000
+      val maxItems = 200
 
       try {
         val graph = db.createVertex()
