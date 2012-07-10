@@ -16,7 +16,11 @@
 
 package net.caladesiframework.orientdb.graph
 
-abstract class OrientGraphRepository[T <: OrientGraphEntity] (implicit m:scala.reflect.Manifest[T]) {
+import entity.GraphEntity
+import repository.{CRUDRepository, GraphRepository}
+
+abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect.Manifest[T])
+  extends GraphRepository[T] with CRUDRepository[T] {
 
   /**
    * Creates a new entity (not persisted)
@@ -33,7 +37,7 @@ abstract class OrientGraphRepository[T <: OrientGraphEntity] (implicit m:scala.r
    * @param entity
    * @return
    */
-  def persist(entity: T) = {
+  def update(entity: T) = {
     throw new Exception("Not implemented yet")
   }
 

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.orientdb.graph
+package net.caladesiframework.orientdb.graph.repository
 
-class OrientGraphEntity {
+import net.caladesiframework.orientdb.graph.entity.{GraphEntity}
+
+trait GraphRepository[T <: GraphEntity] {
 
 }
