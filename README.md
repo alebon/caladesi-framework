@@ -42,6 +42,6 @@ To build the caladesi framework from source, checkout this repository and use th
     cd caladesi-framework
     ./caladesi
 
-##Licence
+##License
 
 The Caladesi Framework is open source software released under the Apache 2.0 license. You must be a committer to submit patches.
