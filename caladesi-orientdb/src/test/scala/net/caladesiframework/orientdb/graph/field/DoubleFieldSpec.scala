@@ -14,14 +14,25 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.orientdb.graph.testkit
+package net.caladesiframework.orientdb.graph.field
 
-import net.caladesiframework.orientdb.graph.entity.GraphEntity
-import net.caladesiframework.orientdb.graph.field.{DoubleField, IntField, StringField}
+import org.specs2.mutable._
+import net.caladesiframework.orientdb.graph.testkit.TestEntity
 
-class TestEntity extends GraphEntity {
+class DoubleFieldSpec extends SpecificationWithJUnit {
 
-  object stringField extends StringField(this)
-  object intField extends IntField(this)
-  object doubleField extends DoubleField(this)
+  var testEntity: TestEntity = new TestEntity()
+
+  "DoubleField" should {
+    "accept and reuturn values properly" in {
+
+      testEntity.doubleField.set(5.1)
+      testEntity.doubleField.is must_== (5.1)
+    }
+
+    "be not optional" in {
+
+      testEntity.doubleField.optional must_== false
+    }
+  }
 }

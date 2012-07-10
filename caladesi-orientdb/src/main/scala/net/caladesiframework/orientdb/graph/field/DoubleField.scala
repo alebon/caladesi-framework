@@ -14,14 +14,36 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.orientdb.graph.testkit
+package net.caladesiframework.orientdb.graph.field
 
-import net.caladesiframework.orientdb.graph.entity.GraphEntity
-import net.caladesiframework.orientdb.graph.field.{DoubleField, IntField, StringField}
+import net.caladesiframework.orientdb.graph.entity.Entity
 
-class TestEntity extends GraphEntity {
+class DoubleField extends Field[Double] {
 
-  object stringField extends StringField(this)
-  object intField extends IntField(this)
-  object doubleField extends DoubleField(this)
+  override lazy val defaultValue = 0d
+
+  override val optional = false
+
+  /**
+   * Init the field with default value
+   *
+   * @param ownerEntity
+   */
+  def this(ownerEntity: Entity) = {
+    this()
+    owner = ownerEntity
+    set(defaultValue)
+  }
+
+  /**
+   * Init the field with value
+   *
+   * @param ownerEntity
+   * @param value
+   */
+  def this(ownerEntity: Entity, value: Double) = {
+    this()
+    owner = ownerEntity
+    set(value)
+  }
 }
