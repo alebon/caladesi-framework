@@ -19,12 +19,9 @@ package net.caladesiframework.orientdb.graph
 import org.specs2.mutable._
 import testkit.TestEntity
 import com.orientechnologies.orient.core.db.graph.OGraphDatabase
-import com.orientechnologies.orient.core.tx.OTransaction
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import java.util
-import com.orientechnologies.orient.core.metadata.schema.OClass.INDEX_TYPE
-import com.orientechnologies.orient.core.metadata.schema.OType
 
 class OrientGraphRepositorySpec extends SpecificationWithJUnit {
 

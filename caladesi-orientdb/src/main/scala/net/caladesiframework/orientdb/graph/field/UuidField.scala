@@ -16,16 +16,18 @@
 
 package net.caladesiframework.orientdb.graph.field
 
+import java.util.{UUID}
 import net.caladesiframework.orientdb.graph.entity.Entity
 
-class StringField extends Field[String] {
+class UuidField extends Field[UUID] {
 
-  override lazy val defaultValue = ""
+  override def name = "_uuid"
+  val defaultValue = UUID.randomUUID()
 
   override val optional = false
 
   /**
-   * Init the field with default value
+   * Init with efault value
    *
    * @param ownerEntity
    */
@@ -36,12 +38,12 @@ class StringField extends Field[String] {
   }
 
   /**
-   * Init the field with value
+   * Init with given value
    *
    * @param ownerEntity
    * @param value
    */
-  def this(ownerEntity: Entity, value: String) = {
+  def this(ownerEntity: Entity, value: UUID) = {
     this()
     owner = ownerEntity
     set(value)
