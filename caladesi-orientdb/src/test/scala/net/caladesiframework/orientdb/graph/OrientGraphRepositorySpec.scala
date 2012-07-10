@@ -28,19 +28,21 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
   "OrientGraph Repository" should {
     "create DB in memory" in {
 
-      val db : OGraphDatabase = new OGraphDatabase("memory:db")
+      //val db : OGraphDatabase = new OGraphDatabase("memory:db")
+      val db : OGraphDatabase = new OGraphDatabase("remote:127.0.0.1/db")
 
-      if (!db.exists()) {
-        db.create()
-      } else {
+      //if (!db.exists()) {
+        //db.create()
+      //} else {
         db.open("admin", "admin")
-      }
+      //}
 
       db.begin(TXTYPE.NOTX)
       db.declareIntent(new OIntentMassiveInsert())
       var countSize = 0
-      val maxItems = 200
+      val maxItems = 100
 
+      val start = System.currentTimeMillis()
       try {
         val graph = db.createVertex()
         graph.field("id", 0)
@@ -55,9 +57,9 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
         repoConnection.field("name", "TEST_REPOSITORY")
         repoConnection.save
 
-
+        val vertex = db.createVertex()
         for (i <- 1 to maxItems) {
-          val vertex = db.createVertex()
+          vertex.reset
 
           //vertex.setClassName("TestEntity")
           vertex.field("entityCount", i)
@@ -74,7 +76,9 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
           //println("Vertex identity: " + vertex.getIdentity)
           //println(vertex.getSize)
         }
+        val end = System.currentTimeMillis()
 
+        println("Insertion time for " + maxItems + " verteces: " + (end-start) + " ms")
         println("Overall size for " + maxItems + ": " + (countSize/1024) + " KByte")
         println("DB Size: " + (db.getSize/1024) + " KByte")
 
@@ -83,7 +87,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
         case e:Exception =>
           println(e.getMessage)
       } finally {
-        db.drop()
+        //db.drop()
         db.close()
       }
 
