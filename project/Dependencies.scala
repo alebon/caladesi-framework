@@ -33,6 +33,7 @@ object Dependencies {
   // OrientDB
   lazy val orient_commons       = "com.orientechnologies" % "orient-commons" % orientVersion
   lazy val orientdb_core        = "com.orientechnologies" % "orientdb-core" % orientVersion
+  lazy val orientdb_client      = "com.orientechnologies" % "orientdb-client" % orientVersion
 
   // Blueprints
   //lazy val orientdb_core        = "com.tinkerpop.blueprints" % "orientdb-core" % orientVersion

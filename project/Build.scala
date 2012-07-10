@@ -46,5 +46,5 @@ object BuildDef extends Build {
             base = file("caladesi-orientdb"),
             settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework OrientDB",
-                libraryDependencies ++= Seq(orient_commons, orientdb_core, slf4j_api, scalacheck, specs2, junit))
+                libraryDependencies ++= Seq(orient_commons, orientdb_core, orientdb_client, slf4j_api, scalacheck, specs2, junit))
 }
