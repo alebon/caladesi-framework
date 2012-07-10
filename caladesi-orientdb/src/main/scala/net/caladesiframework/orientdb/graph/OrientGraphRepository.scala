@@ -42,6 +42,16 @@ abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect
   }
 
   /**
+   * Saves all given entities or updates the if already present
+   *
+   * @param list
+   * @return
+   */
+  def update(list: List[T]) = {
+    throw new Exception("Not implemented yet")
+  }
+
+  /**
    * Removes entity from db
    *
    * @param entity
