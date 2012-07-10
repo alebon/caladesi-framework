@@ -16,6 +16,27 @@
 
 package net.caladesiframework.orientdb.graph.entity
 
-class GraphEntity extends Entity {
+abstract class GraphEntity extends Entity {
 
+  private var internalId : String = null
+
+  /**
+   * Init the entity with given internalId
+   * (For loading from DB)
+   *
+   * @param internalId
+   */
+  def this(internalId : String) = {
+    this()
+    this.internalId = internalId
+  }
+
+  /**
+   * Is the GraphEntity represented in the graph
+   *
+   * @return
+   */
+  def hasInternalId() = {
+    null != this.internalId
+  }
 }
