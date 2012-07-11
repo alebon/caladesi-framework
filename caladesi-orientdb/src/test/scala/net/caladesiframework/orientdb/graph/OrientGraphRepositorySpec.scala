@@ -40,7 +40,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
       db.begin(TXTYPE.NOTX)
       db.declareIntent(new OIntentMassiveInsert())
       var countSize = 0
-      val maxItems = 10000
+      val maxItems = 10
 
       val start = System.currentTimeMillis()
       try {
@@ -107,7 +107,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
 
     "create main repository node" in {
       val repo = new OrientGraphRepository[TestEntity]() {}
-      //repo.init()
+      repo.init()
 
       true must_==(true)
     }

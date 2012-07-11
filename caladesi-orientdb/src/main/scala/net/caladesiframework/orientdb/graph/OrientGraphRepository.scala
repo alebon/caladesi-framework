@@ -20,6 +20,7 @@ import entity.GraphEntity
 import net.caladesiframework.orientdb.repository.CRUDRepository
 import repository.{GraphRepository}
 import com.orientechnologies.orient.core.db.graph.OGraphDatabase
+import com.orientechnologies.orient.core.record.impl.ODocument
 
 abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect.Manifest[T])
   extends GraphRepository[T] with CRUDRepository[T] {
@@ -48,7 +49,9 @@ abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect
         graphDB.setRoot(repositoryIdentifier, rootVertex)
         graphDB.getRoot(repositoryIdentifier)
         println("Created main repository node")
-      case r : OGraphDatabase => r
+      case r : ODocument => r
+      case _ =>
+        throw new Exception("Unexpected behaviour while repo initialization, please report a bug")
     }
 
     graphDB.close()
