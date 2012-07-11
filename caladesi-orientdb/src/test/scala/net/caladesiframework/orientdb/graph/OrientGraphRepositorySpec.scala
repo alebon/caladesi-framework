@@ -104,5 +104,12 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
 
       entityInstance.isInstanceOf[TestEntity] must_== true
     }
+
+    "create main repository node" in {
+      val repo = new OrientGraphRepository[TestEntity]() {}
+      //repo.init()
+
+      true must_==(true)
+    }
   }
 }

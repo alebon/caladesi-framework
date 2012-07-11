@@ -19,9 +19,40 @@ package net.caladesiframework.orientdb.graph
 import entity.GraphEntity
 import net.caladesiframework.orientdb.repository.CRUDRepository
 import repository.{GraphRepository}
+import com.orientechnologies.orient.core.db.graph.OGraphDatabase
 
 abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect.Manifest[T])
   extends GraphRepository[T] with CRUDRepository[T] {
+
+  // @TODO Inject by configuration
+  private val graphDB = new OGraphDatabase("remote:127.0.0.1/db")
+  private val userName = "admin"
+  private val password = "admin"
+
+  // Override to rename repository
+  def repositoryIdentifier = "DEFAULT_REPOSITORY"
+  def repositoryEntityIdentifier = "DEFAULT_ENTITY"
+
+  /**
+   * Creates main repository node (id not present)
+   */
+  def init() = {
+    graphDB.open(userName, password)
+
+    // Init the main repository node
+    var root = graphDB.getRoot(repositoryIdentifier) match {
+      case null =>
+        graphDB.createVertexType("OrientGraphRepository")
+        val rootVertex = graphDB.createVertex("OrientGraphRepository")
+
+        graphDB.setRoot(repositoryIdentifier, rootVertex)
+        graphDB.getRoot(repositoryIdentifier)
+        println("Created main repository node")
+      case r : OGraphDatabase => r
+    }
+
+    graphDB.close()
+  }
 
   /**
    * Creates a new entity (not persisted)
