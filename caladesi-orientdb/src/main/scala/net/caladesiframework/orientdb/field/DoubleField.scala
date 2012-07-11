@@ -14,23 +14,36 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.orientdb.graph.entity
+package net.caladesiframework.orientdb.field
 
-abstract class Entity {
+import net.caladesiframework.orientdb.entity.Entity
 
-  private[this] var metaFields = List[Any]()
+class DoubleField extends Field[Double] {
 
-  def fields = this.metaFields
+  override lazy val defaultValue = 0d
+
+  override val optional = false
 
   /**
-   * Adds the field to the meta fields
+   * Init the field with default value
    *
-   * @param field
-   * @return
+   * @param ownerEntity
    */
-  def attach(field: Any) = {
-    if (!this.metaFields.contains(field)) {
-      this.metaFields = field :: metaFields
-    }
+  def this(ownerEntity: Entity) = {
+    this()
+    owner = ownerEntity
+    set(defaultValue)
+  }
+
+  /**
+   * Init the field with value
+   *
+   * @param ownerEntity
+   * @param value
+   */
+  def this(ownerEntity: Entity, value: Double) = {
+    this()
+    owner = ownerEntity
+    set(value)
   }
 }

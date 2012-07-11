@@ -14,36 +14,28 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.orientdb.graph.field
+package net.caladesiframework.orientdb.document
 
-import net.caladesiframework.orientdb.graph.entity.Entity
+import entity.Document
+import net.caladesiframework.orientdb.repository.CRUDRepository
 
-class IntField extends Field[Int] {
+class OrientDocumentRepository[T <: Document](implicit m:scala.reflect.Manifest[T]) extends CRUDRepository[T] {
 
-   override lazy val defaultValue = 0
+  /**
+   * Create a fresh document
+   * @return
+   */
+  def create = m.erasure.newInstance().asInstanceOf[T]
 
-   override val optional = false
+  def update(document: T) = {
+    document.fields foreach {
+      field => {
 
-   /**
-    * Init the field with default value
-    *
-    * @param ownerEntity
-    */
-   def this(ownerEntity: Entity) = {
-     this()
-     owner = ownerEntity
-     set(defaultValue)
-   }
+      }
+    }
 
-   /**
-    * Init the field with value
-    *
-    * @param ownerEntity
-    * @param value
-    */
-   def this(ownerEntity: Entity, value: Int) = {
-     this()
-     owner = ownerEntity
-     set(value)
-   }
- }
+    false
+  }
+
+  def delete(document: T) = false
+}

@@ -14,13 +14,36 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.orientdb.graph.entity
+package net.caladesiframework.orientdb.field
 
-import net.caladesiframework.orientdb.field.UuidField
 import net.caladesiframework.orientdb.entity.Entity
 
-trait UUIDPk extends Entity {
+class IntField extends Field[Int] {
 
-  object uuid extends UuidField(this)
+  override lazy val defaultValue = 0
 
+  override val optional = false
+
+  /**
+   * Init the field with default value
+   *
+   * @param ownerEntity
+   */
+  def this(ownerEntity: Entity) = {
+    this()
+    owner = ownerEntity
+    set(defaultValue)
+  }
+
+  /**
+   * Init the field with value
+   *
+   * @param ownerEntity
+   * @param value
+   */
+  def this(ownerEntity: Entity, value: Int) = {
+    this()
+    owner = ownerEntity
+    set(value)
+  }
 }

@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.orientdb.graph.field
+package net.caladesiframework.orientdb.field
 
-import java.util.{UUID}
-import net.caladesiframework.orientdb.graph.entity.Entity
+import net.caladesiframework.orientdb.entity.Entity
 
-class UuidField extends Field[UUID] {
+class StringField extends Field[String] {
 
-  override def name = "_uuid"
-  val defaultValue = UUID.randomUUID()
+  override lazy val defaultValue = ""
 
   override val optional = false
 
   /**
-   * Init with efault value
+   * Init the field with default value
    *
    * @param ownerEntity
    */
@@ -38,12 +36,12 @@ class UuidField extends Field[UUID] {
   }
 
   /**
-   * Init with given value
+   * Init the field with value
    *
    * @param ownerEntity
    * @param value
    */
-  def this(ownerEntity: Entity, value: UUID) = {
+  def this(ownerEntity: Entity, value: String) = {
     this()
     owner = ownerEntity
     set(value)

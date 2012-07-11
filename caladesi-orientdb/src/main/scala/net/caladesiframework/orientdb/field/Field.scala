@@ -14,36 +14,30 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.orientdb.graph.field
+package net.caladesiframework.orientdb.field
 
-import net.caladesiframework.orientdb.graph.entity.Entity
+import net.caladesiframework.orientdb.entity.Entity
 
-class DoubleField extends Field[Double] {
+trait Field[T] {
+  var value: T = defaultValue
 
-  override lazy val defaultValue = 0d
+  var owner: Entity = null
 
-  override val optional = false
+  val optional: Boolean = true
 
-  /**
-   * Init the field with default value
-   *
-   * @param ownerEntity
-   */
-  def this(ownerEntity: Entity) = {
-    this()
-    owner = ownerEntity
-    set(defaultValue)
+  def me = this
+
+  def set(value: T) {
+    this.value = value
+    // Add field to owner entity
+    if (!owner.fields.contains(this)) {
+      owner attach me
+    }
   }
 
-  /**
-   * Init the field with value
-   *
-   * @param ownerEntity
-   * @param value
-   */
-  def this(ownerEntity: Entity, value: Double) = {
-    this()
-    owner = ownerEntity
-    set(value)
-  }
+  def defaultValue: T
+
+  def name = this.getClass.toString
+
+  def is = this.value
 }

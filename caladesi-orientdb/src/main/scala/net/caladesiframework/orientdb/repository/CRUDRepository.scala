@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.orientdb.graph.repository
+package net.caladesiframework.orientdb.repository
 
-import net.caladesiframework.orientdb.graph.entity.Entity
+import net.caladesiframework.orientdb.entity.Entity
 
 trait CRUDRepository[T <: Entity] {
 
-  def create : T
+  def create: T
 
-  def update(entity: T) : Boolean
+  def update(entity: T): Boolean
 
-  def delete(entity: T) : Boolean
+  def delete(entity: T): Boolean
 
 }

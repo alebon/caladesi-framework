@@ -17,7 +17,8 @@
 package net.caladesiframework.orientdb.graph
 
 import entity.GraphEntity
-import repository.{CRUDRepository, GraphRepository}
+import net.caladesiframework.orientdb.repository.CRUDRepository
+import repository.{GraphRepository}
 
 abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect.Manifest[T])
   extends GraphRepository[T] with CRUDRepository[T] {

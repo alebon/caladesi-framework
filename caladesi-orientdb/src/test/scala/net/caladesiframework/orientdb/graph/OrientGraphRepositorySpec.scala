@@ -40,11 +40,12 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
       db.begin(TXTYPE.NOTX)
       db.declareIntent(new OIntentMassiveInsert())
       var countSize = 0
-      val maxItems = 100
+      val maxItems = 10000
 
       val start = System.currentTimeMillis()
       try {
         val graph = db.createVertex()
+        //graph.setClassName("OGraph")
         graph.field("id", 0)
         graph.field("name", "rootNode")
         graph.save
@@ -66,11 +67,11 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
           vertex.field("price", 1.60 + i)
           vertex.field("name", "Product Test Bla bli Lorem ipsum dolor" + i)
           vertex.field("lastUpdate", new util.Date().toString)
-          vertex.save
 
           val vertexEdge = db.createEdge(repoVertex, vertex)
           vertexEdge.field("rel", "TEST_ENTITY")
-          vertexEdge.save
+
+          vertex.save
 
           countSize += vertex.getSize
           //println("Vertex identity: " + vertex.getIdentity)
@@ -78,7 +79,9 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
         }
         val end = System.currentTimeMillis()
 
-        println("Insertion time for " + maxItems + " verteces: " + (end-start) + " ms")
+
+
+        println("Insertion time for " + maxItems + " vertices: " + (end-start) + " ms")
         println("Overall size for " + maxItems + ": " + (countSize/1024) + " KByte")
         println("DB Size: " + (db.getSize/1024) + " KByte")
 

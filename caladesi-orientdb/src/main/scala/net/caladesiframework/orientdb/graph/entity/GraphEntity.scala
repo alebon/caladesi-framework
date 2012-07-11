@@ -16,6 +16,8 @@
 
 package net.caladesiframework.orientdb.graph.entity
 
+import net.caladesiframework.orientdb.entity.Entity
+
 abstract class GraphEntity extends Entity {
 
   private var internalId : String = null

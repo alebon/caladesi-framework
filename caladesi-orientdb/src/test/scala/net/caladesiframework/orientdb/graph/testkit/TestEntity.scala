@@ -17,7 +17,7 @@
 package net.caladesiframework.orientdb.graph.testkit
 
 import net.caladesiframework.orientdb.graph.entity.GraphEntity
-import net.caladesiframework.orientdb.graph.field.{DoubleField, IntField, StringField}
+import net.caladesiframework.orientdb.field.{DoubleField, IntField, StringField}
 
 class TestEntity extends GraphEntity {
 

@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.orientdb.graph.entity
+package net.caladesiframework.orientdb.document.entity
 
-import net.caladesiframework.orientdb.field.UuidField
 import net.caladesiframework.orientdb.entity.Entity
 
-trait UUIDPk extends Entity {
-
-  object uuid extends UuidField(this)
+class Document extends Entity {
 
 }
