@@ -24,14 +24,25 @@ import com.orientechnologies.orient.core.record.impl.ODocument
 import net.caladesiframework.orientdb.field._
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import com.orientechnologies.orient.core.metadata.schema.OClass
+import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
-abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect.Manifest[T])
-  extends GraphRepository[T] with CRUDRepository[T] {
+abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scala.reflect.Manifest[EntityType])
+  extends GraphRepository[EntityType] with CRUDRepository[EntityType] {
 
   // @TODO Inject by configuration
   private val graphDB = new OGraphDatabase("remote:127.0.0.1/db")
   private val userName = "admin"
   private val password = "admin"
+
+  implicit def dbWrapper(db: OGraphDatabase) = new {
+    def queryBySql[T](sql: String, params: AnyRef*): List[T] = {
+      val params4Java = params.toArray
+      val result: java.util.List[T] = db.query(new OSQLSynchQuery(sql), params4Java:_*)
+      result.asScala.toList
+    }
+  }
 
   // Override to rename
   def repositoryEntityClass = "OGraphEntity"
@@ -56,8 +67,8 @@ abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect
    *
    * @return
    */
-  def create : T = {
-    m.erasure.newInstance().asInstanceOf[T]
+  def create : EntityType = {
+    m.erasure.newInstance().asInstanceOf[EntityType]
   }
 
   /**
@@ -66,7 +77,7 @@ abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect
    * @param entity
    * @return
    */
-  def update(entity: T) = {
+  def update(entity: EntityType) = {
     graphDB.open(userName, password)
 
     // Check for right VertexType present
@@ -92,7 +103,7 @@ abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect
    * @param list
    * @return
    */
-  def update(list: List[T]) = {
+  def update(list: List[EntityType]) = {
     open
     graphDB.declareIntent(new OIntentMassiveInsert())
 
@@ -126,7 +137,7 @@ abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect
    * @param entity
    * @return
    */
-  def delete(entity: T) = {
+  def delete(entity: EntityType) = {
     throw new Exception("Not implemented yet")
   }
 
@@ -136,7 +147,15 @@ abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect
    * @return
    */
   def count = {
-    throw new Exception("Not implemented yet")
+    var count : Long = 0
+
+    graphDB.open(userName, password)
+
+    val result = graphDB.queryBySql[Long]("SELECT COUNT(*) FROM " + repositoryEntityClass)
+    count = result.head.toString.replace("}", "").replace("{", "").split(":").last.toLong
+
+    graphDB.close()
+    count
   }
 
   def drop = {
@@ -165,7 +184,7 @@ abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect
    * @param vertex
    * @param entity
    */
-  private def setVertexFields(vertex: ODocument, entity: T) = {
+  private def setVertexFields(vertex: ODocument, entity: EntityType) = {
     entity.fields foreach {
       fieldObj => {
         //@TODO More generic approach

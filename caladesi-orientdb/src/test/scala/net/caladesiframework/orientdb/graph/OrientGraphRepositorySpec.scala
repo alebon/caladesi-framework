@@ -109,6 +109,8 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
       val repo = new OrientGraphRepository[TestEntity]() {}
       repo.init
 
+      val preCount = repo.count
+
       val testEntity = new TestEntity
       testEntity.uuid.set(util.UUID.randomUUID())
       testEntity.stringField.set("This is the name of the test entity")
@@ -117,6 +119,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
 
       repo.update(testEntity)
 
+      repo.count must_== preCount + 1
       testEntity.hasInternalId must_==(true)
     }
   }
