@@ -18,7 +18,7 @@ package net.caladesiframework.orientdb.graph.entity
 
 import net.caladesiframework.orientdb.entity.Entity
 
-abstract class GraphEntity extends Entity {
+abstract class GraphEntity extends Entity with UUIDPk {
 
   private var internalId : String = null
 
@@ -41,4 +41,18 @@ abstract class GraphEntity extends Entity {
   def hasInternalId() = {
     null != this.internalId
   }
+
+  /**
+   * Sets internal id
+   *
+   * @param id
+   */
+  def assignInternalId(id: String) = {
+    this.internalId = id
+  }
 }
+
+/**
+ * Prototype
+ */
+object GraphEntity extends GraphEntity {}

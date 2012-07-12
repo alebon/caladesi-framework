@@ -34,8 +34,8 @@ class OrientDocumentRepository[T <: Document](implicit m:scala.reflect.Manifest[
       }
     }
 
-    false
+    throw new Exception("Not implemented yet")
   }
 
-  def delete(document: T) = false
+  def delete(document: T) = throw new Exception("Not implemented yet")
 }

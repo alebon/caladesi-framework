@@ -21,6 +21,9 @@ import net.caladesiframework.orientdb.repository.CRUDRepository
 import repository.{GraphRepository}
 import com.orientechnologies.orient.core.db.graph.OGraphDatabase
 import com.orientechnologies.orient.core.record.impl.ODocument
+import net.caladesiframework.orientdb.field._
+import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
+import com.orientechnologies.orient.core.metadata.schema.OClass
 
 abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect.Manifest[T])
   extends GraphRepository[T] with CRUDRepository[T] {
@@ -30,28 +33,19 @@ abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect
   private val userName = "admin"
   private val password = "admin"
 
-  // Override to rename repository
-  def repositoryIdentifier = "DEFAULT_REPOSITORY"
-  def repositoryEntityIdentifier = "DEFAULT_ENTITY"
+  // Override to rename
+  def repositoryEntityClass = "OGraphEntity"
 
   /**
-   * Creates main repository node (id not present)
+   * Creates the correct VertexType if missing
    */
-  def init() = {
+  def init = {
     graphDB.open(userName, password)
 
-    // Init the main repository node
-    var root = graphDB.getRoot(repositoryIdentifier) match {
-      case null =>
-        graphDB.createVertexType("OrientGraphRepository")
-        val rootVertex = graphDB.createVertex("OrientGraphRepository")
-
-        graphDB.setRoot(repositoryIdentifier, rootVertex)
-        graphDB.getRoot(repositoryIdentifier)
-        println("Created main repository node")
-      case r : ODocument => r
+    graphDB.getVertexType(repositoryEntityClass) match {
+      case clazz: OClass => // Everything fine, no update needed
       case _ =>
-        throw new Exception("Unexpected behaviour while repo initialization, please report a bug")
+        graphDB.createVertexType(repositoryEntityClass, "OGraphVertex")
     }
 
     graphDB.close()
@@ -73,7 +67,23 @@ abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect
    * @return
    */
   def update(entity: T) = {
-    throw new Exception("Not implemented yet")
+    graphDB.open(userName, password)
+
+    // Check for right VertexType present
+    graphDB.getVertexType(repositoryEntityClass) match {
+      case null => throw new Exception("Please run repository initialization before updating entities")
+      case clazz: OClass => // Everything is fine
+    }
+
+    val vertex = graphDB.createVertex(repositoryEntityClass)
+    //vertex.field(OGraphDatabase.LABEL, repositoryEntityClass)
+    setVertexFields(vertex, entity)
+    vertex.save
+
+    entity.assignInternalId(vertex.getRecord.getIdentity.toString)
+    graphDB.close()
+
+    entity
   }
 
   /**
@@ -83,7 +93,31 @@ abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect
    * @return
    */
   def update(list: List[T]) = {
-    throw new Exception("Not implemented yet")
+    open
+    graphDB.declareIntent(new OIntentMassiveInsert())
+
+    // Check for right VertexType present
+    graphDB.getVertexType(repositoryEntityClass) match {
+      case null => throw new Exception("Please run repository initialization before updating entities")
+      case clazz: OClass => // Everything is fine
+    }
+
+    val vertex = graphDB.createVertex(repositoryEntityClass)
+    list foreach {
+      entity => {
+        vertex.reset
+        vertex.field(OGraphDatabase.LABEL, repositoryEntityClass)
+        setVertexFields(vertex, entity)
+
+        vertex.save
+        entity.assignInternalId(vertex.getRecord.getIdentity.toString)
+      }
+    }
+
+    graphDB.declareIntent(null)
+    close
+
+    list
   }
 
   /**
@@ -103,6 +137,52 @@ abstract class OrientGraphRepository[T <: GraphEntity] (implicit m:scala.reflect
    */
   def count = {
     throw new Exception("Not implemented yet")
+  }
+
+  def drop = {
+    throw new Exception("Not implemented yet")
+  }
+
+  /**
+   * Open db
+   *
+   * @return
+   */
+  private def open() = {
+    graphDB.open(userName, password)
+  }
+
+  /**
+   * Close DB connection
+   */
+  private def close() = {
+    graphDB.close()
+  }
+
+  /**
+   * Copy fields to vertex
+   *
+   * @param vertex
+   * @param entity
+   */
+  private def setVertexFields(vertex: ODocument, entity: T) = {
+    entity.fields foreach {
+      fieldObj => {
+        //@TODO More generic approach
+        fieldObj match {
+          case field: IntField =>
+            vertex.field(field.name, field.is)
+          case field: StringField =>
+            vertex.field(field.name, field.is)
+          case field: DoubleField =>
+            vertex.field(field.name, field.is)
+          case field: UuidField =>
+            vertex.field(field.name, field.is.toString)
+          case _ =>
+            throw new Exception("Not supported Field")
+        }
+      }
+    }
   }
 
 }

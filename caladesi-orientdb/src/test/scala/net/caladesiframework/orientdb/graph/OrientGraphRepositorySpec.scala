@@ -105,11 +105,19 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
       entityInstance.isInstanceOf[TestEntity] must_== true
     }
 
-    "create main repository node" in {
+    "save entities and set the internal id" in {
       val repo = new OrientGraphRepository[TestEntity]() {}
-      repo.init()
+      repo.init
 
-      true must_==(true)
+      val testEntity = new TestEntity
+      testEntity.uuid.set(util.UUID.randomUUID())
+      testEntity.stringField.set("This is the name of the test entity")
+      testEntity.doubleField.set(1.337)
+      testEntity.intField.set(1337)
+
+      repo.update(testEntity)
+
+      testEntity.hasInternalId must_==(true)
     }
   }
 }
