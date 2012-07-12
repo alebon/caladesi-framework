@@ -27,6 +27,7 @@ import com.orientechnologies.orient.core.metadata.schema.OClass
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import java.util
 
 abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scala.reflect.Manifest[EntityType])
   extends GraphRepository[EntityType] with CRUDRepository[EntityType] {
@@ -62,6 +63,23 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
     graphDB.close()
   }
 
+  def findByUuid(id: util.UUID): EntityType = {
+    graphDB.open(userName, password)
+
+    val result = graphDB.queryBySql("SELECT FROM " + repositoryEntityClass + " WHERE _uuid = '" + id.toString + "'")
+
+    if (result.size == 0) {
+      throw new Exception("Not found")
+    }
+    val document : ODocument = result.head
+    graphDB.close()
+
+    val entity = this.create
+    setEntityFields(entity, document)
+
+    entity
+  }
+
   /**
    * Creates a new entity (not persisted)
    *
@@ -87,7 +105,6 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
     }
 
     val vertex = graphDB.createVertex(repositoryEntityClass)
-    //vertex.field(OGraphDatabase.LABEL, repositoryEntityClass)
     setVertexFields(vertex, entity)
     vertex.save
 
@@ -202,6 +219,33 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
         }
       }
     }
+  }
+
+  /**
+   * Copy vertex fields to entity
+   *
+   * @param entity
+   * @param vertex
+   */
+  private def setEntityFields(entity: EntityType, vertex: ODocument) = {
+    entity.fields foreach {
+      fieldObj => {
+        fieldObj match {
+          case field: IntField =>
+            field.set(vertex.field(field.name))
+          case field: StringField =>
+            field.set(vertex.field(field.name))
+          case field: DoubleField =>
+            field.set(vertex.field(field.name))
+          case field: UuidField =>
+            field.set(util.UUID.fromString(vertex.field(field.name)))
+          case _ =>
+            throw new Exception("Not supported Field")
+        }
+      }
+    }
+    // Set id
+    entity.assignInternalId(vertex.getIdentity.toString)
   }
 
 }

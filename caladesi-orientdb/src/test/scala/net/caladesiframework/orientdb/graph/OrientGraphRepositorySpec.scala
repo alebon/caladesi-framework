@@ -119,8 +119,11 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
 
       repo.update(testEntity)
 
+      val resultEntity = repo.findByUuid(testEntity.uuid.is)
+
       repo.count must_== preCount + 1
       testEntity.hasInternalId must_==(true)
+      resultEntity.getInternalId must_==(testEntity.getInternalId)
     }
   }
 }

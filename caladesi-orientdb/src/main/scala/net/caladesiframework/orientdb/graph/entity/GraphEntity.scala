@@ -50,6 +50,18 @@ abstract class GraphEntity extends Entity with UUIDPk {
   def assignInternalId(id: String) = {
     this.internalId = id
   }
+
+  /**
+   * Returns the internal id assigned from graph
+   *
+   * @return
+   */
+  def getInternalId = {
+    if (!hasInternalId()) {
+      throw new Exception("No internal id")
+    }
+    this.internalId
+  }
 }
 
 /**
