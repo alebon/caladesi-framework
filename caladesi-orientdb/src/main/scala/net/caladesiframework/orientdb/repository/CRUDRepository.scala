@@ -24,6 +24,6 @@ trait CRUDRepository[T <: Entity] {
 
   def update(entity: T): T
 
-  def delete(entity: T): T
+  def delete(entity: T): Boolean
 
 }

@@ -125,5 +125,34 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
       testEntity.hasInternalId must_==(true)
       resultEntity.getInternalId must_==(testEntity.getInternalId)
     }
+
+    "delete entities by uuid properly" in  {
+      val repo = new OrientGraphRepository[TestEntity]() {}
+      repo.init
+
+      val preCount = repo.count
+
+      val testEntity = new TestEntity
+      testEntity.uuid.set(util.UUID.randomUUID())
+      testEntity.stringField.set("This is the name of the test entity")
+      testEntity.doubleField.set(1.337)
+      testEntity.intField.set(1337)
+
+      repo.update(testEntity)
+
+      repo.delete(testEntity)
+
+      var ok = false
+
+      try {
+        repo.findByUuid(testEntity.uuid.is)
+      } catch {
+        case e:Exception =>
+          ok = true
+        case _ =>
+      }
+
+      true must_==(ok)
+    }
   }
 }

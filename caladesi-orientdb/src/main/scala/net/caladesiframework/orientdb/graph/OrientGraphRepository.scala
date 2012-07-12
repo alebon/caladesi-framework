@@ -28,6 +28,7 @@ import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import java.util
+import com.orientechnologies.orient.core.id.ORID
 
 abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scala.reflect.Manifest[EntityType])
   extends GraphRepository[EntityType] with CRUDRepository[EntityType] {
@@ -155,7 +156,16 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
    * @return
    */
   def delete(entity: EntityType) = {
-    throw new Exception("Not implemented yet")
+    graphDB.open(userName, password)
+
+    val result = graphDB.queryBySql("SELECT FROM " + repositoryEntityClass + " WHERE _uuid = '" + entity.uuid.is.toString + "'")
+
+    if (result.size == 0) {
+      throw new Exception("Not found vertex with given uuid")
+    }
+    graphDB.removeVertex(result.head)
+    graphDB.close()
+    true
   }
 
   /**
