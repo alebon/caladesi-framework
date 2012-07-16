@@ -17,18 +17,20 @@
 package net.caladesiframework.orientdb.graph
 
 import org.specs2.mutable._
-import testkit.TestEntity
+import testkit.{OrientDatabaseTestKit, TestEntity}
 import com.orientechnologies.orient.core.db.graph.OGraphDatabase
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import java.util
 
-class OrientGraphRepositorySpec extends SpecificationWithJUnit {
+class OrientGraphRepositorySpec extends SpecificationWithJUnit
+  with OrientDatabaseTestKit {
 
   sequential
 
   "OrientGraph Repository" should {
     "create DB in memory" in {
+      checkOrientDBIsRunning
 
       //val db : OGraphDatabase = new OGraphDatabase("memory:db")
       val db : OGraphDatabase = new OGraphDatabase("remote:127.0.0.1/db")
@@ -98,6 +100,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
     }
 
     "create entities properly" in {
+      checkOrientDBIsRunning
 
       val repo = new OrientGraphRepository[TestEntity]() {}
       val entityInstance = repo.create
@@ -106,6 +109,8 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
     }
 
     "save entities and set the internal id" in {
+      checkOrientDBIsRunning
+
       val repo = new OrientGraphRepository[TestEntity]() {}
       repo.init
 
@@ -128,6 +133,8 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
     }
 
     "delete entities by uuid properly" in  {
+      checkOrientDBIsRunning
+
       val repo = new OrientGraphRepository[TestEntity]() {}
       repo.init
 
@@ -157,6 +164,8 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
     }
 
     "update a list of entities properly" in {
+      checkOrientDBIsRunning
+
       val repo = new OrientGraphRepository[TestEntity]() {}
       repo.init
 
@@ -179,6 +188,8 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
     }
 
     "update existing entities properly" in {
+      checkOrientDBIsRunning
+
       val repo = new OrientGraphRepository[TestEntity]() {}
       repo.init
 
