@@ -76,8 +76,6 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
           vertex.save
 
           countSize += vertex.getSize
-          //println("Vertex identity: " + vertex.getIdentity)
-          //println(vertex.getSize)
         }
         val end = System.currentTimeMillis()
 
@@ -126,7 +124,6 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
       repo.count must_== preCount + 1
       testEntity.hasInternalId must_==(true)
 
-      println(testEntity.getInternalId)
       resultEntity.getInternalId must_==(testEntity.getInternalId)
     }
 
@@ -179,6 +176,30 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
       repo.update(entityList)
 
       repo.count must_==(preCount + 10)
+    }
+
+    "update existing entities properly" in {
+      val repo = new OrientGraphRepository[TestEntity]() {}
+      repo.init
+
+      val testEntity = repo.create
+      testEntity.uuid.set(util.UUID.randomUUID())
+      testEntity.stringField.set("This is the name of the test entity")
+
+      repo.update(testEntity)
+
+      testEntity.stringField.set("Updated string field of the test entity")
+      repo.update(testEntity)
+
+      var resultEntity : TestEntity = null
+      try {
+        resultEntity = repo.findByUuid(testEntity.uuid.is)
+      } catch {
+        case _ =>
+          throw new Exception("Test failed")
+      }
+
+      testEntity.stringField.is must_==(resultEntity.stringField.is)
     }
   }
 }

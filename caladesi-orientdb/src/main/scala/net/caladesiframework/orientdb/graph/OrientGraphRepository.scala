@@ -29,6 +29,8 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import java.util
 import com.orientechnologies.orient.core.id.ORID
+import com.orientechnologies.orient.core.db.record.OIdentifiable
+import com.orientechnologies.orient.core.record.ORecord
 
 abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scala.reflect.Manifest[EntityType])
   extends GraphRepository[EntityType] with CRUDRepository[EntityType] {
@@ -73,6 +75,7 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
     if (result.size == 0) {
       throw new Exception("Not found")
     }
+
     val document : ODocument = result.head
 
     val entity = this.create
@@ -99,13 +102,23 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
   def update(entity: EntityType) = {
 
       val vertex = transactional[ODocument](implicit db => {
+
         // Check for right VertexType present
         db.getVertexType(repositoryEntityClass) match {
           case null => throw new Exception("Please run repository initialization before updating entities")
           case clazz: OClass => // Everything is fine
         }
 
-        val vertex = db.createVertex(repositoryEntityClass)
+        // Decide by internal id: create or update
+        var vertex: ODocument = null
+        if (entity.hasInternalId()) {
+          vertex = db.queryBySql[ODocument]("SELECT FROM " +
+            repositoryEntityClass + " WHERE _uuid = '" + entity.uuid.is.toString + "'").head
+        } else {
+          vertex = db.createVertex(repositoryEntityClass)
+        }
+
+        // Set the new fields and save
         setVertexFields(vertex, entity)
         vertex.save
 
@@ -247,9 +260,7 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
 
     try {
       val transaction = synchronized { db.begin() }
-
       val ret = f(db)
-
       transaction.commit()
 
       return ret
@@ -261,5 +272,4 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
       db.close()
     }
   }
-
 }

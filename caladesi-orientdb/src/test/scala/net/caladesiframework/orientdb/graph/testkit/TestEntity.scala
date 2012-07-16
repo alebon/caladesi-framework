@@ -19,7 +19,7 @@ package net.caladesiframework.orientdb.graph.testkit
 import net.caladesiframework.orientdb.graph.entity.GraphEntity
 import net.caladesiframework.orientdb.field.{DoubleField, IntField, StringField}
 
-class TestEntity extends GraphEntity {
+class TestEntity(init: Boolean = true) extends GraphEntity {
 
   object stringField extends StringField(this) {
     override def name = "stringField"
@@ -31,5 +31,13 @@ class TestEntity extends GraphEntity {
 
   object doubleField extends DoubleField(this) {
     override def name = "doubleField"
+  }
+
+  def this() = {
+    this(true)
+
+    stringField.name
+    intField.name
+    doubleField.name
   }
 }
