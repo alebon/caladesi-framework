@@ -69,4 +69,4 @@ dependencies {
 
 ##License
 
-The Caladesi Framework is open source software released under the Apache 2.0 license. You must be a committer to submit patches.
+The Caladesi Framework is open source software released under the Apache 2.0 license.
