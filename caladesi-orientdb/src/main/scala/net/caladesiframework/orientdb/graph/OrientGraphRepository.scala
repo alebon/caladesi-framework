@@ -122,8 +122,7 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
    * @param list
    * @return
    */
-  def update(list: List[EntityType]) = {
-    open
+  def update(list: List[EntityType]) = transactional(f => {
     graphDB.declareIntent(new OIntentMassiveInsert())
 
     // Check for right VertexType present
@@ -132,11 +131,10 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
       case clazz: OClass => // Everything is fine
     }
 
-    val vertex = graphDB.createVertex(repositoryEntityClass)
+    var vertex : ODocument = null
     list foreach {
       entity => {
-        vertex.reset
-        vertex.field(OGraphDatabase.LABEL, repositoryEntityClass)
+        vertex = graphDB.createVertex(repositoryEntityClass)
         setVertexFields(vertex, entity)
 
         vertex.save
@@ -145,10 +143,9 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
     }
 
     graphDB.declareIntent(null)
-    close
 
     list
-  }
+  })
 
   /**
    * Removes entity from db
@@ -171,17 +168,14 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
    *
    * @return
    */
-  def count = {
+  def count = transactional(f => {
     var count : Long = 0
-
-    graphDB.open(userName, password)
 
     val result = graphDB.queryBySql[Long]("SELECT COUNT(*) FROM " + repositoryEntityClass)
     count = result.head.toString.replace("}", "").replace("{", "").split(":").last.toLong
 
-    graphDB.close()
     count
-  }
+  })
 
   def drop = {
     throw new Exception("Not implemented yet")
@@ -276,7 +270,7 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
     } catch {
       case e:Exception =>
         graphDB.rollback()
-        throw new Exception("Failure during execution")
+        throw new Exception("Failure during execution: " + e.getMessage)
     } finally {
       graphDB.close()
     }

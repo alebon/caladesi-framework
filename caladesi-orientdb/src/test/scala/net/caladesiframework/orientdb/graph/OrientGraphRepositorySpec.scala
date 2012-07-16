@@ -134,7 +134,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
 
       val preCount = repo.count
 
-      val testEntity = new TestEntity
+      val testEntity = repo.create
       testEntity.uuid.set(util.UUID.randomUUID())
       testEntity.stringField.set("This is the name of the test entity")
       testEntity.doubleField.set(1.337)
@@ -155,6 +155,28 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
       }
 
       true must_==(ok)
+    }
+
+    "update a list of entities properly" in {
+      val repo = new OrientGraphRepository[TestEntity]() {}
+      repo.init
+
+      val preCount = repo.count
+      var entityList = List[TestEntity]()
+
+      for (i <- 0 to 10) {
+        val e = repo.create
+
+        e.uuid.set(util.UUID.randomUUID())
+        e.stringField.set("This is the name of the test entity from list test " + i)
+        e.doubleField.set(1.337 + i)
+        e.intField.set(1337 + i)
+        entityList = e :: entityList
+      }
+
+      repo.update(entityList)
+
+      repo.count must_==(preCount + 10)
     }
   }
 }
