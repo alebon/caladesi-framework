@@ -17,7 +17,8 @@
 package net.caladesiframework.orientdb.graph.repository
 
 import net.caladesiframework.orientdb.graph.entity.{GraphEntity}
+import net.caladesiframework.orientdb.repository.CRUDRepository
 
-trait GraphRepository[T <: GraphEntity] {
+trait GraphRepository[T <: GraphEntity] extends CRUDRepository[T] {
 
 }

@@ -123,6 +123,8 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
 
       repo.count must_== preCount + 1
       testEntity.hasInternalId must_==(true)
+
+      println(testEntity.getInternalId)
       resultEntity.getInternalId must_==(testEntity.getInternalId)
     }
 

@@ -97,22 +97,23 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
    * @return
    */
   def update(entity: EntityType) = {
-    graphDB.open(userName, password)
 
-    // Check for right VertexType present
-    graphDB.getVertexType(repositoryEntityClass) match {
-      case null => throw new Exception("Please run repository initialization before updating entities")
-      case clazz: OClass => // Everything is fine
-    }
+      val vertex = transactional[ODocument](f => {
+        // Check for right VertexType present
+        graphDB.getVertexType(repositoryEntityClass) match {
+          case null => throw new Exception("Please run repository initialization before updating entities")
+          case clazz: OClass => // Everything is fine
+        }
 
-    val vertex = graphDB.createVertex(repositoryEntityClass)
-    setVertexFields(vertex, entity)
-    vertex.save
+        val vertex = graphDB.createVertex(repositoryEntityClass)
+        setVertexFields(vertex, entity)
+        vertex.save
 
-    entity.assignInternalId(vertex.getRecord.getIdentity.toString)
-    graphDB.close()
+        vertex
+      })
+      entity.assignInternalId(vertex.getRecord.getIdentity.toString)
 
-    entity
+      entity
   }
 
   /**
@@ -155,18 +156,15 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
    * @param entity
    * @return
    */
-  def delete(entity: EntityType) = {
-    graphDB.open(userName, password)
-
+  def delete(entity: EntityType) = transactional[Boolean]( f => {
     val result = graphDB.queryBySql("SELECT FROM " + repositoryEntityClass + " WHERE _uuid = '" + entity.uuid.is.toString + "'")
 
     if (result.size == 0) {
       throw new Exception("Not found vertex with given uuid")
     }
     graphDB.removeVertex(result.head)
-    graphDB.close()
     true
-  }
+  })
 
   /**
    * Returns the overall count of the entities in this repository
@@ -256,6 +254,32 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
     }
     // Set id
     entity.assignInternalId(vertex.getIdentity.toString)
+  }
+
+  /**
+   * Opens the db, performs execution
+   *
+   * @param f
+   * @tparam T
+   * @return
+   */
+  def transactional[T <: Any](f: Any => T) : T = {
+    try {
+      graphDB.open(userName, password)
+      val transaction = synchronized { graphDB.begin() }
+
+      val ret = f()
+
+      transaction.commit()
+
+      return ret
+    } catch {
+      case e:Exception =>
+        graphDB.rollback()
+        throw new Exception("Failure during execution")
+    } finally {
+      graphDB.close()
+    }
   }
 
 }

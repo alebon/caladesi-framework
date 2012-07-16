@@ -18,12 +18,12 @@ package net.caladesiframework.orientdb.repository
 
 import net.caladesiframework.orientdb.entity.Entity
 
-trait CRUDRepository[T <: Entity] {
+trait CRUDRepository[Entity] {
 
-  def create: T
+  def create: Entity
 
-  def update(entity: T): T
+  def update(entity: Entity): Entity
 
-  def delete(entity: T): Boolean
+  def delete(entity: Entity): Boolean
 
 }

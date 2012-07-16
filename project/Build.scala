@@ -28,21 +28,21 @@ object BuildDef extends Build {
                           base = file(".")) aggregate(common, web, orientdb)
 
   lazy val common =
-    Project(id = "caladesi-framework-common",
+    Project(id = "caladesi-common",
       base = file("caladesi-common"),
       settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework Common Utilities‚",
       libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit))
 
   lazy val web =
-     Project(id = "caladesi-framework-web",
+     Project(id = "caladesi-web",
              base = file("caladesi-web"),
              settings = Project.defaultSettings)
        .settings(description := "Caladesi Framework Web Utilities",
                  libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit))
 
   lazy val orientdb =
-    Project(id = "caladesi-framework-orientdb",
+    Project(id = "caladesi-orientdb",
             base = file("caladesi-orientdb"),
             settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework OrientDB",
