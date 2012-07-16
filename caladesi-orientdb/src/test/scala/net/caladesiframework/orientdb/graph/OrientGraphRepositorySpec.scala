@@ -25,6 +25,8 @@ import java.util
 
 class OrientGraphRepositorySpec extends SpecificationWithJUnit {
 
+  sequential
+
   "OrientGraph Repository" should {
     "create DB in memory" in {
 
@@ -144,17 +146,17 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
 
       repo.delete(testEntity)
 
-      var ok = false
+      var deletionResult = false
 
       try {
         repo.findByUuid(testEntity.uuid.is)
       } catch {
         case e:Exception =>
-          ok = true
+          deletionResult = true
         case _ =>
       }
 
-      true must_==(ok)
+      true must_==(deletionResult)
     }
 
     "update a list of entities properly" in {
@@ -164,7 +166,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit {
       val preCount = repo.count
       var entityList = List[TestEntity]()
 
-      for (i <- 0 to 10) {
+      for (i <- 0 to 9) {
         val e = repo.create
 
         e.uuid.set(util.UUID.randomUUID())
