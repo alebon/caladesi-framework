@@ -47,6 +47,9 @@ class ShipRepository extends OrientGraphRepository[ShipEntity] {
 Usage in your BL code (draft, not implemented yet):
 
 ```scala
+val shipRepository = new ShipRepository()
+shipRepository.init
+
 val single = shipRepository.findBy(ShipEntity._uuid, UUID.fromString("048b080c-8ca1-429e-a640-138d928a8ecd"))
 
 // All green container assigned to ship with uuid 048b080c-8ca1-429e-a640-138d928a8ecd
@@ -89,6 +92,32 @@ dependencies {
     compile "net.caladesiframework:caladesi-common_2.9.1:0.1.0",
         "net.caladesiframework:caladesi-orientdb_2.9.1:0.1.0"
 }
+```
+
+##Drafts (features for next versions)
+
+```scala
+class ShipEntity extends GraphEntity[Ship] with UuidPk {
+
+  // Defines 1:N relations: Ship -[HAS]-> Container*
+  object containerList extends MultiRelation[Container](this, "HAS")
+
+  // Defines 1:1 directed relations: Ship -[SPECIAL]-> Container
+  object singleContainer extends SingleRelation[Container](this, "SPECIAL")
+}
+```
+
+```scala
+// Usage
+ship.containerList.add(containerRepository.create)
+
+val specialContainer = containerRepository.create
+specialContainer.color.set("red")
+
+ship.singleContainer.reAssign(specialContainer)
+
+// Ship and new container are updated
+shipRepository.update(ship)
 ```
 
 ##License
