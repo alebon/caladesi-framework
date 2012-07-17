@@ -3,33 +3,48 @@
 The Caladesi Framework OrientDB Component is written in Scala and is intended to be used in other Scala projects. It is
 an abstraction layer for the fabulous OrientDB.
 
-##The Idea
+##The OrientDB Entity Repository
 
-The main goal is to create a simple Scala API for OrientDB. There will be an ActiveRecord approach as well as a
-Repository implementation.
+The main goal of the repository is to create a simple Scala API for OrientDB. You can perform CRUD operation on the
+defined entities.
 
-The following (Repository) examples are meant to be a draft:
+The following (Repository) examples are not final:
+
+###Defining the entities
 
 ```scala
 class ShipEntity extends OrientGraphEntity with UuidPk {
 
-  object name extends StringField(this, 150) with IndexedFulltext
+  // We want the ship to have a name
+  object name extends StringField(this)
+
+  // Ships have a weight and we name the inner property "weight"
+  object weight extends DoubleField(this) {
+    // That is the property name that is stored in DB later on
+    override def name = "weight"
+  }
 }
 
 class ContainerEntity extends OrientGraphEntity with UuidPk {
 
-  object color extends StringField(this, 100)
+  object color extends StringField(this)
 
 }
 ```
+
+###Defining the Repository
 
 ```scala
 class ShipRepository extends OrientGraphRepository[ShipEntity] {
-  // Override methods here
+  // This part will be removed in future versions
+  override def dbName = "db"
+  override def dbType = "remote"
+  override def dbUser = "admin"
+  override def dbPassword = "admin"
 }
 ```
 
-Usage in your BL code:
+Usage in your BL code (draft, not implemented yet):
 
 ```scala
 val single = shipRepository.findBy(ShipEntity._uuid, UUID.fromString("048b080c-8ca1-429e-a640-138d928a8ecd"))
@@ -41,7 +56,7 @@ val list = containerRepository.findAll(ContainerEntity~>ShipEntity)
 ```
 
 ##Getting Started with Caladesi Framework OrientDB
-You can use the OrientDB Component by adding the dependency to your project:
+You can use the OrientDB Component by adding the dependency to your project.
 
 ### SBT 0.11.3 (Simple Build Tool)
 Modify your build.sbt
