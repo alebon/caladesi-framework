@@ -190,8 +190,24 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
     count
   })
 
-  def drop = {
-    throw new Exception("Not implemented yet")
+  /**
+   * Drops all entities in the repository (use with care)
+   */
+  def drop : Unit = {
+    transactional(implicit db => {
+
+      val documents : util.List[ODocument] = db.queryBySql("SELECT FROM " + repositoryEntityClass + " LIMIT 100")
+      documents foreach {
+        doc => {
+          db.removeVertex(doc)
+        }
+      }
+
+    })
+
+    if (count >= 100) {
+      this.drop
+    }
   }
 
   /**

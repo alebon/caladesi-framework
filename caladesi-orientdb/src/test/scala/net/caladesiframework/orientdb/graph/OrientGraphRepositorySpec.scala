@@ -212,5 +212,16 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
 
       testEntity.stringField.is must_==(resultEntity.stringField.is)
     }
+
+    "drop all entities properly" in {
+      checkOrientDBIsRunning
+
+      val repo = new OrientGraphRepository[TestEntity]() {}
+      repo.init
+
+      repo.drop
+
+      repo.count must_==(0)
+    }
   }
 }
