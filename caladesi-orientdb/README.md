@@ -120,6 +120,9 @@ specialContainer.color.set("red")
 
 ship.singleContainer.reAssign(specialContainer)
 
+// Perform REST call to create a new Company entity
+ship.remoteCompany.reAssign(CompanyAPI.create)
+
 // Ship and new container are updated
 shipRepository.update(ship)
 ```
