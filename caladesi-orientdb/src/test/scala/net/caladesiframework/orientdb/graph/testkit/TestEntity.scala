@@ -16,14 +16,15 @@
 
 package net.caladesiframework.orientdb.graph.testkit
 
-import net.caladesiframework.orientdb.graph.entity.{OrientGraphEntity}
+import net.caladesiframework.orientdb.graph.entity.{UUIDPk, OrientGraphEntity}
 import net.caladesiframework.orientdb.field._
 
-class TestEntity(init: Boolean = true) extends OrientGraphEntity {
+class TestEntity(init: Boolean = true) extends OrientGraphEntity with UUIDPk {
 
   object stringField extends StringField(this)
   object intField extends IntField(this)
   object doubleField extends DoubleField(this)
+  object longField extends LongField(this)
 
   object optionalStringField extends OptionalStringField(this)
   object optionalUuidField extends OptionalUuidField(this)
@@ -31,9 +32,12 @@ class TestEntity(init: Boolean = true) extends OrientGraphEntity {
   def this() = {
     this(true)
 
+    this.uuid.name
+
     stringField.name
     intField.name
     doubleField.name
+    longField.name
 
     optionalStringField.name
     optionalUuidField.name

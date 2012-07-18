@@ -21,7 +21,7 @@ import net.caladesiframework.orientdb.entity.Entity
 
 class UuidField extends Field[UUID] {
 
-  override def name = "_uuid"
+  //override def name = "_uuid"
 
   val defaultValue = UUID.randomUUID()
 

@@ -222,6 +222,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
             vertex.field(field.name, field.is)
           case field: UuidField =>
             vertex.field(field.name, field.is.toString)
+          case field: LongField =>
+            vertex.field(field.name, field.is)
           case _ =>
             throw new Exception("Not supported Field")
         }
@@ -247,6 +249,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
             field.set(vertex.field(field.name))
           case field: UuidField =>
             field.set(util.UUID.fromString(vertex.field(field.name)))
+          case field: LongField =>
+            field.set(vertex.field(field.name))
           case _ =>
             throw new Exception("Not supported Field")
         }

@@ -20,7 +20,7 @@ import net.caladesiframework.orientdb.entity.Entity
 
 class LongField extends Field[Long] {
 
-  override lazy val defaultValue = 0
+  override lazy val defaultValue : Long = 0
 
   override val optional = false
 

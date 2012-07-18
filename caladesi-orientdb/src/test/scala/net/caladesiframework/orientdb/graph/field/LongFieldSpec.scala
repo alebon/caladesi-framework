@@ -14,15 +14,29 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.orientdb.graph.entity
+package net.caladesiframework.orientdb.graph.field
 
-import net.caladesiframework.orientdb.field.UuidField
-import net.caladesiframework.orientdb.entity.Entity
+import org.specs2.mutable._
+import net.caladesiframework.orientdb.graph.testkit.TestEntity
 
-trait UUIDPk extends Entity {
+class LongFieldSpec extends SpecificationWithJUnit {
 
-  object uuid extends UuidField(this) {
-    override def name = "_uuid"
+  var testEntity: TestEntity = new TestEntity()
+
+  "LongField" should {
+    "accept and reuturn values properly" in {
+
+      testEntity.longField.set(32768)
+      testEntity.longField.is must_== (32768)
+    }
+
+    "be not optional" in {
+
+      testEntity.longField.optional must_== false
+    }
+
+    "have the correct name" in {
+      testEntity.longField.name must_== ("longField")
+    }
   }
-
 }
