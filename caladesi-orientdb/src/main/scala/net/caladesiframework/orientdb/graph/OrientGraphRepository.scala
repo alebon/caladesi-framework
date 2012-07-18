@@ -16,7 +16,7 @@
 
 package net.caladesiframework.orientdb.graph
 
-import entity.GraphEntity
+import entity.{OrientGraphEntity, GraphEntity}
 import net.caladesiframework.orientdb.repository.CRUDRepository
 import repository.{GraphRepository}
 import com.orientechnologies.orient.core.db.graph.{OGraphDatabasePool, OGraphDatabase}
@@ -28,11 +28,8 @@ import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import java.util
-import com.orientechnologies.orient.core.id.ORID
-import com.orientechnologies.orient.core.db.record.OIdentifiable
-import com.orientechnologies.orient.core.record.ORecord
 
-abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scala.reflect.Manifest[EntityType])
+abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit m:scala.reflect.Manifest[EntityType])
   extends GraphRepository[EntityType] with CRUDRepository[EntityType] {
 
   // @TODO Inject by configuration
@@ -124,7 +121,7 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
 
         vertex
       })
-      entity.assignInternalId(vertex.getRecord.getIdentity.toString)
+      entity.setUnderlyingVertex(vertex)
 
       entity
   }
@@ -151,7 +148,7 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
         setVertexFields(vertex, entity)
 
         vertex.save
-        entity.assignInternalId(vertex.getRecord.getIdentity.toString)
+        entity.setUnderlyingVertex(vertex)
       }
     }
 
@@ -259,8 +256,8 @@ abstract class OrientGraphRepository[EntityType <: GraphEntity] (implicit m:scal
         }
       }
     }
-    // Set id
-    entity.assignInternalId(vertex.getIdentity.toString)
+    // Combine both
+    entity.setUnderlyingVertex(vertex)
   }
 
   /**
