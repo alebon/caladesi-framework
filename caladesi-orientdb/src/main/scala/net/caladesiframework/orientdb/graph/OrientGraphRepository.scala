@@ -107,12 +107,9 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
         }
 
         // Decide by internal id: create or update
-        var vertex: ODocument = null
-        if (entity.hasInternalId()) {
-          vertex = db.queryBySql[ODocument]("SELECT FROM " +
-            repositoryEntityClass + " WHERE _uuid = '" + entity.uuid.is.toString + "'").head
-        } else {
-          vertex = db.createVertex(repositoryEntityClass)
+        val vertex: ODocument =  entity.hasInternalId() match {
+          case true => entity.getUnderlyingVertex
+          case false => db.createVertex(repositoryEntityClass)
         }
 
         // Set the new fields and save
@@ -164,12 +161,11 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
    * @return
    */
   def delete(entity: EntityType) = transactional[Boolean]( implicit db => {
-    val result = db.queryBySql("SELECT FROM " + repositoryEntityClass + " WHERE _uuid = '" + entity.uuid.is.toString + "'")
 
-    if (result.size == 0) {
+    if (!entity.hasInternalId()) {
       throw new Exception("Not found vertex with given uuid")
     }
-    db.removeVertex(result.head)
+    db.removeVertex(entity.getUnderlyingVertex)
     true
   })
 
