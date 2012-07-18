@@ -34,5 +34,9 @@ class StringFieldSpec extends SpecificationWithJUnit {
 
       testEntity.stringField.optional must_==false
     }
+    "have the correct name" in {
+      testEntity.stringField.name must_==("stringField")
+    }
+
   }
 }

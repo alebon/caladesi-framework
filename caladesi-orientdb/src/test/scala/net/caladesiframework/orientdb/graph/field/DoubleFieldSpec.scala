@@ -34,5 +34,9 @@ class DoubleFieldSpec extends SpecificationWithJUnit {
 
       testEntity.doubleField.optional must_== false
     }
+
+    "have the correct name" in {
+      testEntity.doubleField.name must_==("doubleField")
+    }
   }
 }

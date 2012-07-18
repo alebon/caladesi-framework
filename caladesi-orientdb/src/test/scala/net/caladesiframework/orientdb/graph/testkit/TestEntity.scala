@@ -21,17 +21,9 @@ import net.caladesiframework.orientdb.field.{DoubleField, IntField, StringField}
 
 class TestEntity(init: Boolean = true) extends OrientGraphEntity {
 
-  object stringField extends StringField(this) {
-    override def name = "stringField"
-  }
-
-  object intField extends IntField(this) {
-    override def name = "intField"
-  }
-
-  object doubleField extends DoubleField(this) {
-    override def name = "doubleField"
-  }
+  object stringField extends StringField(this)
+  object intField extends IntField(this)
+  object doubleField extends DoubleField(this)
 
   def this() = {
     this(true)

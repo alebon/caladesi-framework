@@ -34,5 +34,9 @@ class IntFieldSpec extends SpecificationWithJUnit {
 
        testEntity.intField.optional must_==false
      }
+
+     "have the correct name" in {
+       testEntity.intField.name must_==("intField")
+     }
    }
  }

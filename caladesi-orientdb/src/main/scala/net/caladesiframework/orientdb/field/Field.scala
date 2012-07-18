@@ -37,7 +37,14 @@ trait Field[T] {
 
   def defaultValue: T
 
-  def name = this.getClass.toString
+  /**
+   * Determines the name of the field for DB
+   *
+   * @return
+   */
+  def name = {
+    this.getClass.getName.split('$').last
+  }
 
   def is = this.value
 }
