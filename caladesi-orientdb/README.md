@@ -97,13 +97,17 @@ dependencies {
 ##Drafts (features for next versions)
 
 ```scala
-class ShipEntity extends GraphEntity[Ship] with UuidPk {
+class ShipEntity extends OrientGraphEntity with UuidPk {
 
   // Defines 1:N relations: Ship -[HAS]-> Container*
   object containerList extends MultiRelation[Container](this, "HAS")
 
   // Defines 1:1 directed relations: Ship -[SPECIAL]-> Container
   object singleContainer extends SingleRelation[Container](this, "SPECIAL")
+
+  // Defines remote 1:1 directed relations: Ship-[OWNED_BY]->Company
+  // Remote means that the ShipEntity has to lookup for a REST service and perform a call
+  object remoteCompany extends SingleRelationRemote[CompanyAPI](this, "OWNED_BY")
 }
 ```
 
