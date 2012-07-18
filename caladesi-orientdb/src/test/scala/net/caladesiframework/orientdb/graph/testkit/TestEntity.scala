@@ -17,7 +17,7 @@
 package net.caladesiframework.orientdb.graph.testkit
 
 import net.caladesiframework.orientdb.graph.entity.{OrientGraphEntity}
-import net.caladesiframework.orientdb.field.{DoubleField, IntField, StringField}
+import net.caladesiframework.orientdb.field._
 
 class TestEntity(init: Boolean = true) extends OrientGraphEntity {
 
@@ -25,11 +25,17 @@ class TestEntity(init: Boolean = true) extends OrientGraphEntity {
   object intField extends IntField(this)
   object doubleField extends DoubleField(this)
 
+  object optionalStringField extends OptionalStringField(this)
+  object optionalUuidField extends OptionalUuidField(this)
+
   def this() = {
     this(true)
 
     stringField.name
     intField.name
     doubleField.name
+
+    optionalStringField.name
+    optionalUuidField.name
   }
 }
