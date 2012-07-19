@@ -25,7 +25,9 @@ object BuildDef extends Build {
   val orientRepositories = "Orient Technologies Maven2 Repository" at "https://oss.sonatype.org/content/repositories/releases/com/orientechnologies/"
 
   lazy val root = Project(id = "caladesi-framework",
-                          base = file(".")) aggregate(common, web, orientdb)
+                          base = file("."))
+                    .aggregate(common, web, orientdb)
+                    .settings(publishArtifact := false)
 
   lazy val common =
     Project(id = "caladesi-common",

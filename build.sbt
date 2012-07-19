@@ -22,6 +22,22 @@ publishTo in ThisBuild <<= version { (v: String) =>
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
 
+pomIncludeRepository in ThisBuild := { x => false }
+
+pomExtra in ThisBuild             := (
+  <scm>
+    <url>git@github.com:alebon/caladesi-framework.git</url>
+    <connection>scm:git:git@github.com:alebon/caladesi-framework.git</connection>
+  </scm>
+  <developers>
+    <developer>
+      <id>abondarenko</id>
+      <name>Alexej Bondarenko</name>
+      <url>http://caladesiframework.net</url>
+    </developer>
+  </developers>
+)
+
 libraryDependencies += "org.scalatest" % "scalatest_2.9.1" % "1.8" % "test"
 
 libraryDependencies += "junit" % "junit" % "4.5" % "test"
