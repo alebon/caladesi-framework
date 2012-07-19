@@ -231,7 +231,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
 
     })
 
-    if (count >= 100) {
+    if (count >= 1) {
       this.drop
     }
   }

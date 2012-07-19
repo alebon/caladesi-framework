@@ -29,6 +29,17 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
   sequential
 
   "OrientGraph Repository" should {
+    "clean up db" in {
+      checkOrientDBIsRunning
+
+      val repo = new OrientGraphRepository[TestEntity]() {}
+      repo.init
+
+      repo.drop
+
+      repo.count must_==(0)
+    }
+
     "create DB in memory" in {
       checkOrientDBIsRunning
 
@@ -172,7 +183,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       val preCount = repo.count
       var entityList = List[TestEntity]()
 
-      for (i <- 0 to 9) {
+      for (i <- 0 to 1000) {
         val e = repo.create
 
         e.uuid.set(util.UUID.randomUUID())
@@ -182,9 +193,13 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
         entityList = e :: entityList
       }
 
+      val start = System.currentTimeMillis()
       repo.update(entityList)
+      val end = System.currentTimeMillis()
 
-      repo.count must_==(preCount + 10)
+      println("Updating took: " + (end - start) + " ms")
+
+      repo.count must_==(preCount + 1001)
     }
 
     "update existing entities properly" in {
