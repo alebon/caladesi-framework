@@ -43,3 +43,6 @@ class TestEntity(init: Boolean = true) extends OrientGraphEntity with UUIDPk {
     optionalUuidField.name
   }
 }
+
+// Prototype
+object TestEntity extends TestEntity

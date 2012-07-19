@@ -28,6 +28,7 @@ import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import java.util
+import net.caladesiframework.orientdb.document.entity.Document
 
 abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit m:scala.reflect.Manifest[EntityType])
   extends GraphRepository[EntityType] with CRUDRepository[EntityType] {
@@ -59,6 +60,38 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
         db.createVertexType(repositoryEntityClass, "OGraphVertex")
     }
   })
+
+  /**
+   * Finds entities by given field and value
+   *
+   * TODO: Replace "transactional" with "connected"
+   *
+   * @param field
+   * @param value
+   * @tparam FieldType
+   */
+  def find[FieldType](field: Field[FieldType], value: FieldType) : List[EntityType] = connected(implicit db => {
+    val qry = "SELECT FROM " + repositoryEntityClass + " WHERE " + field.name + " = '" + value.toString + "'"
+    println(qry)
+    val result = db.queryBySql(qry)
+
+    var list : List[EntityType] = Nil
+    for (vertex: ODocument <- result) {
+      list = transformToEntity(vertex) :: list
+    }
+
+    list
+  })
+
+  /**
+   * Creates a fresh node and assigns the vertex data to it
+   *
+   * @param vertex
+   * @return
+   */
+  private def transformToEntity(vertex: ODocument) : EntityType = {
+    return setEntityFields(create, vertex)
+  }
 
   /**
    * Finds an entity by given uuid
@@ -258,6 +291,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
     }
     // Combine both
     entity.setUnderlyingVertex(vertex)
+    entity
   }
 
   /**
@@ -281,6 +315,28 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
       case e:Exception =>
         db.rollback()
         throw new Exception("Failure during execution: " + e.getMessage)
+    } finally {
+      db.close()
+    }
+  }
+
+  /**
+   * Opens the db, performs execution and closes connection
+   *
+   * @param f
+   * @tparam T
+   * @return
+   */
+  def connected[T <: Any](f: OGraphDatabase => T) : T = {
+    val db = OGraphDatabasePool.global()
+      .acquire(dbType + ":127.0.0.1/" + dbName, dbUser, dbPassword)
+
+    try {
+      val ret = f(db)
+      return ret
+    } catch {
+      case e:Exception =>
+        throw new Exception("Failure during execution in connected mode: " + e.getMessage)
     } finally {
       db.close()
     }

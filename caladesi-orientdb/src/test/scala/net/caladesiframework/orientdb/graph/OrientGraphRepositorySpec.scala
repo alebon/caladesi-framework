@@ -213,6 +213,35 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       testEntity.stringField.is must_==(resultEntity.stringField.is)
     }
 
+    "query by field properly" in {
+      checkOrientDBIsRunning
+
+      val repo = new OrientGraphRepository[TestEntity]() {}
+      repo.init
+
+      val testEntity = repo.create
+      testEntity.uuid.set(util.UUID.randomUUID())
+      testEntity.stringField.set("QueryByFieldTest-Positive")
+
+      repo.update(testEntity)
+
+      val testEntity2 = repo.create
+      testEntity2.uuid.set(util.UUID.randomUUID())
+      testEntity2.stringField.set("QueryByFieldTest-Positive")
+
+      repo.update(testEntity2)
+
+      val testEntity3 = repo.create
+      testEntity3.uuid.set(util.UUID.randomUUID())
+      testEntity3.stringField.set("QueryByFieldTest-Negative")
+
+      repo.update(testEntity3)
+
+      val resultList = repo.find(TestEntity.stringField, "QueryByFieldTest-Positive")
+
+      resultList.size must_==(2)
+    }
+
     "drop all entities properly" in {
       checkOrientDBIsRunning
 
