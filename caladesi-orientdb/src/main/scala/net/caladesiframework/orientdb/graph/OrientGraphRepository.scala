@@ -53,7 +53,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
   /**
    * Creates the correct VertexType if missing
    */
-  def init = transactional (implicit db => {
+  def init = connected(implicit db => {
     db.getVertexType(repositoryEntityClass) match {
       case clazz: OClass => // Everything fine, no update needed
       case _ =>
