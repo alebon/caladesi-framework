@@ -26,7 +26,7 @@ class UuidField extends Field[UUID] {
   override val optional = false
 
   /**
-   * Init with efault value
+   * Init with default value
    *
    * @param ownerEntity
    */
@@ -47,4 +47,6 @@ class UuidField extends Field[UUID] {
     owner = ownerEntity
     set(value)
   }
+
+  override def valueToDB = this.value.toString
 }

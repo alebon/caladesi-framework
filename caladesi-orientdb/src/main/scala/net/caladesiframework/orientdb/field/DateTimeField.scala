@@ -16,17 +16,17 @@
 
 package net.caladesiframework.orientdb.field
 
-import java.util.{Locale}
 import net.caladesiframework.orientdb.entity.Entity
+import java.util.{Date, Calendar}
 
-class LocaleField extends Field[Locale] {
+class DateTimeField extends Field[Calendar] {
 
-  val defaultValue = Locale.getDefault
+  override lazy val defaultValue: Calendar = Calendar.getInstance()
 
   override val optional = false
 
   /**
-   * Init with default value
+   * Init the field with default value
    *
    * @param ownerEntity
    */
@@ -37,16 +37,22 @@ class LocaleField extends Field[Locale] {
   }
 
   /**
-   * Init with given value
+   * Set the field with value
    *
    * @param ownerEntity
    * @param value
    */
-  def this(ownerEntity: Entity, value: Locale) = {
+  def this(ownerEntity: Entity, value: Calendar) = {
     this()
     owner = ownerEntity
     set(value)
   }
 
-  override def valueToDB = this.value.toString
+  override def valueToDB = this.is.getTimeInMillis
+
+  override def valueFromDB(value: Any) = {
+    val date = Calendar.getInstance()
+    date.setTimeInMillis(value.asInstanceOf[Long])
+    this.set(date)
+  }
 }

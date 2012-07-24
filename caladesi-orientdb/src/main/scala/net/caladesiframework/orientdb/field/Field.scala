@@ -47,4 +47,21 @@ trait Field[T] {
   }
 
   def is = this.value
+
+  /**
+   * Converts the current value to DB value
+   * Locale obj -> de_DE
+   * DateTime -> internetDate
+   * ...
+   *
+   * @return
+   */
+  def valueToDB : Any = this.value
+
+  /**
+   * Sets the value from DB (override to customize it)
+   *
+   * @param value
+   */
+  def valueFromDB(value: Any) = this.set(value.asInstanceOf[T])
 }

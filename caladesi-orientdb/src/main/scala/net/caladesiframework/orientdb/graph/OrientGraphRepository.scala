@@ -260,6 +260,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
             vertex.field(field.name, field.is)
           case field:LocaleField =>
             vertex.field(field.name, field.is.toString)
+          case field:DateTimeField =>
+            vertex.field(field.name, field.valueToDB)
           case _ =>
             throw new Exception("Not supported Field")
         }
@@ -289,6 +291,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
             field.set(vertex.field(field.name))
           case field: LocaleField =>
             field.set(new Locale(vertex.field(field.name)))
+          case field: DateTimeField =>
+            field.valueFromDB(vertex.field(field.name))
           case _ =>
             throw new Exception("Not supported Field")
         }
