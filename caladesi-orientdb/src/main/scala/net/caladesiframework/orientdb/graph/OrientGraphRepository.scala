@@ -29,6 +29,7 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import java.util
 import net.caladesiframework.orientdb.document.entity.Document
+import util.Locale
 
 abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit m:scala.reflect.Manifest[EntityType])
   extends GraphRepository[EntityType] with CRUDRepository[EntityType] {
@@ -257,6 +258,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
             vertex.field(field.name, field.is.toString)
           case field: LongField =>
             vertex.field(field.name, field.is)
+          case field:LocaleField =>
+            vertex.field(field.name, field.is.toString)
           case _ =>
             throw new Exception("Not supported Field")
         }
@@ -284,6 +287,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
             field.set(util.UUID.fromString(vertex.field(field.name)))
           case field: LongField =>
             field.set(vertex.field(field.name))
+          case field: LocaleField =>
+            field.set(new Locale(vertex.field(field.name)))
           case _ =>
             throw new Exception("Not supported Field")
         }
