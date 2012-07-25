@@ -53,7 +53,7 @@ Usage in your BL code (draft, not implemented yet):
 val shipRepository = new ShipRepository()
 shipRepository.init
 
-val single = shipRepository.findBy(ShipEntity._uuid, UUID.fromString("048b080c-8ca1-429e-a640-138d928a8ecd"))
+val single = (shipRepository.find where ShipEntity._uuid eqs UUID.fromString("048b080c-8ca1-429e-a640-138d928a8ecd" limit 1 ex)).head
 
 // All green container assigned to ship with uuid 048b080c-8ca1-429e-a640-138d928a8ecd
 val list = containerRepository.findAll(ContainerEntity~>ShipEntity)
@@ -66,7 +66,8 @@ val list = containerRepository.findAll(ContainerEntity~>ShipEntity)
 // Fetching green ships with pagination
 val greenShips = shipRepository find where ShipEntity.color eqs "green" skip 5 limit 5 ex
 
-val greenLola = (shipRepository find where ShipEntity.color eqs "green" and ShipEntity.name eqs "Lola" limit 1).head
+// Find single ship with color green and name Lola
+val greenLola = (shipRepository find where ShipEntity.color eqs "green" and ShipEntity.name eqs "Lola" limit 1 ex).head
 ```
 
 ##Getting Started with Caladesi Framework OrientDB
