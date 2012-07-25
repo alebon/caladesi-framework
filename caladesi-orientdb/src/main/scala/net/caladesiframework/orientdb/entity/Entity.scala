@@ -33,4 +33,13 @@ abstract class Entity {
       this.metaFields = field :: metaFields
     }
   }
+
+  /**
+   * Determines the class name
+   *
+   * @return
+   */
+  def clazz : String = {
+    this.getClass.getName.split('.').last.split('$').head
+  }
 }

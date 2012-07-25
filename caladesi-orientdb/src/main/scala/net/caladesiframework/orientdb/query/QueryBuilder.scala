@@ -27,7 +27,7 @@ class QueryBuilder {
   private var callBack : OrientGraphRepository[OrientGraphEntity] = null
 
   private def select(entity: OrientGraphEntity) = {
-    qry += "select from TestEntity"
+    qry += "select from " + entity.clazz
   }
 
   /**
