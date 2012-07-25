@@ -32,7 +32,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     "clean up db" in {
       checkOrientDBIsRunning
 
-      val repo = new OrientGraphRepository[TestEntity]() {}
+      val repo = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
       repo.init
 
       repo.drop
@@ -40,80 +40,12 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       repo.count must_==(0)
     }
 
-    "create DB in memory" in {
-      checkOrientDBIsRunning
-
-      //val db : OGraphDatabase = new OGraphDatabase("memory:db")
-      val db : OGraphDatabase = new OGraphDatabase("remote:127.0.0.1/db")
-
-      //if (!db.exists()) {
-        //db.create()
-      //} else {
-        db.open("admin", "admin")
-      //}
-
-      db.begin(TXTYPE.NOTX)
-      db.declareIntent(new OIntentMassiveInsert())
-      var countSize = 0
-      val maxItems = 10
-
-      val start = System.currentTimeMillis()
-      try {
-        val graph = db.createVertex()
-        //graph.setClassName("OGraph")
-        graph.field("id", 0)
-        graph.field("name", "rootNode")
-        graph.save
-
-        val repoVertex = db.createVertex()
-        repoVertex.field("name", "TestRepository")
-        repoVertex.save
-
-        val repoConnection = db.createEdge(graph, repoVertex)
-        repoConnection.field("name", "TEST_REPOSITORY")
-        repoConnection.save
-
-        val vertex = db.createVertex()
-        for (i <- 1 to maxItems) {
-          vertex.reset
-
-          //vertex.setClassName("TestEntity")
-          vertex.field("entityCount", i)
-          vertex.field("price", 1.60 + i)
-          vertex.field("name", "Product Test Bla bli Lorem ipsum dolor" + i)
-          vertex.field("lastUpdate", new util.Date().toString)
-
-          val vertexEdge = db.createEdge(repoVertex, vertex)
-          vertexEdge.field("rel", "TEST_ENTITY")
-
-          vertex.save
-
-          countSize += vertex.getSize
-        }
-        val end = System.currentTimeMillis()
-
-
-
-        println("Insertion time for " + maxItems + " vertices: " + (end-start) + " ms")
-        println("Overall size for " + maxItems + ": " + (countSize/1024) + " KByte")
-        println("DB Size: " + (db.getSize/1024) + " KByte")
-
-
-      } catch {
-        case e:Exception =>
-          println(e.getMessage)
-      } finally {
-        //db.drop()
-        db.close()
-      }
-
-      true must_== true
-    }
-
     "create entities properly" in {
       checkOrientDBIsRunning
 
-      val repo = new OrientGraphRepository[TestEntity]() {}
+      val repo = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
+      repo.init
+
       val entityInstance = repo.create
 
       entityInstance.isInstanceOf[TestEntity] must_== true
@@ -122,7 +54,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     "save entities and set the internal id" in {
       checkOrientDBIsRunning
 
-      val repo = new OrientGraphRepository[TestEntity]() {}
+      val repo = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
       repo.init
 
       val preCount = repo.count
@@ -135,7 +67,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
 
       repo.update(testEntity)
 
-      val resultEntity = repo.findByUuid(testEntity.uuid.is)
+      val resultEntity = (repo.find where TestEntity.uuid eqs testEntity.uuid.is.toString limit 1 ex).head
 
       repo.count must_== preCount + 1
       testEntity.hasInternalId must_==(true)
@@ -146,7 +78,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     "delete entities by uuid properly" in  {
       checkOrientDBIsRunning
 
-      val repo = new OrientGraphRepository[TestEntity]() {}
+      val repo = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
       repo.init
 
       val preCount = repo.count
@@ -177,7 +109,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     "update a list of entities properly" in {
       checkOrientDBIsRunning
 
-      val repo = new OrientGraphRepository[TestEntity]() {}
+      val repo = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
       repo.init
 
       val preCount = repo.count
@@ -205,7 +137,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     "update existing entities properly" in {
       checkOrientDBIsRunning
 
-      val repo = new OrientGraphRepository[TestEntity]() {}
+      val repo = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
       repo.init
 
       val testEntity = repo.create
@@ -231,7 +163,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     "query by field properly" in {
       checkOrientDBIsRunning
 
-      val repo = new OrientGraphRepository[TestEntity]() {}
+      val repo = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
       repo.init
 
       val testEntity = repo.create
@@ -252,7 +184,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
 
       repo.update(testEntity3)
 
-      val resultList = repo.find(TestEntity.stringField, "QueryByFieldTest-Positive")
+      val resultList = repo.find where TestEntity.stringField eqs "QueryByFieldTest-Positive" limit 10 ex
 
       resultList.size must_==(2)
     }
@@ -260,7 +192,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     "drop all entities properly" in {
       checkOrientDBIsRunning
 
-      val repo = new OrientGraphRepository[TestEntity]() {}
+      val repo = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
       repo.init
 
       repo.drop

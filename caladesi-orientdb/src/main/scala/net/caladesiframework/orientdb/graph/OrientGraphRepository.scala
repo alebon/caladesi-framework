@@ -30,6 +30,7 @@ import scala.collection.JavaConverters._
 import java.util
 import net.caladesiframework.orientdb.document.entity.Document
 import util.Locale
+import net.caladesiframework.orientdb.query.QueryBuilder
 
 abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit m:scala.reflect.Manifest[EntityType])
   extends GraphRepository[EntityType] with CRUDRepository[EntityType] {
@@ -39,6 +40,10 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
   def dbUser = "admin"
   def dbName = "db"
   def dbPassword = "admin"
+
+  private def getQueryBuilder: QueryBuilder = {
+    new QueryBuilder(create, this)
+  }
 
   implicit def dbWrapper(db: OGraphDatabase) = new {
     def queryBySql[T](sql: String, params: AnyRef*): List[T] = {
@@ -63,17 +68,21 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
   })
 
   /**
-   * Finds entities by given field and value
-   *
-   * TODO: Replace "transactional" with "connected"
-   *
-   * @param field
-   * @param value
-   * @tparam FieldType
+   * Finds entities by constructed query
    */
-  def find[FieldType](field: Field[FieldType], value: FieldType) : List[EntityType] = connected(implicit db => {
-    val qry = "SELECT FROM " + repositoryEntityClass + " WHERE " + field.name + " = '" + value.toString + "'"
-    println(qry)
+  def find : QueryBuilder = {
+    new QueryBuilder(create, this)
+  }
+
+  /**
+   * Executes a string query (drop any custom query in here)
+   *
+   * @param qry
+   * @return
+   */
+  def execute(qry: String): List[EntityType] = connected(implicit db => {
+
+    println("Executing: " + qry)
     val result = db.queryBySql(qry)
 
     var list : List[EntityType] = Nil
