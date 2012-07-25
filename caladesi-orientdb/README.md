@@ -6,7 +6,7 @@ an abstraction layer for the fabulous OrientDB.
 ##The OrientDB Entity Repository
 
 The main goal of the repository is to create a simple Scala API for OrientDB. You can perform CRUD operation on the
-defined entities.
+defined entities and use the caladesi query language for searching for entities.
 
 The following (Repository) examples are not final:
 
@@ -17,6 +17,9 @@ class ShipEntity extends OrientGraphEntity with UuidPk {
 
   // We want the ship to have a name
   object name extends StringField(this)
+
+  // Color of the ship
+  object color extends StringField(this)
 
   // Ships have a weight and we name the inner property "weight"
   object weight extends DoubleField(this) {
@@ -56,6 +59,14 @@ val single = shipRepository.findBy(ShipEntity._uuid, UUID.fromString("048b080c-8
 val list = containerRepository.findAll(ContainerEntity~>ShipEntity)
             .filter(ShipEntity._uuid, UUID.fromString("048b080c-8ca1-429e-a640-138d928a8ecd",
                     ContainerEntity.color, "green"))
+```
+
+##Caladesi Query Language Sample
+```
+// Fetching green ships with pagination
+val greenShips = shipRepository find where ShipEntity.color eqs "green" skip 5 limit 5 ex
+
+val greenLola = (shipRepository find where ShipEntity.color eqs "green" and ShipEntity.name eqs "Lola" limit 1).head
 ```
 
 ##Getting Started with Caladesi Framework OrientDB
@@ -107,7 +118,7 @@ class ShipEntity extends OrientGraphEntity with UuidPk {
 
   // Defines remote 1:1 directed relations: Ship-[OWNED_BY]->Company
   // Remote means that the ShipEntity has to lookup for a REST service and perform a call
-  object remoteCompany extends SingleRelationRemote[CompanyAPI](this, "OWNED_BY")
+  object remoteCompany extends SingleRelation[Company](this, "OWNED_BY")
 }
 ```
 
