@@ -16,14 +16,16 @@
 
 package net.caladesiframework.orientdb.relation
 
-import net.caladesiframework.orientdb.graph.entity.OrientGraphEntity
 import net.caladesiframework.orientdb.field.Field
+import net.caladesiframework.orientdb.graph.entity.OrientGraphEntity
 import net.caladesiframework.orientdb.entity.Entity
+import net.caladesiframework.orientdb.repository.RepositoryRegistry
 
-class MultiRelation[EntityType <: OrientGraphEntity](implicit m:Manifest[EntityType])
-  extends Field[Seq[EntityType]] {
+class RelatedToOne[EntityType <: OrientGraphEntity](implicit m:Manifest[EntityType])
+  extends Field[EntityType] {
 
-  override lazy val defaultValue : Seq[EntityType] = Nil
+  override lazy val defaultValue : EntityType =
+      RepositoryRegistry.get(m.erasure.newInstance().asInstanceOf[EntityType].getClass.getName).create
 
   override val optional = false
 
@@ -32,7 +34,7 @@ class MultiRelation[EntityType <: OrientGraphEntity](implicit m:Manifest[EntityT
    *
    * @param ownerEntity
    */
-  def this(ownerEntity: Entity, relation: String) = {
+  def this(ownerEntity: Entity, relation: String)(implicit m:Manifest[EntityType]) = {
     this()
     owner = ownerEntity
     set(defaultValue)
@@ -44,7 +46,7 @@ class MultiRelation[EntityType <: OrientGraphEntity](implicit m:Manifest[EntityT
    * @param ownerEntity
    * @param value
    */
-  def this(ownerEntity: Entity, value: Seq[EntityType], relation: String) = {
+  def this(ownerEntity: Entity, value: EntityType, relation: String)(implicit m:Manifest[EntityType]) = {
     this()
     owner = ownerEntity
     set(value)

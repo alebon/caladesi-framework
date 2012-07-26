@@ -31,6 +31,7 @@ import java.util
 import net.caladesiframework.orientdb.document.entity.Document
 import util.Locale
 import net.caladesiframework.orientdb.query.QueryBuilder
+import net.caladesiframework.orientdb.relation.RelatedToOne
 
 abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit m:scala.reflect.Manifest[EntityType])
   extends GraphRepository[EntityType] with CRUDRepository[EntityType] {
@@ -40,6 +41,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
   def dbUser = "admin"
   def dbName = "db"
   def dbPassword = "admin"
+
+  lazy val entityName = determineEntityName
 
   implicit def dbWrapper(db: OGraphDatabase) = new {
     def queryBySql[T](sql: String, params: AnyRef*): List[T] = {
@@ -245,12 +248,21 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
   }
 
   /**
+   * Returns the class name of the entity that's handled by this repository
+   *
+   * @return
+   */
+  def determineEntityName = {
+    create.getClass.getName
+  }
+
+  /**
    * Copy fields to vertex
    *
    * @param vertex
    * @param entity
    */
-  private def setVertexFields(vertex: ODocument, entity: EntityType) = {
+  private def setVertexFields(vertex: ODocument, entity: EntityType)(implicit db: OGraphDatabase) = {
     entity.fields foreach {
       fieldObj => {
         //@TODO More generic approach
@@ -269,6 +281,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
             vertex.field(field.name, field.is.toString)
           case field:DateTimeField =>
             vertex.field(field.name, field.valueToDB)
+          case field:RelatedToOne[OrientGraphEntity] =>
+            handleRelatedToOne(vertex, field)
           case _ =>
             throw new Exception("Not supported Field")
         }
@@ -300,6 +314,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
             field.set(new Locale(vertex.field(field.name)))
           case field: DateTimeField =>
             field.valueFromDB(vertex.field(field.name))
+          case field:RelatedToOne[OrientGraphEntity] =>
+            throw new Exception("Not implemented yet")
           case _ =>
             throw new Exception("Not supported Field")
         }
@@ -330,7 +346,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
     } catch {
       case e:Exception =>
         db.rollback()
-        throw new Exception("Failure during execution: " + e.getMessage)
+        throw new Exception("Failure during execution: " + e.getMessage + e.getStackTraceString)
     } finally {
       db.close()
     }
@@ -352,9 +368,21 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
       return ret
     } catch {
       case e:Exception =>
-        throw new Exception("Failure during execution in connected mode: " + e.getMessage)
+        throw new Exception("Failure during execution in connected mode: " + e.getMessage + e.getStackTraceString)
     } finally {
       db.close()
+    }
+  }
+
+  private def handleRelatedToOne[RelatedEntityType <: OrientGraphEntity](vertex: ODocument,
+                                                                         field: RelatedToOne[RelatedEntityType])(implicit db: OGraphDatabase) = {
+    field.is.hasInternalId() match {
+      case true =>
+        // Create relationship here
+        val edge = db.createEdge(vertex, field.is.getUnderlyingVertex, "OGraphEdge")
+        edge.save
+
+      case _ => throw new Exception("Please update the related entity first")
     }
   }
 }

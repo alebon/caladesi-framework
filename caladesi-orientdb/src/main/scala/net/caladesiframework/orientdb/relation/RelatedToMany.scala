@@ -16,16 +16,13 @@
 
 package net.caladesiframework.orientdb.relation
 
-import net.caladesiframework.orientdb.field.Field
 import net.caladesiframework.orientdb.graph.entity.OrientGraphEntity
+import net.caladesiframework.orientdb.field.Field
 import net.caladesiframework.orientdb.entity.Entity
-import net.caladesiframework.orientdb.repository.RepositoryRegistry
 
-class SingleRelation[EntityType <: OrientGraphEntity](implicit m:Manifest[EntityType])
-  extends Field[EntityType] {
+class RelatedToMany[EntityType <: OrientGraphEntity]() extends Field[Seq[EntityType]] {
 
-  override lazy val defaultValue : EntityType =
-      RepositoryRegistry.get(m.erasure.newInstance().asInstanceOf[EntityType]).create
+  override lazy val defaultValue : Seq[EntityType] = Nil
 
   override val optional = false
 
@@ -46,7 +43,7 @@ class SingleRelation[EntityType <: OrientGraphEntity](implicit m:Manifest[Entity
    * @param ownerEntity
    * @param value
    */
-  def this(ownerEntity: Entity, value: EntityType, relation: String) = {
+  def this(ownerEntity: Entity, value: Seq[EntityType], relation: String) = {
     this()
     owner = ownerEntity
     set(value)

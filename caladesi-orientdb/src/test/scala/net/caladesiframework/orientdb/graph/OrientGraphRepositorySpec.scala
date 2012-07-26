@@ -17,11 +17,12 @@
 package net.caladesiframework.orientdb.graph
 
 import org.specs2.mutable._
-import testkit.{OrientDatabaseTestKit, TestEntity}
+import testkit.{TestEntityWithRelations, OrientDatabaseTestKit, TestEntity}
 import com.orientechnologies.orient.core.db.graph.OGraphDatabase
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import java.util
+import util.UUID
 
 class OrientGraphRepositorySpec extends SpecificationWithJUnit
   with OrientDatabaseTestKit {
@@ -129,7 +130,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       repo.update(entityList)
       val end = System.currentTimeMillis()
 
-      println("Updating took: " + (end - start) + " ms")
+      println("Updating 1000 vertices took: " + (end - start) + " ms")
 
       repo.count must_==(preCount + 1001)
     }
@@ -187,6 +188,28 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       val resultList = repo.find where TestEntity.stringField eqs "QueryByFieldTest-Positive" limit 10 ex
 
       resultList.size must_==(2)
+    }
+
+    "create relations to assigned entities properly" in {
+
+      val repoTestEntity = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
+      repoTestEntity.init
+      val testEntity = repoTestEntity.create
+      repoTestEntity.update(testEntity)
+
+      val repoTestEntityRel = new OrientGraphRepository[TestEntityWithRelations]() {
+        override def repositoryEntityClass = "TestEntityRelating"
+      }
+
+      repoTestEntityRel.init
+
+      val testEntityRel = repoTestEntityRel.create
+      testEntityRel.uuid.set(UUID.randomUUID())
+      testEntityRel.testEntity.set(testEntity)
+
+      repoTestEntityRel.update(testEntityRel)
+
+      true must_==true
     }
 
     "drop all entities properly" in {

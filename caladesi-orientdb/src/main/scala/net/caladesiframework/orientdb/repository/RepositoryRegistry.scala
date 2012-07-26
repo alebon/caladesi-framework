@@ -29,37 +29,32 @@ object RepositoryRegistry {
    * Register a repository to access entities
    *
    * @param repository
-   * @param t
    * @tparam EntityType
    * @return
    */
-  def register[EntityType <: OrientGraphEntity](repository: OrientGraphRepository[EntityType])(implicit t: Manifest[EntityType]) = {
-    map.put(t.getClass.getName, repository)
+  def register[EntityType <: OrientGraphEntity](repository: OrientGraphRepository[EntityType]) = {
+    println("Registering " + repository.entityName)
+    map.put(repository.entityName, repository)
   }
 
   /**
    * Is repository registered for the given entity?
    *
-   * @param entity
-   * @param t
-   * @tparam EntityType
    * @return
    */
-  def contains[EntityType <: OrientGraphEntity](entity: EntityType)(implicit t: Manifest[EntityType]): Boolean = {
-    //return map.contains(t.getClass.toString)
-    true
+  def contains(key: String)(): Boolean = {
+    map.contains(key)
   }
 
   /**
    * Remove repository from registry
    *
    * @param repository
-   * @param t
    * @tparam EntityType
    * @return
    */
-  def remove[EntityType <: OrientGraphEntity](repository: OrientGraphRepository[EntityType])(implicit t: Manifest[EntityType]) = {
-    map.remove(t.getClass.getName)
+  def remove[EntityType <: OrientGraphEntity](repository: OrientGraphRepository[EntityType]) = {
+    map.remove(repository.entityName)
 
     //this.contains(t.getClass.getName) match {
     //  case true => map.remove(t.getClass.getName)
@@ -70,12 +65,14 @@ object RepositoryRegistry {
   /**
    * Get the repository for given entity type to work with
    *
-   * @param entity
-   * @param t
    * @tparam EntityType
    * @return
    */
-  def get[EntityType <: OrientGraphEntity](entity: EntityType)(implicit t: Manifest[EntityType]): OrientGraphRepository[EntityType] = {
-    map.get(t.getClass.toString).asInstanceOf[OrientGraphRepository[EntityType]]
+  def get[EntityType <: OrientGraphEntity](key: String): OrientGraphRepository[EntityType] = {
+    map.get(key) match {
+      case Some(value) =>
+        map.get(key).get.asInstanceOf[OrientGraphRepository[EntityType]]
+      case None => throw new Exception("No repository for " + key + " specified")
+    }
   }
 }

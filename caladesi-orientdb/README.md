@@ -112,14 +112,14 @@ dependencies {
 class ShipEntity extends OrientGraphEntity with UuidPk {
 
   // Defines 1:N relations: Ship -[HAS]-> Container*
-  object containerList extends MultiRelation[Container](this, "HAS")
+  object containerList extends RelatedToMany[Container](this, "HAS")
 
   // Defines 1:1 directed relations: Ship -[SPECIAL]-> Container
-  object singleContainer extends SingleRelation[Container](this, "SPECIAL")
+  object singleContainer extends RelatedToOne[Container](this, "SPECIAL")
 
   // Defines remote 1:1 directed relations: Ship-[OWNED_BY]->Company
   // Remote means that the ShipEntity has to lookup for a REST service and perform a call
-  object remoteCompany extends SingleRelation[Company](this, "OWNED_BY")
+  object remoteCompany extends RelatedToOne[Company](this, "OWNED_BY")
 }
 ```
 
