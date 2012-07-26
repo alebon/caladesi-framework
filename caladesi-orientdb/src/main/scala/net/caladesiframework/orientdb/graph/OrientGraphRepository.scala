@@ -17,7 +17,7 @@
 package net.caladesiframework.orientdb.graph
 
 import entity.{OrientGraphEntity, GraphEntity}
-import net.caladesiframework.orientdb.repository.CRUDRepository
+import net.caladesiframework.orientdb.repository.{RepositoryRegistry, CRUDRepository}
 import repository.{GraphRepository}
 import com.orientechnologies.orient.core.db.graph.{OGraphDatabasePool, OGraphDatabase}
 import com.orientechnologies.orient.core.record.impl.ODocument
@@ -65,6 +65,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
       case _ =>
         db.createVertexType(repositoryEntityClass, "OGraphVertex")
     }
+
+    RepositoryRegistry.register(this)
   })
 
   /**

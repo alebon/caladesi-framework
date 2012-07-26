@@ -10,7 +10,7 @@ class QueryBuilderSpec extends SpecificationWithJUnit {
   "QueryBuilder" should {
     "assemble simple queries properly" in {
 
-      val repo = new OrientGraphRepository[TestEntity]() {}
+      val repo = new OrientGraphRepository[TestEntity]() {override def repositoryEntityClass = "TestEntity"}
 
       val testEntity = new TestEntity()
       val sutQb = new QueryBuilder(TestEntity, repo)
