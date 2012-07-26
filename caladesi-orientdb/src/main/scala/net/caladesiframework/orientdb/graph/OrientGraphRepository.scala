@@ -41,10 +41,6 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
   def dbName = "db"
   def dbPassword = "admin"
 
-  private def getQueryBuilder: QueryBuilder = {
-    new QueryBuilder(create, this)
-  }
-
   implicit def dbWrapper(db: OGraphDatabase) = new {
     def queryBySql[T](sql: String, params: AnyRef*): List[T] = {
       val params4Java = params.toArray
