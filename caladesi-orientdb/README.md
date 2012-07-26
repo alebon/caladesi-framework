@@ -44,10 +44,13 @@ class ShipRepository extends OrientGraphRepository[ShipEntity] {
   override def dbType = "remote"
   override def dbUser = "admin"
   override def dbPassword = "admin"
+
+  // Override this to use own names or use same repositories with different entity sets
+  override def repositoryEntityClass = "OShipEntityCustom"
 }
 ```
 
-Usage in your BL code (draft, not implemented yet):
+Usage in your BL code (draft, not all implemented yet):
 
 ```scala
 val shipRepository = new ShipRepository()
@@ -61,8 +64,27 @@ val list = containerRepository.findAll(ContainerEntity~>ShipEntity)
                     ContainerEntity.color, "green"))
 ```
 
-##Caladesi Query Language Sample
+###Defining directed 1:1 relationships
+```scala
+class ShipEntity extends OrientGraphEntity with UUIDPk {
+  // Defines 1:1 directed relations: Ship -[SPECIAL]-> Container
+  object specialContainer extends RelatedToOne[Container](this, "SPECIAL")
+}
+
+
+// Create and assign the entities in your BL
+val container = containerRepository.create
+containerRepository.update(container) // This is handled in an own transaction
+
+val ship = shipRepository.create
+ship.specialContainer.set(container)
+
+// Wires the ship with the container Ship -["SPECIAL"]-> Container
+shipRepository.update(ship) // The second transaction contains the creation of the directed edge
 ```
+
+##Caladesi Query Language Sample
+```scala
 // Fetching green ships with pagination
 val greenShips = shipRepository find where ShipEntity.color eqs "green" skip 5 limit 5 ex
 
@@ -113,9 +135,6 @@ class ShipEntity extends OrientGraphEntity with UuidPk {
 
   // Defines 1:N relations: Ship -[HAS]-> Container*
   object containerList extends RelatedToMany[Container](this, "HAS")
-
-  // Defines 1:1 directed relations: Ship -[SPECIAL]-> Container
-  object singleContainer extends RelatedToOne[Container](this, "SPECIAL")
 
   // Defines remote 1:1 directed relations: Ship-[OWNED_BY]->Company
   // Remote means that the ShipEntity has to lookup for a REST service and perform a call
