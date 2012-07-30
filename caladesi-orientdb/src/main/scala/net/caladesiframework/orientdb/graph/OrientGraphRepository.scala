@@ -16,9 +16,9 @@
 
 package net.caladesiframework.orientdb.graph
 
-import entity.{OrientGraphEntity, GraphEntity}
+import entity.{OrientGraphEntity}
 import net.caladesiframework.orientdb.repository.{RepositoryRegistry, CRUDRepository}
-import repository.{GraphRepository}
+import repository.{EdgeHandler, GraphRepository}
 import com.orientechnologies.orient.core.db.graph.{OGraphDatabasePool, OGraphDatabase}
 import com.orientechnologies.orient.core.record.impl.ODocument
 import net.caladesiframework.orientdb.field._
@@ -28,13 +28,12 @@ import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import java.util
-import net.caladesiframework.orientdb.document.entity.Document
 import util.Locale
 import net.caladesiframework.orientdb.query.QueryBuilder
 import net.caladesiframework.orientdb.relation.RelatedToOne
 
 abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit m:scala.reflect.Manifest[EntityType])
-  extends GraphRepository[EntityType] with CRUDRepository[EntityType] {
+  extends GraphRepository[EntityType] with CRUDRepository[EntityType] with EdgeHandler {
 
   // @TODO Inject by configuration
   def dbType = "remote"
@@ -53,7 +52,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
   }
 
   // Override to rename
-  def repositoryEntityClass = "OGraphEntity"
+  def repositoryEntityClass = this.determineEntityName + "_V"
 
   /**
    * Creates the correct VertexType if missing
@@ -63,6 +62,16 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
       case clazz: OClass => // Everything fine, no update needed
       case _ =>
         db.createVertexType(repositoryEntityClass, "OGraphVertex")
+    }
+
+    create.fields foreach {
+      fieldObj => {
+        fieldObj match {
+          case field:RelatedToOne[OrientGraphEntity] =>
+            checkEdgeType(field)
+          case _ => // Ignore it
+        }
+      }
     }
 
     RepositoryRegistry.register(this)
@@ -371,18 +380,6 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
         throw new Exception("Failure during execution in connected mode: " + e.getMessage + e.getStackTraceString)
     } finally {
       db.close()
-    }
-  }
-
-  private def handleRelatedToOne[RelatedEntityType <: OrientGraphEntity](vertex: ODocument,
-                                                                         field: RelatedToOne[RelatedEntityType])(implicit db: OGraphDatabase) = {
-    field.is.hasInternalId() match {
-      case true =>
-        // Create relationship here
-        val edge = db.createEdge(vertex, field.is.getUnderlyingVertex, "OGraphEdge")
-        edge.save
-
-      case _ => throw new Exception("Please update the related entity first")
     }
   }
 }

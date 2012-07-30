@@ -42,7 +42,7 @@ object RepositoryRegistry {
    *
    * @return
    */
-  def contains(key: String)(): Boolean = {
+  def contains(key: String): Boolean = {
     map.contains(key)
   }
 
@@ -74,5 +74,9 @@ object RepositoryRegistry {
         map.get(key).get.asInstanceOf[OrientGraphRepository[EntityType]]
       case None => throw new Exception("No repository for " + key + " specified")
     }
+  }
+
+  def dumpRegisteredServices = {
+    println(map.flatMap(repo => repo.toString()))
   }
 }

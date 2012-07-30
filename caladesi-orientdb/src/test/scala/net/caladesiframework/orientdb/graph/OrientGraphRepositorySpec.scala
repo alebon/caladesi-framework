@@ -212,6 +212,31 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       true must_==true
     }
 
+    "assign RelatedToOne only one time on several updates" in {
+
+      val repoTestEntity = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
+      repoTestEntity.init
+      val testEntity = repoTestEntity.create
+      repoTestEntity.update(testEntity)
+
+      val repoTestEntityRel = new OrientGraphRepository[TestEntityWithRelations]() {
+        override def repositoryEntityClass = "TestEntityRelating"
+      }
+
+      repoTestEntityRel.init
+
+      val testEntityRel = repoTestEntityRel.create
+      testEntityRel.uuid.set(UUID.randomUUID())
+      testEntityRel.testEntity.set(testEntity)
+
+      repoTestEntityRel.update(testEntityRel)
+      repoTestEntityRel.update(testEntityRel)
+      repoTestEntityRel.update(testEntityRel)
+      repoTestEntityRel.update(testEntityRel)
+
+      true must_==true
+    }
+
     "drop all entities properly" in {
       checkOrientDBIsRunning
 

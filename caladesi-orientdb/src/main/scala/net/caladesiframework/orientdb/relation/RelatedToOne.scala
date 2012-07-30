@@ -25,9 +25,11 @@ class RelatedToOne[EntityType <: OrientGraphEntity](implicit m:Manifest[EntityTy
   extends Field[EntityType] {
 
   override lazy val defaultValue : EntityType =
-      RepositoryRegistry.get(m.erasure.newInstance().asInstanceOf[EntityType].getClass.getName).create
+      m.erasure.newInstance().asInstanceOf[EntityType]
 
   override val optional = false
+
+  protected var relationName = "OGraphVertex"
 
   /**
    * Init the field with default value
@@ -38,6 +40,7 @@ class RelatedToOne[EntityType <: OrientGraphEntity](implicit m:Manifest[EntityTy
     this()
     owner = ownerEntity
     set(defaultValue)
+    relationName = relation
   }
 
   /**
@@ -50,5 +53,8 @@ class RelatedToOne[EntityType <: OrientGraphEntity](implicit m:Manifest[EntityTy
     this()
     owner = ownerEntity
     set(value)
+    relationName = relation
   }
+
+  def relType = this.relationName
 }
