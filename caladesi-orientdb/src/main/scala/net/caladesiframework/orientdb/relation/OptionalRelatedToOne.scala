@@ -16,23 +16,26 @@
 
 package net.caladesiframework.orientdb.relation
 
-import net.caladesiframework.orientdb.graph.entity.OrientGraphEntity
 import net.caladesiframework.orientdb.field.Field
+import net.caladesiframework.orientdb.graph.entity.OrientGraphEntity
 import net.caladesiframework.orientdb.entity.Entity
 
-class RelatedToMany[EntityType <: OrientGraphEntity]()
-  extends Field[Seq[EntityType]] with Relation {
+class OptionalRelatedToOne[EntityType <: OrientGraphEntity](implicit m:Manifest[EntityType])
+  extends Field[EntityType] with Relation {
 
-  override lazy val defaultValue : Seq[EntityType] = Nil
+  override lazy val defaultValue : EntityType =
+    m.erasure.newInstance().asInstanceOf[EntityType]
 
-  override val optional = false
+  override val optional = true
+
+  protected var shouldReset = false
 
   /**
    * Init the field with default value
    *
    * @param ownerEntity
    */
-  def this(ownerEntity: Entity, relation: String) = {
+  def this(ownerEntity: Entity, relation: String)(implicit m:Manifest[EntityType]) = {
     this()
     owner = ownerEntity
     set(defaultValue)
@@ -45,10 +48,18 @@ class RelatedToMany[EntityType <: OrientGraphEntity]()
    * @param ownerEntity
    * @param value
    */
-  def this(ownerEntity: Entity, value: Seq[EntityType], relation: String) = {
+  def this(ownerEntity: Entity, value: EntityType, relation: String)(implicit m:Manifest[EntityType]) = {
     this()
     owner = ownerEntity
     set(value)
     relationName = relation
   }
+
+  /**
+   * Internally, marks the relation to be removed
+   */
+  def reset = this.shouldReset = true
+
+  def markedToBeRemoved = this.shouldReset
+
 }

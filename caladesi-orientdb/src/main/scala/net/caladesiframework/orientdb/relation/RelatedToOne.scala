@@ -22,14 +22,12 @@ import net.caladesiframework.orientdb.entity.Entity
 import net.caladesiframework.orientdb.repository.RepositoryRegistry
 
 class RelatedToOne[EntityType <: OrientGraphEntity](implicit m:Manifest[EntityType])
-  extends Field[EntityType] {
+  extends Field[EntityType] with Relation {
 
   override lazy val defaultValue : EntityType =
       m.erasure.newInstance().asInstanceOf[EntityType]
 
   override val optional = false
-
-  protected var relationName = "OGraphVertex"
 
   /**
    * Init the field with default value
@@ -55,6 +53,4 @@ class RelatedToOne[EntityType <: OrientGraphEntity](implicit m:Manifest[EntityTy
     set(value)
     relationName = relation
   }
-
-  def relType = this.relationName
 }
