@@ -62,4 +62,30 @@ class OptionalRelatedToOne[EntityType <: OrientGraphEntity](implicit m:Manifest[
 
   def markedToBeRemoved = this.shouldReset
 
+  /**
+   * Since this is an optional value
+   *
+   * @return
+   */
+  def isOpt : Option[EntityType] = {
+    if (this.value.hasInternalId()) {
+      Some(this.value)
+    } else {
+      None
+    }
+  }
+
+  /**
+   * Special handling for optional field
+   *
+   * @return
+   */
+  override def is = {
+    if (this.value.hasInternalId()) {
+      this.value
+    } else {
+      throw new Exception("Empty field value - you are using an optional field, try isOpt instead!")
+    }
+  }
+
 }

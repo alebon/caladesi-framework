@@ -92,8 +92,8 @@ ship.specialContainer.set(container)
 shipRepository.update(ship) // The second transaction contains the creation of the directed edge
 ```
 
-By using the OptionalRelatedToOne relation you don't need to define a relationship. By calling the ".is()" method on
-an optional relation an Option will be returned.
+By using the OptionalRelatedToOne relation you don't need to define a relationship. By calling the ".isOpt" method on
+an optional relation an Option(Some or None) will be returned.
 
 ##Caladesi Query Language Sample
 ```scala
@@ -104,7 +104,7 @@ val greenShips = shipRepository find where ShipEntity.color eqs "green" skip 5 l
 val greenLola = (shipRepository find where ShipEntity.color eqs "green" and ShipEntity.name eqs "Lola" limit 1 ex).head
 
 // Check for related company (we assume that greenLola was found)
-greenLola.company.is match {
+greenLola.company.isOpt match {
   case Some(company) => // Do something with the company
   case None => // There is no company related
 }
