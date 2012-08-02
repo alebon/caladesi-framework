@@ -6,9 +6,10 @@ an abstraction layer for the fabulous OrientDB.
 ##The OrientDB Entity Repository
 
 The main goal of the repository is to create a simple Scala API for OrientDB. You can perform CRUD operation on the
-defined entities and use the caladesi query language for searching for entities.
+defined entities and use the caladesi query language for searching for entities. Furthermore - to make use of a graph
+database - you can define relationships between entities and traverse them.
 
-The following (Repository) examples are not final:
+The following examples should give you an idea of how to use the caladaesi framework to define graph based repositories:
 
 ###Defining the entities
 
@@ -50,12 +51,17 @@ class ShipRepository extends OrientGraphRepository[ShipEntity] {
 }
 ```
 
-Usage in your BL code (draft, not all implemented yet):
+The default configuration tells the repository to use the class name of the entity as the class inside orientdb. To
+override this (maybe you want to define two different repositories for the same entity class) just override the method
+"repositoryEntityClass".
+
+Usage in your BL code:
 
 ```scala
 val shipRepository = new ShipRepository()
 shipRepository.init
 
+// Find one ship entity where uuid equals "048b080c-8ca1-429e-a640-138d928a8ecd"
 val single = (shipRepository.find where ShipEntity._uuid eqs UUID.fromString("048b080c-8ca1-429e-a640-138d928a8ecd" limit 1 ex)).head
 
 // All green container assigned to ship with uuid 048b080c-8ca1-429e-a640-138d928a8ecd
@@ -64,13 +70,16 @@ val list = containerRepository.findAll(ContainerEntity~>ShipEntity)
                     ContainerEntity.color, "green"))
 ```
 
-###Defining directed 1:1 relationships
+###Defining directed 1..1 relationships and 0..1
 ```scala
 class ShipEntity extends OrientGraphEntity with UUIDPk {
-  // Defines 1:1 directed relations: Ship -[SPECIAL]-> Container
-  object specialContainer extends RelatedToOne[Container](this, "SPECIAL")
-}
 
+  // Defines 1:1 directed relations: Ship -[SPECIAL]-> Container
+  object specialContainer extends RelatedToOne[ContainerEntity](this, "SPECIAL")
+
+  // Define 0..1 directed relation: Ship-[OWNED_BY]->Company
+  object company extends OptionalRelatedToOne[CompanyEntity](this, "OWNED_BY")
+}
 
 // Create and assign the entities in your BL
 val container = containerRepository.create
@@ -79,9 +88,12 @@ containerRepository.update(container) // This is handled in an own transaction
 val ship = shipRepository.create
 ship.specialContainer.set(container)
 
-// Wires the ship with the container Ship -["SPECIAL"]-> Container
+// Wires the ship with the container: Ship -["SPECIAL"]-> Container
 shipRepository.update(ship) // The second transaction contains the creation of the directed edge
 ```
+
+By using the OptionalRelatedToOne relation you don't need to define a relationship. By calling the ".is()" method on
+an optional relation an Option will be returned.
 
 ##Caladesi Query Language Sample
 ```scala
@@ -90,6 +102,12 @@ val greenShips = shipRepository find where ShipEntity.color eqs "green" skip 5 l
 
 // Find single ship with color green and name Lola
 val greenLola = (shipRepository find where ShipEntity.color eqs "green" and ShipEntity.name eqs "Lola" limit 1 ex).head
+
+// Check for related company (we assume that greenLola was found)
+greenLola.company.is match {
+  case Some(company) => // Do something with the company
+  case None => // There is no company related
+}
 ```
 
 ##Getting Started with Caladesi Framework OrientDB
