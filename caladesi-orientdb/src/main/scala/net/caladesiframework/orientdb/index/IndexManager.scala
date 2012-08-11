@@ -22,6 +22,9 @@ import net.caladesiframework.orientdb.graph.OrientGraphDbWrapper
 import com.orientechnologies.orient.core.record.impl.ODocument
 import com.orientechnologies.orient.core.metadata.schema.{OType, OClass}
 import com.orientechnologies.orient.core.index.OSimpleKeyIndexDefinition
+import net.caladesiframework.orientdb.graph.entity.OrientGraphEntity
+import com.orientechnologies.orient.core.id.ORID
+import com.orientechnologies.orient.core.db.record.OIdentifiable
 
 trait IndexManager extends OrientGraphDbWrapper {
 
@@ -29,7 +32,7 @@ trait IndexManager extends OrientGraphDbWrapper {
 
     val documents : List[ODocument] =  db.queryBySql[ODocument]("select flatten(indexes) from cluster:0")
 
-    val indexName = field.owner.clazz + "_" + field.name
+    val indexName = NamingStrategy.indexName(field)
 
     var matches = false
     documents foreach {
@@ -42,6 +45,41 @@ trait IndexManager extends OrientGraphDbWrapper {
         OClass.INDEX_TYPE.FULLTEXT.toString,
         new OSimpleKeyIndexDefinition(OType.STRING), null, null)
     }
+  }
+
+  /**
+   * Update index entries for the entity
+   *
+   * @param entity
+   * @param db
+   * @return
+   */
+  def updateIndex(entity: OrientGraphEntity)(implicit db: OGraphDatabase)  = {
+
+    val vertex: OIdentifiable = entity.getUnderlyingVertex
+
+    entity.fields foreach {
+      field => {
+        val index = db.getMetadata.getIndexManager.getIndex(NamingStrategy.indexName(field.asInstanceOf[Field[AnyRef]]))
+
+        field match {
+          case field: FulltextIndexed =>
+            index.remove(vertex)
+            index.put(field.asInstanceOf[Field[AnyRef]].value, vertex)
+          case _ =>
+            // Ignore field
+        }
+      }
+    }
+
+  }
+
+}
+
+object NamingStrategy {
+
+  def indexName(field: Field[AnyRef]): String = {
+    field.owner.clazz + "_" + field.name
   }
 
 }

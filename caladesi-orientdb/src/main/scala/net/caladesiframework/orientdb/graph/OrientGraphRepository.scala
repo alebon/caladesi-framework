@@ -25,7 +25,6 @@ import net.caladesiframework.orientdb.field._
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import com.orientechnologies.orient.core.metadata.schema.OClass
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import java.util
 import util.Locale
 import net.caladesiframework.orientdb.query.QueryBuilder
@@ -176,6 +175,10 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
       })
       entity.setUnderlyingVertex(vertex)
 
+      transactional(implicit db => {
+        updateIndex(entity)
+      })
+
       entity
   }
 
@@ -202,6 +205,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
 
         vertex.save
         entity.setUnderlyingVertex(vertex)
+        updateIndex(entity)
       }
     }
 
