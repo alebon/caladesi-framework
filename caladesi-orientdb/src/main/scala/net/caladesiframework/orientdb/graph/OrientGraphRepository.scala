@@ -175,7 +175,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
       })
       entity.setUnderlyingVertex(vertex)
 
-      transactional(implicit db => {
+      connected(implicit db => {
         updateIndex(entity)
       })
 
@@ -260,7 +260,12 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
 
     if (count >= 1) {
       this.drop
+    } else {
+      connected(implicit dbName => {
+        dropIndex(create)
+      })
     }
+
   }
 
   /**

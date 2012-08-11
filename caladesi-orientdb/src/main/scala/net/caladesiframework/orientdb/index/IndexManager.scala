@@ -69,9 +69,31 @@ trait IndexManager extends OrientGraphDbWrapper {
           case _ =>
             // Ignore field
         }
+
+        //index.lazySave()
       }
     }
 
+  }
+
+  /**
+   * Drops field index for all fields
+   *
+   * @param entity
+   * @param db
+   * @return
+   */
+  def dropIndex(entity: OrientGraphEntity)(implicit db: OGraphDatabase) = {
+    entity.fields foreach {
+      field => {
+        field match {
+          case field: FulltextIndexed =>
+            db.getMetadata.getIndexManager.dropIndex(NamingStrategy.indexName(field.asInstanceOf[Field[AnyRef]]))
+          case _ =>
+            // Ignore field
+        }
+      }
+    }
   }
 
 }
