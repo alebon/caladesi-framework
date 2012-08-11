@@ -30,7 +30,7 @@ class QueryBuilder {
   private var params: List[AnyRef] = List[AnyRef]()
 
   private def select(entity: OrientGraphEntity) = {
-    qry += "select from " + entity.clazz
+    qry += "select from " + callBack.repositoryEntityClass
   }
 
   /**
@@ -92,8 +92,8 @@ class QueryBuilder {
 
   def this(entity: Any, repository: Any) = {
     this
-    select(entity.asInstanceOf[OrientGraphEntity])
     callBack = repository.asInstanceOf[OrientGraphRepository[OrientGraphEntity]]
+    select(entity.asInstanceOf[OrientGraphEntity])
   }
 
   /**

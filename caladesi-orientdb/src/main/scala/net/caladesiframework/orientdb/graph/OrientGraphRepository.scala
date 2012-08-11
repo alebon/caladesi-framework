@@ -54,7 +54,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
   }
 
   // Override to rename
-  def repositoryEntityClass = this.determineEntityName + "_V"
+  def repositoryEntityClass = create.clazz + "_V"
 
   /**
    * Creates the correct VertexType if missing
