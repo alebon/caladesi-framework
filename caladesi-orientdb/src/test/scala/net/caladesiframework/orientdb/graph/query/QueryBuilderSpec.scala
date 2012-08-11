@@ -17,7 +17,7 @@ class QueryBuilderSpec extends SpecificationWithJUnit {
 
       sutQb where testEntity.doubleField eqs 0.0 and testEntity.intField eqs 1 skip 5 limit 5
 
-      sutQb.qryTemp must_==("select from TestEntity where doubleField = 0.0 and intField = 1 skip 5 limit 5")
+      sutQb.qryTemp must_==("select from TestEntity where doubleField = ? and intField = ? skip 5 limit 5")
     }
   }
 

@@ -30,7 +30,9 @@ import scala.collection.JavaConverters._
 import java.util
 import util.Locale
 import net.caladesiframework.orientdb.query.QueryBuilder
-import net.caladesiframework.orientdb.relation.RelatedToOne
+import net.caladesiframework.orientdb.relation.{Relation, RelatedToOne}
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
+import com.orientechnologies.orient.core.tx.OTransaction
 
 abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit m:scala.reflect.Manifest[EntityType])
   extends GraphRepository[EntityType] with CRUDRepository[EntityType] with EdgeHandler {
@@ -90,10 +92,9 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
    * @param qry
    * @return
    */
-  def execute(qry: String): List[EntityType] = connected(implicit db => {
+  def execute(qry: String, params: AnyRef*): List[EntityType] = connected(implicit db => {
 
-    println("Executing: " + qry)
-    val result = db.queryBySql(qry)
+    val result = db.queryBySql(qry, params:_*)
 
     var list : List[EntityType] = Nil
     for (vertex: ODocument <- result) {
@@ -112,27 +113,6 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
   private def transformToEntity(vertex: ODocument) : EntityType = {
     return setEntityFields(create, vertex)
   }
-
-  /**
-   * Finds an entity by given uuid
-   *
-   * @param id
-   * @return
-   */
-  def findByUuid(id: util.UUID): EntityType = transactional(implicit db => {
-    val result = db.queryBySql("SELECT FROM " + repositoryEntityClass + " WHERE _uuid = '" + id.toString + "'")
-
-    if (result.size == 0) {
-      throw new Exception("Not found")
-    }
-
-    val document : ODocument = result.head
-
-    val entity = this.create
-    setEntityFields(entity, document)
-
-    entity
-  })
 
   /**
    * Creates a new entity (not persisted)
@@ -159,15 +139,33 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
           case clazz: OClass => // Everything is fine
         }
 
+        var existing = false
         // Decide by internal id: create or update
         val vertex: ODocument =  entity.hasInternalId() match {
-          case true => entity.getUnderlyingVertex
+          case true => //db.load[ODocument](entity.getUnderlyingVertex.getIdentity)
+            println("before: " + entity.getUnderlyingVertex.getIdentity.toString())
+            existing = true
+            //entity.getUnderlyingVertex
+            db.load[ODocument](entity.getUnderlyingVertex.getIdentity)
+
           case false => db.createVertex(repositoryEntityClass)
         }
 
         // Set the new fields and save
         setVertexFields(vertex, entity)
-        vertex.save
+        if (existing) {
+          val check = db.load[ODocument](entity.getUnderlyingVertex.getIdentity)
+          println("after: " + entity.getUnderlyingVertex.getIdentity.toString())
+
+          if (check.getVersion == vertex.getVersion) {
+            vertex.save
+          } else {
+            throw new Exception("THIS IS IT")
+          }
+
+        } else {
+          vertex.save
+        }
 
         vertex
       })
@@ -290,8 +288,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
             vertex.field(field.name, field.is.toString)
           case field:DateTimeField =>
             vertex.field(field.name, field.valueToDB)
-          case field:RelatedToOne[OrientGraphEntity] =>
-            handleRelatedToOne(vertex, field)
+          case field:Relation =>
+            handleRelation(vertex, field)
           case _ =>
             throw new Exception("Not supported Field")
         }
@@ -347,7 +345,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
       .acquire(dbType + ":127.0.0.1/" + dbName, dbUser, dbPassword)
 
     try {
-      val transaction = synchronized { db.begin() }
+      val transaction = synchronized { db.begin(OTransaction.TXTYPE.OPTIMISTIC) }
       val ret = f(db)
       transaction.commit()
 
@@ -355,7 +353,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
     } catch {
       case e:Exception =>
         db.rollback()
-        throw new Exception("Failure during execution: " + e.getMessage + e.getStackTraceString)
+        throw new Exception("Failure during execution: " + e.getMessage + " STACKTRACE: " + e.getStackTraceString)
     } finally {
       db.close()
     }

@@ -97,24 +97,21 @@ trait EdgeHandler {
       case true =>
 
         val edges = db.getEdgesBetweenVertexes(vertex, field.is.getUnderlyingVertex)
-        var existent = false
 
-        val relationShip = edgeName(field.asInstanceOf[Field[AnyRef] with Relation])
+        val relationshipName = edgeName(field.asInstanceOf[Field[AnyRef] with Relation])
         edges.asScala foreach  {
           entry => {
             entry match {
-              case oDoc: ODocument if (oDoc.getClassName == relationShip) =>
-                existent = true
+              case oDoc: ODocument if (oDoc.getClassName == relationshipName) =>
+                db.removeEdge(oDoc)
               case _ => // Skip
             }
           }
         }
 
-        if (!existent) {
-          // Create relationship here
-          val edge = db.createEdge(vertex, field.is.getUnderlyingVertex, relationShip)
-          edge.save
-        }
+        // Create relationship here
+        val edge = db.createEdge(vertex, field.is.getUnderlyingVertex, relationshipName)
+        edge.save
 
       case _ => throw new Exception("Please update the related entity first")
     }

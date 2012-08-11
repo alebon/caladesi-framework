@@ -19,12 +19,15 @@ package net.caladesiframework.orientdb.query
 import net.caladesiframework.orientdb.field.Field
 import net.caladesiframework.orientdb.graph.entity.{GraphEntity, OrientGraphEntity}
 import net.caladesiframework.orientdb.graph.OrientGraphRepository
+import java.util.UUID
 
 class QueryBuilder {
 
   private var qry : String = ""
 
   private var callBack : OrientGraphRepository[OrientGraphEntity] = null
+
+  private var params: List[AnyRef] = List[AnyRef]()
 
   private def select(entity: OrientGraphEntity) = {
     qry += "select from " + entity.clazz
@@ -51,18 +54,18 @@ class QueryBuilder {
   }
 
   def eqs(value: Any) = {
-    // @TODO Add field type awareness
-    if (value.isInstanceOf[String]) {
-      qry += " = '" + value + "'"
-    } else {
-      qry += " = " + value
+    value match {
+      case v: UUID => params = v.toString :: params
+      case v: scala.Double => params = v.asInstanceOf[java.lang.Double] :: params
+      case v:scala.Int => params = v.asInstanceOf[java.lang.Integer] :: params
+      case _ => params = value.toString :: params
     }
+    qry += " = ?"
     this
   }
 
   /**
    * Adds where condition (Fluent interface)
-   * // JCT-Q2H-X95-94K
    *
    * @return
    */
@@ -83,7 +86,8 @@ class QueryBuilder {
    * Execute the query
    */
   def ex = {
-    callBack.execute(qry)
+    println("Executing query: " + qry + " with params " + params.toString())
+    callBack.execute(qry, reverse[AnyRef](params):_*)
   }
 
   def this(entity: Any, repository: Any) = {
@@ -100,4 +104,15 @@ class QueryBuilder {
     this.qry
   }
 
+  /**
+   * Little helper method
+   *
+   * @param l
+   * @tparam T
+   * @return
+   */
+  private def reverse[T](l: List[T]) : List[T] = l match {
+    case Nil => Nil
+    case h::t => reverse(t):::List(h)
+  }
 }
