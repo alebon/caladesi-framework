@@ -24,18 +24,21 @@ import com.orientechnologies.orient.core.record.impl.ODocument
 import net.caladesiframework.orientdb.field._
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import com.orientechnologies.orient.core.metadata.schema.OClass
-import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import java.util
 import util.Locale
 import net.caladesiframework.orientdb.query.QueryBuilder
 import net.caladesiframework.orientdb.relation.{Relation, RelatedToOne}
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import com.orientechnologies.orient.core.tx.OTransaction
+import net.caladesiframework.orientdb.index.{FulltextIndexed, IndexManager}
 
 abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit m:scala.reflect.Manifest[EntityType])
-  extends GraphRepository[EntityType] with CRUDRepository[EntityType] with EdgeHandler {
+  extends GraphRepository[EntityType]
+  with CRUDRepository[EntityType]
+  with OrientGraphDbWrapper
+  with EdgeHandler
+  with IndexManager {
 
   // @TODO Inject by configuration
   def dbType = "remote"
@@ -43,41 +46,43 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
   def dbName = "db"
   def dbPassword = "admin"
 
-  lazy val entityName = determineEntityName
-
-  implicit def dbWrapper(db: OGraphDatabase) = new {
-    def queryBySql[T](sql: String, params: AnyRef*): List[T] = {
-      val params4Java = params.toArray
-      val result: java.util.List[T] = db.query(new OSQLSynchQuery(sql), params4Java:_*)
-      result.asScala.toList
-    }
-  }
-
   // Override to rename
   def repositoryEntityClass = create.clazz + "_V"
 
   /**
    * Creates the correct VertexType if missing
    */
-  def init = connected(implicit db => {
-    db.getVertexType(repositoryEntityClass) match {
-      case clazz: OClass => // Everything fine, no update needed
-      case _ =>
-        db.createVertexType(repositoryEntityClass, "OGraphVertex")
-    }
+  def init = {
+    connected(implicit db => {
+      // Check for Vertices
+      db.getVertexType(repositoryEntityClass) match {
+        case clazz: OClass => // Everything fine, no update needed
+        case _ =>
+          db.createVertexType(repositoryEntityClass, "OGraphVertex")
+      }
 
-    create.fields foreach {
-      fieldObj => {
-        fieldObj match {
-          case field:RelatedToOne[OrientGraphEntity] =>
-            checkEdgeType(field)
-          case _ => // Ignore it
+      create.fields foreach {
+        fieldObj => {
+          // Check for missing edge types
+          fieldObj match {
+            case field:RelatedToOne[OrientGraphEntity] =>
+              checkEdgeType(field)
+            case _ => // Ignore it
+          }
+
+          // Check for missing indexes
+          fieldObj match {
+            case field: FulltextIndexed =>
+              checkFieldIndex(field.asInstanceOf[Field[AnyRef] with FulltextIndexed])
+            case _ => // Ignore
+          }
+
         }
       }
-    }
+    })
 
     RepositoryRegistry.register(this)
-  })
+  }
 
   /**
    * Finds entities by constructed query
@@ -145,8 +150,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
           case true => //db.load[ODocument](entity.getUnderlyingVertex.getIdentity)
             println("before: " + entity.getUnderlyingVertex.getIdentity.toString())
             existing = true
-            //entity.getUnderlyingVertex
-            db.load[ODocument](entity.getUnderlyingVertex.getIdentity)
+            entity.getUnderlyingVertex
+            //db.load[ODocument](entity.getUnderlyingVertex.getIdentity)
 
           case false => db.createVertex(repositoryEntityClass)
         }
@@ -175,7 +180,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
   }
 
   /**
-   * Saves all given entities or updates the if already present
+   * Saves all given entities or updates them if already present
    *
    * @param list
    * @return
@@ -252,15 +257,6 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
     if (count >= 1) {
       this.drop
     }
-  }
-
-  /**
-   * Returns the class name of the entity that's handled by this repository
-   *
-   * @return
-   */
-  def determineEntityName = {
-    create.getClass.getName
   }
 
   /**
@@ -375,7 +371,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
       return ret
     } catch {
       case e:Exception =>
-        throw new Exception("Failure during execution in connected mode: " + e.getMessage + e.getStackTraceString)
+        throw new Exception("Failure during execution in connected mode: " + e.getMessage + " - Stacktrace:" + e.getStackTraceString)
     } finally {
       db.close()
     }
