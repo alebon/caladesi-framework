@@ -23,13 +23,13 @@ import java.util.UUID
 
 class QueryBuilder {
 
-  private var qry : String = ""
+  protected var qry : String = ""
 
-  private var callBack : OrientGraphRepository[OrientGraphEntity] = null
+  protected var callBack : OrientGraphRepository[OrientGraphEntity] = null
 
-  private var params: List[AnyRef] = List[AnyRef]()
+  protected var params: List[AnyRef] = List[AnyRef]()
 
-  private def select(entity: OrientGraphEntity) = {
+  protected def select(entity: OrientGraphEntity) = {
     qry += "select from " + callBack.repositoryEntityClass
   }
 
@@ -111,7 +111,7 @@ class QueryBuilder {
    * @tparam T
    * @return
    */
-  private def reverse[T](l: List[T]) : List[T] = l match {
+  protected def reverse[T](l: List[T]) : List[T] = l match {
     case Nil => Nil
     case h::t => reverse(t):::List(h)
   }

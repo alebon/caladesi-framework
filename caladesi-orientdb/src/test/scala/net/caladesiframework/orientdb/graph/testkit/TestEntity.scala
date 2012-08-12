@@ -35,7 +35,7 @@ class TestEntity(init: Boolean = true) extends OrientGraphEntity with UUIDPk {
   def this() = {
     this(true)
 
-    this.uuid.name
+    uuid.name
 
     stringField.name
     stringFieldIndexed.name

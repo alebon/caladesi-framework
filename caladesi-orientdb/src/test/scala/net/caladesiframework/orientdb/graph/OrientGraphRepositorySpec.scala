@@ -188,6 +188,38 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       resultList.size must_==(2)
     }
 
+    "query by indexed field properly" in {
+      checkOrientDBIsRunning
+
+      val repo = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
+      repo.init
+
+      val testEntity = repo.create
+      testEntity.uuid.set(util.UUID.randomUUID())
+      testEntity.stringField.set("something")
+      testEntity.stringFieldIndexed.set("QueryByFieldTest Positive")
+
+      repo.update(testEntity)
+
+      val testEntity2 = repo.create
+      testEntity2.uuid.set(util.UUID.randomUUID())
+      testEntity2.stringField.set("something")
+      testEntity2.stringFieldIndexed.set("QueryByFieldTest Positive")
+
+      repo.update(testEntity2)
+
+      val testEntity3 = repo.create
+      testEntity3.uuid.set(util.UUID.randomUUID())
+      testEntity3.stringField.set("something")
+      testEntity3.stringFieldIndexed.set("QueryByFieldTest Negative")
+
+      repo.update(testEntity3)
+
+      val resultList = repo.findIdx where TestEntity.stringFieldIndexed contains "Positive" limit 10 ex
+
+      resultList.size must_==(2)
+    }
+
     "create relations to assigned entities properly" in {
 
       val repoTestEntity = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}

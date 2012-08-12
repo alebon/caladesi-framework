@@ -27,7 +27,7 @@ import com.orientechnologies.orient.core.metadata.schema.OClass
 import scala.collection.JavaConversions._
 import java.util
 import util.Locale
-import net.caladesiframework.orientdb.query.QueryBuilder
+import net.caladesiframework.orientdb.query.{IndexQueryBuilder, QueryBuilder}
 import net.caladesiframework.orientdb.relation.{Relation, RelatedToOne}
 import com.orientechnologies.orient.core.tx.OTransaction
 import net.caladesiframework.orientdb.index.{FulltextIndexed, IndexManager}
@@ -91,6 +91,14 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
   }
 
   /**
+   * Finds entities by query to index
+   * @return
+   */
+  def findIdx: IndexQueryBuilder = {
+    new IndexQueryBuilder(create, this)
+  }
+
+  /**
    * Executes a string query (drop any custom query in here)
    *
    * @param qry
@@ -115,6 +123,10 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
    * @return
    */
   private def transformToEntity(vertex: ODocument, depth: Int = 0)(implicit db: OGraphDatabase) : EntityType = {
+    // Check if its a index query result
+    if (vertex.field("rid") != null) {
+      return setEntityFields(create, vertex.field("rid"), depth)
+    }
     return setEntityFields(create, vertex, depth)
   }
 
@@ -324,6 +336,9 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
           case field: DoubleField =>
             field.set(vertex.field(field.name))
           case field: UuidField =>
+            if (vertex.field(field.name) == null) {
+              throw new Exception(vertex.toJSON)
+            }
             field.set(util.UUID.fromString(vertex.field(field.name)))
           case field: LongField =>
             field.set(vertex.field(field.name))
