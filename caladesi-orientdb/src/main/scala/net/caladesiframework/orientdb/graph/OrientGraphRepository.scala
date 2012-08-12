@@ -102,7 +102,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
 
     var list : List[EntityType] = Nil
     for (vertex: ODocument <- result) {
-      list = transformToEntity(vertex) :: list
+      list = transformToEntity(vertex, 1) :: list
     }
 
     list
@@ -114,8 +114,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
    * @param vertex
    * @return
    */
-  private def transformToEntity(vertex: ODocument) : EntityType = {
-    return setEntityFields(create, vertex)
+  private def transformToEntity(vertex: ODocument, depth: Int = 0)(implicit db: OGraphDatabase) : EntityType = {
+    return setEntityFields(create, vertex, depth)
   }
 
   /**
@@ -125,6 +125,10 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
    */
   def create : EntityType = {
     m.erasure.newInstance().asInstanceOf[EntityType]
+  }
+
+  def createFromVertex(vertex: ODocument, depth: Int = 0)(implicit db: OGraphDatabase): EntityType = {
+    transformToEntity(vertex, depth)
   }
 
   /**
@@ -235,7 +239,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
    *
    * @return
    */
-  def count = transactional(implicit db => {
+  def count = connected(implicit db => {
     var count : Long = 0
 
     val result = db.queryBySql[Long]("SELECT COUNT(*) FROM " + repositoryEntityClass)
@@ -309,7 +313,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
    * @param entity
    * @param vertex
    */
-  private def setEntityFields(entity: EntityType, vertex: ODocument) = {
+  private def setEntityFields(entity: EntityType, vertex: ODocument, depth: Int = 0)(implicit db: OGraphDatabase) = {
     entity.fields foreach {
       fieldObj => {
         fieldObj match {
@@ -328,7 +332,10 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
           case field: DateTimeField =>
             field.valueFromDB(vertex.field(field.name))
           case field:RelatedToOne[OrientGraphEntity] =>
-            throw new Exception("Not implemented yet")
+            if (depth > 0) {
+              // Traverse the relations
+              loadRelation(field.asInstanceOf[Field[AnyRef] with Relation], vertex, depth)
+            }
           case _ =>
             throw new Exception("Not supported Field")
         }

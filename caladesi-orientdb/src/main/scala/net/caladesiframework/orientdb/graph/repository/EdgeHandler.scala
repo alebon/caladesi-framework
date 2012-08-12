@@ -25,6 +25,11 @@ import com.orientechnologies.orient.core.record.impl.ODocument
 import scala.collection.JavaConverters._
 import java.util
 import net.caladesiframework.orientdb.field.Field
+import com.orientechnologies.orient.core.db.record.OIdentifiable
+import com.orientechnologies.orient.core.command.traverse.OTraverse
+import com.orientechnologies.orient.core.command.{OCommandContext, OCommandPredicate}
+import com.orientechnologies.orient.core.record.ORecord
+import net.caladesiframework.orientdb.repository.RepositoryRegistry
 
 trait EdgeHandler {
 
@@ -154,6 +159,37 @@ trait EdgeHandler {
   }
 
   /**
+   * Loads target vertex for RelatedToOne relations
+   *
+   * @param field
+   * @param vertex
+   * @param db
+   * @return
+   */
+  protected def loadRelation(field: Field[AnyRef] with Relation,
+                              vertex: ODocument, depth: Int = 0)(implicit db: OGraphDatabase) = {
+
+    println("Loading relations")
+
+    val traversal = new OTraverse().field("out")
+      .target(vertex)
+      .predicate(new SingleRelationCommand)
+
+    val result = traversal.execute()
+    for (identifiable: OIdentifiable <- result.asScala) {
+      identifiable.asInstanceOf[ODocument].getSchemaClass.toString match {
+        case s:String if (s.equals(edgeName(field))) =>
+          // Matched the related edge (sourceVertex):out--out:[Edge]:in-->in:(targetVertex)
+          val targetVertex: ODocument = identifiable.asInstanceOf[ODocument].field("in")
+          val targetRepo =  RepositoryRegistry.get(field.defaultValue.asInstanceOf[OrientGraphEntity].clazz)
+          field.set(targetRepo.createFromVertex(targetVertex, depth - 1))
+        case _ =>
+          // Ignore this document
+      }
+    }
+  }
+
+  /**
    * Returns all edges between two vertices by name
    *
    * @param source
@@ -178,5 +214,14 @@ trait EdgeHandler {
 
       }
     } */
+  }
+}
+
+sealed class SingleRelationCommand extends OCommandPredicate {
+  def evaluate(oRecord: ORecord[_], iContext: OCommandContext): Boolean = {
+    val path = iContext.getVariable("path")
+    println(path)
+
+    return ((iContext.getVariable("depth").asInstanceOf[Int]) <= 1);
   }
 }

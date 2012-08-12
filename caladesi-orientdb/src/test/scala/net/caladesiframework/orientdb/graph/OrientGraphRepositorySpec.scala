@@ -207,7 +207,12 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
 
       repoTestEntityRel.update(testEntityRel)
 
-      true must_==true
+      val resultEntity = (repoTestEntityRel.find where TestEntityWithRelations.uuid eqs testEntityRel.uuid.is limit 1 ex).headOption match {
+        case Some(entity) => entity.asInstanceOf[TestEntityWithRelations]
+        case None => null
+      }
+
+      resultEntity.testEntity.is.uuid.is.toString must_==testEntity.uuid.is.toString
     }
 
     "assign RelatedToOne only one time on several updates" in {

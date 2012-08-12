@@ -33,8 +33,8 @@ object RepositoryRegistry {
    * @return
    */
   def register[EntityType <: OrientGraphEntity](repository: OrientGraphRepository[EntityType]) = {
-    println("Registering " + repository.repositoryEntityClass)
-    map.put(repository.repositoryEntityClass, repository)
+    println("Registering " + repository.create.clazz)
+    map.put(repository.create.clazz, repository)
   }
 
   /**
@@ -54,7 +54,7 @@ object RepositoryRegistry {
    * @return
    */
   def remove[EntityType <: OrientGraphEntity](repository: OrientGraphRepository[EntityType]) = {
-    map.remove(repository.repositoryEntityClass)
+    map.remove(repository.create.clazz)
 
     //this.contains(t.getClass.getName) match {
     //  case true => map.remove(t.getClass.getName)
