@@ -9,15 +9,15 @@ The main goal of the repository is to create a simple Scala API for OrientDB. Yo
 defined entities and use the caladesi query language for searching for entities. Furthermore - to make use of a graph
 database - you can define relationships between entities and traverse them.
 
-The following examples should give you an idea of how to use the caladaesi framework to define graph based repositories:
+The following examples should give you an idea of how to use the caladesi framework to define graph based repositories:
 
 ###Defining the entities
 
 ```scala
 class ShipEntity extends OrientGraphEntity with UuidPk {
 
-  // We want the ship to have a name
-  object name extends StringField(this)
+  // We want the ship to have a name that we can search for
+  object name extends StringField(this) extends FulltextIndexed
 
   // Color of the ship
   object color extends StringField(this)
@@ -108,6 +108,9 @@ greenLola.company.isOpt match {
   case Some(company) => // Do something with the company
   case None => // There is no company related
 }
+
+// Searching the indexed fields
+val redShips = shipRepository.findIdx where ShipEntity.name contains "red" limit 10 ex
 ```
 
 ##Getting Started with Caladesi Framework OrientDB
