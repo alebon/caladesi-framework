@@ -2,7 +2,7 @@ import Dependencies._
 
 organization in ThisBuild	:= "net.caladesiframework"
 
-version in ThisBuild		:= "0.2.0"
+version in ThisBuild		:= "0.3.0-SNAPSHOT"
 
 homepage in ThisBuild		:= Some(url("http://caladesiframework.net"))
 
