@@ -54,7 +54,7 @@ trait IndexManager extends OrientGraphDbWrapper {
    * @param db
    * @return
    */
-  def updateIndex(entity: OrientGraphEntity)(implicit db: OGraphDatabase)  = {
+  def updateIndex(entity: OrientGraphEntity, reIndex: Boolean = true)(implicit db: OGraphDatabase)  = {
 
     val vertex: OIdentifiable = entity.getUnderlyingVertex
 
@@ -65,7 +65,9 @@ trait IndexManager extends OrientGraphDbWrapper {
         field match {
           case field: FulltextIndexed =>
             index.remove(vertex)
-            index.put(field.asInstanceOf[Field[AnyRef]].value, vertex)
+            if (reIndex) {
+              index.put(field.asInstanceOf[Field[AnyRef]].value, vertex)
+            }
           case _ =>
             // Ignore field
         }
@@ -73,7 +75,6 @@ trait IndexManager extends OrientGraphDbWrapper {
         //index.lazySave()
       }
     }
-
   }
 
   /**

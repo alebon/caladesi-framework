@@ -225,6 +225,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
     if (!entity.hasInternalId()) {
       throw new Exception("Not found vertex with given uuid")
     }
+    updateIndex(entity, reIndex = false)
     db.removeVertex(entity.getUnderlyingVertex)
     true
   })
