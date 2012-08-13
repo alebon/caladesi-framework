@@ -17,7 +17,7 @@
 package net.caladesiframework.orientdb.query
 
 import net.caladesiframework.orientdb.field.Field
-import net.caladesiframework.orientdb.graph.entity.{GraphEntity, OrientGraphEntity}
+import net.caladesiframework.orientdb.graph.entity.{OrientGraphEntity}
 import net.caladesiframework.orientdb.graph.OrientGraphRepository
 import java.util.UUID
 
@@ -50,6 +50,16 @@ class QueryBuilder {
    */
   def where[FieldType](field: Field[FieldType]) : QueryBuilder = {
     qry += " where " + field.name
+    this
+  }
+
+  /**
+   * To lower case modifier (only after where)
+   *
+   * @return
+   */
+  def toLC: QueryBuilder = {
+    qry += ".toLowerCase()"
     this
   }
 
