@@ -33,7 +33,7 @@ class IndexQueryBuilder extends QueryBuilder {
    * @return
    */
   override def where[FieldType](field: Field[FieldType]): IndexQueryBuilder = {
-    qry += field.name + " WHERE key "
+    qry += field.name + " WHERE key"
     this
   }
 

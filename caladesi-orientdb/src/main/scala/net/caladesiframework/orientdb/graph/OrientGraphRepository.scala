@@ -122,7 +122,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
    * @param vertex
    * @return
    */
-  private def transformToEntity(vertex: ODocument, depth: Int = 0)(implicit db: OGraphDatabase) : EntityType = {
+  def transformToEntity(vertex: ODocument, depth: Int = 0)(implicit db: OGraphDatabase) : EntityType = {
     // Check if its a index query result
     if (vertex.field("rid") != null) {
       return setEntityFields(create, vertex.field("rid"), depth)
@@ -291,7 +291,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
    * @param vertex
    * @param entity
    */
-  private def setVertexFields(vertex: ODocument, entity: EntityType)(implicit db: OGraphDatabase) = {
+  protected def setVertexFields(vertex: ODocument, entity: EntityType)(implicit db: OGraphDatabase) = {
     entity.fields foreach {
       fieldObj => {
         //@TODO More generic approach
@@ -325,7 +325,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
    * @param entity
    * @param vertex
    */
-  private def setEntityFields(entity: EntityType, vertex: ODocument, depth: Int = 0)(implicit db: OGraphDatabase) = {
+  protected def setEntityFields(entity: EntityType, vertex: ODocument, depth: Int = 0)(implicit db: OGraphDatabase) = {
     entity.fields foreach {
       fieldObj => {
         fieldObj match {

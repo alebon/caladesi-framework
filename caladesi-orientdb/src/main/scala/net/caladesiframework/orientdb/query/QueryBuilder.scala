@@ -74,6 +74,12 @@ class QueryBuilder {
     this
   }
 
+  def like(value: String) = {
+    params = value.toString :: params
+    qry += " LIKE ?"
+    this
+  }
+
   /**
    * Adds where condition (Fluent interface)
    *
