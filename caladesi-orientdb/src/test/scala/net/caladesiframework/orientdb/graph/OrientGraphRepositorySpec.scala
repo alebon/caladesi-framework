@@ -18,11 +18,12 @@ package net.caladesiframework.orientdb.graph
 
 import org.specs2.mutable._
 import testkit.{TestEntityWithRelations, OrientDatabaseTestKit, TestEntity}
-import com.orientechnologies.orient.core.db.graph.OGraphDatabase
+import com.orientechnologies.orient.core.db.graph.{OGraphDatabasePool, OGraphDatabase}
 import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import java.util
 import util.UUID
+import com.orientechnologies.orient.core.record.impl.ODocument
 
 class OrientGraphRepositorySpec extends SpecificationWithJUnit
   with OrientDatabaseTestKit {
@@ -30,6 +31,80 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
   sequential
 
   "OrientGraph Repository" should {
+
+    /**"create 15 relationships properly" in {
+
+      val db = OGraphDatabasePool.global()
+        .acquire("remote:127.0.0.1/db", "admin", "admin")
+
+      val clazz = db.getVertexType("TARGET_VERTEX")
+      if (clazz == null) {
+        db.createVertexType("TARGET_VERTEX")
+      }
+
+      val clazz2 = db.getVertexType("SOURCE_VERTEX")
+      if (clazz2 == null) {
+        db.createVertexType("SOURCE_VERTEX")
+      }
+
+
+      db.begin(TXTYPE.OPTIMISTIC)
+      var repoVertex: ODocument = null
+      try {
+        repoVertex = db.createVertex("TARGET_VERTEX")
+        repoVertex.field("name", "TestRepositoryFOREDGESTEST")
+        repoVertex.save
+        db.commit()
+      } catch {
+        case e:Exception =>
+          println(e.getMessage)
+      } finally {
+        // Do nothing
+      }
+
+      for (i <- 1 to 10) {
+        db.begin(TXTYPE.OPTIMISTIC)
+        db.declareIntent(new OIntentMassiveInsert())
+        var countSize = 0
+        val maxItems = 2
+
+        try {
+          for (i <- 1 to maxItems) {
+            val vertex = db.createVertex("SOURCE_VERTEX")
+
+            //vertex.setClassName("TestEntity")
+            vertex.field("entityCount", i)
+            vertex.field("price", 1.60 + i)
+            vertex.field("name", "Product Test Bla bli Lorem ipsum dolor" + i)
+            vertex.field("lastUpdate", new util.Date().toString)
+            vertex.save
+
+            val vertexEdge: ODocument = db.createEdge(repoVertex, vertex)
+            vertexEdge.field("rel", "TEST_ENTITY")
+            vertexEdge.save
+
+            repoVertex.save()
+
+            countSize += vertex.getSize
+          }
+
+          println("Overall size for " + maxItems + ": " + (countSize/1024) + " KByte")
+          println("DB Size: " + (db.getSize/1024) + " KByte")
+
+        } catch {
+          case e:Exception =>
+            println(e.getMessage)
+        } finally {
+          // Do nothing
+        }
+
+        db.commit()
+      }
+
+      db.close()
+      true must_== true
+    }     */
+
     "clean up db" in {
       checkOrientDBIsRunning
 
@@ -334,6 +409,32 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
 
       resultEntity.getInternalId must_==(testEntity.getInternalId)
     }
+
+    /**"Create more than 10 relations properly to one node" in {
+      val repoTestEntity = new OrientGraphRepository[TestEntity]() {
+        override def repositoryEntityClass = "TestEntityEDGETEST"
+      }
+      repoTestEntity.init
+
+      val testEntity = repoTestEntity.create
+      repoTestEntity.update(testEntity)
+
+      val repoTestEntityRel = new OrientGraphRepository[TestEntityWithRelations]() {
+        override def repositoryEntityClass = "TestEntityRelatingEDGETEST"
+      }
+
+      repoTestEntityRel.init
+
+      for (i <- 1 to 150) {
+        val testEntityRel = repoTestEntityRel.create
+        testEntityRel.uuid.set(UUID.randomUUID())
+        testEntityRel.testEntity.set(testEntity)
+
+        repoTestEntityRel.update(testEntityRel)
+      }
+
+      true must_==(true)
+    }*/
 
     "drop all entities properly" in {
       checkOrientDBIsRunning

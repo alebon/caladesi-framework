@@ -57,7 +57,7 @@ trait EdgeHandler {
    * @return
    */
   private def edgeName(field: Field[AnyRef] with Relation) = {
-    field.name + "_" + field.relType + "_E"
+    field.owner.clazz + "_" + field.relType + "_" + field.name + "_EDGE"
   }
 
   /**
@@ -199,7 +199,7 @@ trait EdgeHandler {
    * @return
    */
   private def getEdgesBetweenVerticesByName(source: ODocument, target: ODocument,
-    name: String)(implicit db: OGraphDatabase): Iterable[ODocument] = {
+    name: String)(implicit db: OGraphDatabase): Iterable[OIdentifiable] = {
 
     val labels = new util.ArrayList[String]()
     val relation = new util.ArrayList[String]()
@@ -219,9 +219,6 @@ trait EdgeHandler {
 
 sealed class SingleRelationCommand extends OCommandPredicate {
   def evaluate(oRecord: ORecord[_], iContext: OCommandContext): Boolean = {
-    val path = iContext.getVariable("path")
-    println(path)
-
     return ((iContext.getVariable("depth").asInstanceOf[Int]) <= 1);
   }
 }

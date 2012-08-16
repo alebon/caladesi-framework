@@ -193,6 +193,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
 
       connected(implicit db => {
         updateIndex(entity)
+        entity.getUnderlyingVertex.reload()
       })
 
       entity

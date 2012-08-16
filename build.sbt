@@ -2,7 +2,7 @@ import Dependencies._
 
 organization in ThisBuild	:= "net.caladesiframework"
 
-version in ThisBuild		:= "0.3.0-SNAPSHOT"
+version in ThisBuild		:= "0.3.0-M01-SNAPSHOT"
 
 homepage in ThisBuild		:= Some(url("http://caladesiframework.net"))
 
@@ -13,6 +13,9 @@ startYear in ThisBuild		:= Some(2012)
 credentials in ThisBuild        += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
 publishMavenStyle in ThisBuild  := true
+
+resolvers in ThisBuild          ++= Seq("oss-snapshots"     at "http://oss.sonatype.org/content/repositories/snapshots",
+                                        "oss-releases"        at "http://oss.sonatype.org/content/repositories/releases")
 
 publishTo in ThisBuild <<= version { (v: String) =>
   val nexus = "https://oss.sonatype.org/"
