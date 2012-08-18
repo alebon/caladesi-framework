@@ -18,12 +18,8 @@ package net.caladesiframework.orientdb.graph
 
 import org.specs2.mutable._
 import testkit.{TestEntityWithRelations, OrientDatabaseTestKit, TestEntity}
-import com.orientechnologies.orient.core.db.graph.{OGraphDatabasePool, OGraphDatabase}
-import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
-import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import java.util
 import util.UUID
-import com.orientechnologies.orient.core.record.impl.ODocument
 
 class OrientGraphRepositorySpec extends SpecificationWithJUnit
   with OrientDatabaseTestKit {

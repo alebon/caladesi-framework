@@ -18,10 +18,13 @@ package net.caladesiframework.orientdb.graph.testkit
 
 import org.specs2.mutable._
 import com.orientechnologies.orient.core.db.graph.OGraphDatabasePool
+import net.caladesiframework.orientdb.db.{OrientHost, OrientConfiguration}
 
 trait OrientDatabaseTestKit {
 
   this: SpecificationWithJUnit =>
+
+  implicit val configuration = OrientConfiguration(host = OrientHost())
 
   def checkOrientDBIsRunning = {
     var running = false

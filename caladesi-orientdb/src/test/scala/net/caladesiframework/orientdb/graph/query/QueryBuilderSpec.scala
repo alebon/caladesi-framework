@@ -4,8 +4,11 @@ import org.specs2.mutable.SpecificationWithJUnit
 import net.caladesiframework.orientdb.graph.testkit.TestEntity
 import net.caladesiframework.orientdb.query.QueryBuilder
 import net.caladesiframework.orientdb.graph.OrientGraphRepository
+import net.caladesiframework.orientdb.db.{OrientHost, OrientConfiguration}
 
 class QueryBuilderSpec extends SpecificationWithJUnit {
+
+  implicit val configuration = OrientConfiguration(host = OrientHost())
 
   "QueryBuilder" should {
     "assemble simple queries properly" in {

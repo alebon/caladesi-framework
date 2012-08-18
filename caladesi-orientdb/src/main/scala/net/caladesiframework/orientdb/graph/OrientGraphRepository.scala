@@ -31,22 +31,18 @@ import net.caladesiframework.orientdb.query.{IndexQueryBuilder, QueryBuilder}
 import net.caladesiframework.orientdb.relation.{Relation, RelatedToOne}
 import com.orientechnologies.orient.core.tx.OTransaction
 import net.caladesiframework.orientdb.index.{FulltextIndexed, IndexManager}
+import net.caladesiframework.orientdb.db.OrientConfiguration
 
-abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit m:scala.reflect.Manifest[EntityType])
+abstract class OrientGraphRepository[EntityType <: OrientGraphEntity]
+  (implicit m:scala.reflect.Manifest[EntityType], configuration: OrientConfiguration)
   extends GraphRepository[EntityType]
   with CRUDRepository[EntityType]
   with OrientGraphDbWrapper
   with EdgeHandler
   with IndexManager {
 
-  // @TODO Inject by configuration
-  def dbType = "remote"
-  def dbUser = "admin"
-  def dbName = "db"
-  def dbPassword = "admin"
-
   // Override to rename
-  def repositoryEntityClass = create.clazz + "_V"
+  def repositoryEntityClass = create.clazz
 
   /**
    * Creates the correct VertexType if missing
@@ -371,7 +367,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
    */
   def transactional[T <: Any](f: OGraphDatabase => T) : T = {
     val db = OGraphDatabasePool.global()
-      .acquire(dbType + ":127.0.0.1/" + dbName, dbUser, dbPassword)
+      .acquire(configuration.databaseType + ":" + configuration.host.server.location + "/" + configuration.database,
+      configuration.user, configuration.password)
 
     try {
       val transaction = synchronized { db.begin(OTransaction.TXTYPE.OPTIMISTIC) }
@@ -397,7 +394,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity] (implicit 
    */
   def connected[T <: Any](f: OGraphDatabase => T) : T = {
     val db = OGraphDatabasePool.global()
-      .acquire(dbType + ":127.0.0.1/" + dbName, dbUser, dbPassword)
+      .acquire(configuration.databaseType + ":" + configuration.host.server.location + "/" + configuration.database,
+        configuration.user, configuration.password)
 
     try {
       val ret = f(db)
