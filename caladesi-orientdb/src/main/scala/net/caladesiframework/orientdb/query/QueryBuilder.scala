@@ -75,8 +75,20 @@ class QueryBuilder {
   }
 
   def like(value: String) = {
-    params = value.toString :: params
-    qry += " LIKE ?"
+    params = "%" + value.toString + "%" :: params
+    qry += ".toLowerCase() LIKE ?"
+    this
+  }
+
+  def startsLike(value: String) = {
+    params = value.toString + "%" :: params
+    qry += ".toLowerCase() LIKE ?"
+    this
+  }
+
+  def endsLike(value: String) = {
+    params = "%" + value.toString :: params
+    qry += ".toLowerCase() LIKE ?"
     this
   }
 

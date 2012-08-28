@@ -20,6 +20,10 @@ import org.specs2.mutable._
 import testkit.{TestEntityWithRelations, OrientDatabaseTestKit, TestEntity}
 import java.util
 import util.UUID
+import com.orientechnologies.orient.core.db.graph.OGraphDatabasePool
+import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
+import com.orientechnologies.orient.core.record.impl.ODocument
+import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 
 class OrientGraphRepositorySpec extends SpecificationWithJUnit
   with OrientDatabaseTestKit {
@@ -99,7 +103,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
 
       db.close()
       true must_== true
-    }     */
+    } */
 
     "clean up db" in {
       checkOrientDBIsRunning
@@ -406,7 +410,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       resultEntity.getInternalId must_==(testEntity.getInternalId)
     }
 
-    /**"Create more than 10 relations properly to one node" in {
+    "create more than 10 relations properly to one node" in {
       val repoTestEntity = new OrientGraphRepository[TestEntity]() {
         override def repositoryEntityClass = "TestEntityEDGETEST"
       }
@@ -430,7 +434,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       }
 
       true must_==(true)
-    }*/
+    }
 
     "drop all entities properly" in {
       checkOrientDBIsRunning
