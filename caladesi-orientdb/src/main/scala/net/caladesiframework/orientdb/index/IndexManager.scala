@@ -28,7 +28,14 @@ import com.orientechnologies.orient.core.db.record.OIdentifiable
 
 trait IndexManager extends OrientGraphDbWrapper {
 
-  def checkFieldIndex(field: Field[AnyRef] with FulltextIndexed)(implicit db: OGraphDatabase) = {
+  /**
+   * Check for index and create one if its missing
+   *
+   * @param field
+   * @param db
+   * @return
+   */
+  def checkFieldIndex(field: Field[_] with IndexedField)(implicit db: OGraphDatabase) = {
 
     val documents : List[ODocument] =  db.queryBySql[ODocument]("select flatten(indexes) from cluster:0")
 
@@ -41,8 +48,16 @@ trait IndexManager extends OrientGraphDbWrapper {
     }
 
     if (!matches) {
+      // Select index type
+      val indexType = field match {
+        case index: UniqueIndexed => OClass.INDEX_TYPE.UNIQUE.toString
+        case index: FulltextIndexed => OClass.INDEX_TYPE.FULLTEXT.toString
+        case _ => throw new Exception("Not supported index type")
+      }
+
+      // Create index
       db.getMetadata.getIndexManager.createIndex(indexName,
-        OClass.INDEX_TYPE.FULLTEXT.toString,
+        indexType,
         new OSimpleKeyIndexDefinition(OType.STRING), null, null)
     }
   }
@@ -101,7 +116,7 @@ trait IndexManager extends OrientGraphDbWrapper {
 
 object NamingStrategy {
 
-  def indexName(field: Field[AnyRef]): String = {
+  def indexName(field: Field[_]): String = {
     field.owner.clazz + "_" + field.name
   }
 

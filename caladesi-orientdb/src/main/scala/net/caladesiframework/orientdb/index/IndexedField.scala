@@ -16,6 +16,6 @@
 
 package net.caladesiframework.orientdb.index
 
-trait FulltextIndexed extends IndexedField {
+trait IndexedField {
 
 }
