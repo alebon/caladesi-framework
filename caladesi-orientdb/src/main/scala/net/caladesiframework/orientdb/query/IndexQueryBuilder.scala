@@ -38,15 +38,11 @@ class IndexQueryBuilder extends QueryBuilder {
   }
 
   /**
-   * Restricted
+   * Fulltext index query
    *
    * @param value
    * @return
    */
-  override def eqs(value: Any) = {
-    throw new Exception("Not allowed on index queries")
-  }
-
   def contains(value: Any) = {
     value match {
       case v: UUID => params = v.toString :: params

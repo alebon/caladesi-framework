@@ -169,8 +169,6 @@ trait EdgeHandler {
   protected def loadRelation(field: Field[AnyRef] with Relation,
                               vertex: ODocument, depth: Int = 0)(implicit db: OGraphDatabase) = {
 
-    println("Loading relations")
-
     val traversal = new OTraverse().field("out")
       .target(vertex)
       .predicate(new SingleRelationCommand)

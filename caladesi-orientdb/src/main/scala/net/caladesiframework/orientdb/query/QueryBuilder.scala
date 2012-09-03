@@ -114,7 +114,7 @@ class QueryBuilder {
    * Execute the query
    */
   def ex = {
-    println("Executing query: " + qry + " with params " + params.toString())
+    //println("Executing query: " + qry + " with params " + params.toString())
     callBack.execute(qry, reverse[AnyRef](params):_*)
   }
 
