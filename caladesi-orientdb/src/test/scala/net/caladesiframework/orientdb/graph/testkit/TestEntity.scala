@@ -24,7 +24,6 @@ class TestEntity(init: Boolean = true) extends OrientGraphEntity with UUIDPk {
 
   object stringField extends StringField(this)
   object stringFieldIndexed extends StringField(this) with FulltextIndexed
-  object uniqueStringField extends OptionalStringField(this) with UniqueIndexed
   object intField extends IntField(this)
   object doubleField extends DoubleField(this)
   object longField extends LongField(this)
@@ -40,7 +39,6 @@ class TestEntity(init: Boolean = true) extends OrientGraphEntity with UUIDPk {
 
     stringField.name
     stringFieldIndexed.name
-    uniqueStringField.name
     intField.name
     doubleField.name
     longField.name

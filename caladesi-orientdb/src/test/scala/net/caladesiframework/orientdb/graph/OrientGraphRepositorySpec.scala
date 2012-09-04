@@ -20,10 +20,6 @@ import org.specs2.mutable._
 import testkit.{TestEntityWithRelations, OrientDatabaseTestKit, TestEntity}
 import java.util
 import util.UUID
-import com.orientechnologies.orient.core.db.graph.OGraphDatabasePool
-import com.orientechnologies.orient.core.tx.OTransaction.TXTYPE
-import com.orientechnologies.orient.core.record.impl.ODocument
-import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 
 class OrientGraphRepositorySpec extends SpecificationWithJUnit
   with OrientDatabaseTestKit {
@@ -434,6 +430,24 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       }
 
       true must_==(true)
+    }
+
+    "find entities by unique indexed fields properly" in {
+      checkOrientDBIsRunning
+
+      val repoTestEntity = new OrientGraphRepository[TestEntity]() {}
+      repoTestEntity.init
+
+      val testEntity = repoTestEntity.create
+      repoTestEntity.update(testEntity)
+
+      val uuid = testEntity.uuid.is.toString
+      val foundProperly = (repoTestEntity.findIdx where TestEntity.uuid eqs uuid limit 2 ex).headOption match {
+        case Some(entity) => true
+        case None => false
+      }
+
+      foundProperly must_==(true)
     }
 
     "drop all entities properly" in {

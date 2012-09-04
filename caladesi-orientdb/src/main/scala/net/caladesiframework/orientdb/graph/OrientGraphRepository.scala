@@ -16,7 +16,7 @@
 
 package net.caladesiframework.orientdb.graph
 
-import entity.{OrientGraphEntity}
+import entity.OrientGraphEntity
 import net.caladesiframework.orientdb.repository.{RepositoryRegistry, CRUDRepository}
 import repository.{EdgeHandler, GraphRepository}
 import com.orientechnologies.orient.core.db.graph.{OGraphDatabasePool, OGraphDatabase}
@@ -30,7 +30,7 @@ import util.Locale
 import net.caladesiframework.orientdb.query.{IndexQueryBuilder, QueryBuilder}
 import net.caladesiframework.orientdb.relation.{Relation, RelatedToOne}
 import com.orientechnologies.orient.core.tx.OTransaction
-import net.caladesiframework.orientdb.index.{FulltextIndexed, IndexManager}
+import net.caladesiframework.orientdb.index.{IndexedField, IndexManager}
 import net.caladesiframework.orientdb.db.OrientConfiguration
 
 abstract class OrientGraphRepository[EntityType <: OrientGraphEntity]
@@ -67,8 +67,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity]
 
           // Check for missing indexes
           fieldObj match {
-            case field: FulltextIndexed =>
-              checkFieldIndex(field.asInstanceOf[Field[AnyRef] with FulltextIndexed])
+            case field: Field[_] with IndexedField =>
+              checkFieldIndex(field)
             case _ => // Ignore
           }
 

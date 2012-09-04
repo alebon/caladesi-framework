@@ -75,19 +75,27 @@ trait IndexManager extends OrientGraphDbWrapper {
 
     entity.fields foreach {
       field => {
-        val index = db.getMetadata.getIndexManager.getIndex(NamingStrategy.indexName(field.asInstanceOf[Field[AnyRef]]))
 
         field match {
-          case field: FulltextIndexed =>
+          case field: Field[_] with IndexedField =>
+            val index = db.getMetadata.getIndexManager.getIndex(NamingStrategy.indexName(field.asInstanceOf[Field[_]]))
+
+            if (null == index) {
+              throw new Exception("Missing Index - Please init the index properly")
+            }
+
             index.remove(vertex)
             if (reIndex) {
-              index.put(field.asInstanceOf[Field[AnyRef]].value, vertex)
+              index.put(field.asInstanceOf[Field[AnyRef]].value.toString, vertex)
             }
-          case _ =>
+
+            index.lazySave()
+          case field: Field[_] =>
             // Ignore field
+          case _ =>
+            throw new Exception("Not a valid field")
         }
 
-        //index.lazySave()
       }
     }
   }
@@ -103,7 +111,7 @@ trait IndexManager extends OrientGraphDbWrapper {
     entity.fields foreach {
       field => {
         field match {
-          case field: FulltextIndexed =>
+          case field: Field[_] with IndexedField =>
             db.getMetadata.getIndexManager.dropIndex(NamingStrategy.indexName(field.asInstanceOf[Field[AnyRef]]))
           case _ =>
             // Ignore field
