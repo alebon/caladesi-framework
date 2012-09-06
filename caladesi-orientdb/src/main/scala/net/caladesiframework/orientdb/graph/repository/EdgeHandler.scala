@@ -180,7 +180,7 @@ trait EdgeHandler {
           // Matched the related edge (sourceVertex):out--out:[Edge]:in-->in:(targetVertex)
           val targetVertex: ODocument = identifiable.asInstanceOf[ODocument].field("in")
           val targetRepo =  RepositoryRegistry.get(field.defaultValue.asInstanceOf[OrientGraphEntity].clazz)
-          field.set(targetRepo.createFromVertex(targetVertex, depth - 1))
+          field.set(targetRepo.createFromVertex(targetVertex, depth))
         case _ =>
           // Ignore this document
       }

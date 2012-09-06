@@ -18,6 +18,8 @@ package net.caladesiframework.orientdb.graph.testkit
 
 import net.caladesiframework.orientdb.graph.entity.{UUIDPk, OrientGraphEntity}
 import net.caladesiframework.orientdb.relation.RelatedToOne
+import net.caladesiframework.orientdb.field.OptionalStringField
+import net.caladesiframework.orientdb.index.{UniqueIndexed, FulltextIndexed}
 
 class TestEntityWithRelations(init: Boolean = true) extends OrientGraphEntity with UUIDPk {
 

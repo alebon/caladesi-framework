@@ -346,7 +346,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity]
           case field:RelatedToOne[OrientGraphEntity] =>
             if (depth > 0) {
               // Traverse the relations
-              loadRelation(field.asInstanceOf[Field[AnyRef] with Relation], vertex, depth)
+              loadRelation(field.asInstanceOf[Field[AnyRef] with Relation], vertex, depth - 1)
             }
           case _ =>
             throw new Exception("Not supported Field")

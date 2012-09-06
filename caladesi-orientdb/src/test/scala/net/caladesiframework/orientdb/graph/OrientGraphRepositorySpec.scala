@@ -17,9 +17,10 @@
 package net.caladesiframework.orientdb.graph
 
 import org.specs2.mutable._
-import testkit.{TestEntityWithRelations, OrientDatabaseTestKit, TestEntity}
+import testkit._
 import java.util
 import util.UUID
+import scala.Some
 
 class OrientGraphRepositorySpec extends SpecificationWithJUnit
   with OrientDatabaseTestKit {
@@ -448,6 +449,41 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       }
 
       foundProperly must_==(true)
+    }
+
+    "load related entities properly on index queries by custom fields" in {
+
+      val repoTestEntity = new OrientGraphRepository[TestEntity]() { }
+      repoTestEntity.init
+      val testEntity = repoTestEntity.create
+      repoTestEntity.update(testEntity)
+
+      val repoTestEntityRel = new OrientGraphRepository[TestEntityWithUniqueFields]() {
+
+      }
+      repoTestEntityRel.init
+
+      val testEntityRel = repoTestEntityRel.create
+      testEntityRel.uuid.set(UUID.randomUUID())
+      testEntityRel.name.set(testEntityRel.uuid.is.toString + "_NAME")
+      testEntityRel.testRelation.set(testEntity)
+
+      val testEntityRel2 = repoTestEntityRel.create
+      testEntityRel2.uuid.set(UUID.randomUUID())
+      testEntityRel2.name.set(testEntityRel2.uuid.is.toString + "_NAME")
+      testEntityRel2.testRelation.set(testEntity)
+
+      repoTestEntityRel.update(testEntityRel)
+      repoTestEntityRel.update(testEntityRel2)
+
+      val resultEntity = (repoTestEntityRel.findIdx where TestEntityWithUniqueFields.name eqs testEntityRel.name.is limit 1 ex).headOption match {
+        case Some(entity) => entity.asInstanceOf[TestEntityWithUniqueFields]
+        case None => null
+      }
+
+      println("ResultEntity relation uuid: %s | TestEntity uuid: %s".format(resultEntity.testRelation.is.uuid.is.toString, testEntity.uuid.is.toString))
+
+      resultEntity.testRelation.is.uuid.is.toString must_==testEntity.uuid.is.toString
     }
 
     "drop all entities properly" in {
