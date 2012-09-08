@@ -30,6 +30,7 @@ import com.orientechnologies.orient.core.command.traverse.OTraverse
 import com.orientechnologies.orient.core.command.{OCommandContext, OCommandPredicate}
 import com.orientechnologies.orient.core.record.ORecord
 import net.caladesiframework.orientdb.repository.RepositoryRegistry
+import com.orientechnologies.orient.core.id.ORecordId
 
 trait EdgeHandler {
 
@@ -115,7 +116,8 @@ trait EdgeHandler {
         }
 
         // Create relationship here
-        val edge = db.createEdge(vertex, field.is.getUnderlyingVertex, relationshipName)
+        val targetVertex = db.load[ODocument](field.is.getUnderlyingVertex.getIdentity)
+        val edge = db.createEdge(vertex, targetVertex, relationshipName)
         edge.save
 
       case _ => throw new Exception("Please update the related entity first")

@@ -367,7 +367,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
 
       repoTestEntityRel.update(testEntityRel)
 
-      /** CAUSES VERSION CONFLICT - DON'T KNOW HOW TO FIX YET
+      /** CAUSES VERSION CONFLICT - DON'T KNOW HOW TO FIX YET  */
       repoTestEntityRel.update(testEntityRel)
       repoTestEntityRel.update(testEntityRel)
       repoTestEntityRel.update(testEntityRel)
@@ -378,7 +378,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       repoTestEntityRel.update(testEntityRel)
       repoTestEntityRel.update(testEntityRel)
       repoTestEntityRel.update(testEntityRel)
-      repoTestEntityRel.update(testEntityRel)*/
+      repoTestEntityRel.update(testEntityRel)
 
       testEntityRel.testEntity.set(testEntity2)
       repoTestEntityRel.update(testEntityRel)
