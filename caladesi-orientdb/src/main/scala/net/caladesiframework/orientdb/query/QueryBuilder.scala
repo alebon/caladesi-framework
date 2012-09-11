@@ -92,6 +92,17 @@ class QueryBuilder {
     this
   }
 
+  def in(values:AnyRef*) = {
+    values foreach {
+      value => {
+        params = value.toString :: params
+      }
+    }
+
+    qry += " in [" + values.map(value => "?").mkString(",") + "]"
+    this
+  }
+
   /**
    * Adds where condition (Fluent interface)
    *

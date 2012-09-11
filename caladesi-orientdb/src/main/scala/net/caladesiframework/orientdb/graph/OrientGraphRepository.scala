@@ -159,7 +159,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity]
         // Decide by internal id: create or update
         val vertex: ODocument =  entity.hasInternalId() match {
           case true => //db.load[ODocument](entity.getUnderlyingVertex.getIdentity)
-            println("before: " + entity.getUnderlyingVertex.getIdentity.toString())
+            //println("before: " + entity.getUnderlyingVertex.getIdentity.toString())
             existing = true
             entity.getUnderlyingVertex
             //db.load[ODocument](entity.getUnderlyingVertex.getIdentity)
@@ -171,7 +171,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity]
         setVertexFields(vertex, entity)
         if (existing) {
           val check = db.load[ODocument](entity.getUnderlyingVertex.getIdentity)
-          println("after: " + entity.getUnderlyingVertex.getIdentity.toString())
+          //println("after: " + entity.getUnderlyingVertex.getIdentity.toString())
 
           if (check.getVersion == vertex.getVersion) {
             vertex.save

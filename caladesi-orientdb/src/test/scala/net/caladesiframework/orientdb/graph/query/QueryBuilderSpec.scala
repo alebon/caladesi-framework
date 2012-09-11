@@ -22,6 +22,18 @@ class QueryBuilderSpec extends SpecificationWithJUnit {
 
       sutQb.qryTemp must_==("select from TestEntity where doubleField = ? and intField = ? skip 5 limit 5")
     }
+
+    "assemble in queries properly" in {
+
+      val repo = new OrientGraphRepository[TestEntity]() {override def repositoryEntityClass = "TestEntity"}
+
+      val testEntity = new TestEntity()
+      val sutQb = new QueryBuilder(TestEntity, repo)
+
+      sutQb where testEntity.stringField in ("Test1", "Test2") and testEntity.intField eqs 1 skip 5 limit 5
+
+      sutQb.qryTemp must_==("select from TestEntity where stringField in [?,?] and intField = ? skip 5 limit 5")
+    }
   }
 
 }

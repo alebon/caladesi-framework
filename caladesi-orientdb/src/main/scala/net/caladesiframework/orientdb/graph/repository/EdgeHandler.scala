@@ -114,9 +114,13 @@ trait EdgeHandler {
             }
           }
         }
+       
+        db.getLevel1Cache().invalidate()
 
         // Create relationship here
         val targetVertex = db.load[ODocument](field.is.getUnderlyingVertex.getIdentity)
+        //val sourceVertex = db.load[ODocument](vertex.getIdentity)
+        
         val edge = db.createEdge(vertex, targetVertex, relationshipName)
         edge.save
 
