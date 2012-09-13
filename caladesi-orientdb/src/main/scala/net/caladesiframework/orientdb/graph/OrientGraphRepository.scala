@@ -176,7 +176,8 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity]
           if (check.getVersion == vertex.getVersion) {
             vertex.save
           } else {
-            throw new Exception("THIS IS IT")
+            vertex.reload()
+            vertex.save()
           }
 
         } else {

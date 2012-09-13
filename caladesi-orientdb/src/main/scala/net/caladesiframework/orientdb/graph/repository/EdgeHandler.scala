@@ -109,6 +109,8 @@ trait EdgeHandler {
           entry => {
             entry match {
               case oDoc: ODocument if (oDoc.getClassName == relationshipName) =>
+                // Maybe the relation was already updated
+                oDoc.reload()
                 db.removeEdge(oDoc)
               case _ => // Skip
             }
@@ -120,7 +122,13 @@ trait EdgeHandler {
         // Create relationship here
         val targetVertex = db.load[ODocument](field.is.getUnderlyingVertex.getIdentity)
         //val sourceVertex = db.load[ODocument](vertex.getIdentity)
-        
+
+        // Explicit reload!
+        if (vertex.getIdentity.isValid) {
+          vertex.reload()
+        }
+        targetVertex.reload()
+
         val edge = db.createEdge(vertex, targetVertex, relationshipName)
         edge.save
 

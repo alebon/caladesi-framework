@@ -388,6 +388,38 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       true must_==true
     }
 
+    "handle concurrent RelatedToOne modification properly" in {
+
+      val repoTestEntity = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
+      repoTestEntity.init
+
+      val testEntity = repoTestEntity.create
+      repoTestEntity.update(testEntity)
+
+      val repoTestEntityRel = new OrientGraphRepository[TestEntityWithRelations]() {
+        override def repositoryEntityClass = "TestEntityRelating"
+      }
+      repoTestEntityRel.init
+
+      val testEntityRel = repoTestEntityRel.create
+      testEntityRel.uuid.set(UUID.randomUUID())
+      testEntityRel.testEntity.set(testEntity)
+      repoTestEntityRel.update(testEntityRel)
+
+      val testEntityRel2 = repoTestEntityRel.create
+      testEntityRel2.uuid.set(UUID.randomUUID())
+      testEntityRel2.testEntity.set(testEntity)
+      repoTestEntityRel.update(testEntityRel2)
+
+      testEntity.stringField.set("Something")
+      repoTestEntity.update(testEntity)
+
+      // The version of testEntity was updated meanwhile!
+      repoTestEntityRel.update(testEntityRel)
+
+      true must_==true
+    }
+
     "find entities by two fields properly" in {
       checkOrientDBIsRunning
 
