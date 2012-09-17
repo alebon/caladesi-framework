@@ -99,10 +99,11 @@ trait EdgeHandler {
   protected def handleRelatedToOne[RelatedEntityType <: OrientGraphEntity](vertex: ODocument,
     field: RelatedToOne[RelatedEntityType])(implicit db: OGraphDatabase) = {
 
-    field.is.hasInternalId() match {
+   field.is.hasInternalId() match {
       case true =>
 
         val edges = db.getEdgesBetweenVertexes(vertex, field.is.getUnderlyingVertex)
+        //println("Found %s edges for field processing %s".format(edges.size(), field.name))
 
         val relationshipName = edgeName(field.asInstanceOf[Field[AnyRef] with Relation])
         edges.asScala foreach  {
@@ -111,6 +112,7 @@ trait EdgeHandler {
               case oDoc: ODocument if (oDoc.getClassName == relationshipName) =>
                 // Maybe the relation was already updated
                 oDoc.reload()
+                //println("Removing oDoc %s for relationShip %s".format(oDoc.getIdentity.toString(), relationshipName))
                 db.removeEdge(oDoc)
               case _ => // Skip
             }
@@ -119,18 +121,24 @@ trait EdgeHandler {
        
         db.getLevel1Cache().invalidate()
 
-        // Create relationship here
+        // Update versions of the nodes
         val targetVertex = db.load[ODocument](field.is.getUnderlyingVertex.getIdentity)
-        //val sourceVertex = db.load[ODocument](vertex.getIdentity)
+        if (vertex.getIdentity.isValid) {
+          //val dbVertex: ODocument = db.load(vertex.getIdentity)
+          //vertex.setVersion(dbVertex.getVersion)
+        }
 
         // Explicit reload!
-        if (vertex.getIdentity.isValid) {
-          vertex.reload()
-        }
-        targetVertex.reload()
+        //targetVertex.reload()
 
+        // Create relationship here
         val edge = db.createEdge(vertex, targetVertex, relationshipName)
+        vertex.save
+        targetVertex.save
         edge.save
+
+        val edgesAfter = db.getEdgesBetweenVertexes(vertex, field.is.getUnderlyingVertex)
+        //println("After saving new edge we have %s edges for field %s".format(edgesAfter.size(), field.name))
 
       case _ => throw new Exception("Please update the related entity first")
     }

@@ -21,6 +21,7 @@ import testkit._
 import java.util
 import util.UUID
 import scala.Some
+import com.orientechnologies.orient.core.record.impl.ODocument
 
 class OrientGraphRepositorySpec extends SpecificationWithJUnit
   with OrientDatabaseTestKit {
@@ -420,6 +421,43 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       true must_==true
     }
 
+    "update related entities properly if parent entity was loaded by index query" in {
+
+      val repoTestEntity = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
+      repoTestEntity.init
+
+      val testEntity = repoTestEntity.create
+      repoTestEntity.update(testEntity)
+
+      val repoTestEntityRel = new OrientGraphRepository[TestEntityWithRelations]() {}
+      repoTestEntityRel.init
+
+      val testEntityRel = repoTestEntityRel.create
+      testEntityRel.uuid.set(UUID.randomUUID())
+      testEntityRel.testEntity.set(testEntity)
+      repoTestEntityRel.update(testEntityRel)
+
+      val testEntityRel2 = repoTestEntityRel.create
+      testEntityRel2.uuid.set(UUID.randomUUID())
+      testEntityRel2.testEntity.set(testEntity)
+      repoTestEntityRel.update(testEntityRel2)
+
+      testEntity.stringField.set("Something")
+      repoTestEntity.update(testEntity)
+
+      // The version of testEntity was updated meanwhile!
+      repoTestEntityRel.update(testEntityRel)
+
+      var result: ODocument = (repoTestEntityRel.findIdx where TestEntityWithRelations.uuid eqs testEntityRel2.uuid.is.toString limit 1 ex).headOption match {
+        case Some(entity) =>
+          entity.asInstanceOf[TestEntityWithRelations].testEntity.is.getUnderlyingVertex
+        case None =>
+          null
+      }
+
+      result must_!=null
+    }
+
     "find entities by two fields properly" in {
       checkOrientDBIsRunning
 
@@ -509,13 +547,55 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       repoTestEntityRel.update(testEntityRel2)
 
       val resultEntity = (repoTestEntityRel.findIdx where TestEntityWithUniqueFields.name eqs testEntityRel.name.is limit 1 ex).headOption match {
-        case Some(entity) => entity.asInstanceOf[TestEntityWithUniqueFields]
+        case Some(entity) =>
+          repoTestEntityRel.update(entity.asInstanceOf[TestEntityWithUniqueFields])
+          repoTestEntityRel.update(entity.asInstanceOf[TestEntityWithUniqueFields])
+          repoTestEntityRel.update(entity.asInstanceOf[TestEntityWithUniqueFields])
+          repoTestEntityRel.update(entity.asInstanceOf[TestEntityWithUniqueFields])
+          repoTestEntityRel.update(entity.asInstanceOf[TestEntityWithUniqueFields])
+          entity.asInstanceOf[TestEntityWithUniqueFields]
         case None => null
       }
 
-      println("ResultEntity relation uuid: %s | TestEntity uuid: %s".format(resultEntity.testRelation.is.uuid.is.toString, testEntity.uuid.is.toString))
-
       resultEntity.testRelation.is.uuid.is.toString must_==testEntity.uuid.is.toString
+    }
+
+    "keep outgoing relations after update" in {
+
+      // Related entity
+      val repoTestEntity = new OrientGraphRepository[TestEntity]() { }
+      repoTestEntity.init
+
+      // First related entity
+      val testEntity = repoTestEntity.create
+      repoTestEntity.update(testEntity)
+
+      // Second related entity
+      val testEntity2 = repoTestEntity.create
+      repoTestEntity.update(testEntity2)
+
+      val repoTestEntityRel = new OrientGraphRepository[TestEntityWithMultipleRelations]() {}
+      repoTestEntityRel.init
+
+      //Relating entity
+      val testEntityRel = repoTestEntityRel.create
+      testEntityRel.uuid.set(UUID.randomUUID())
+      testEntityRel.testEntityFirst.set(testEntity)
+      testEntityRel.testEntitySecond.set(testEntity2)
+
+      // Creating save
+      repoTestEntityRel.update(testEntityRel)
+      println(testEntityRel.getUnderlyingVertex.toJSON)
+
+      // Updating save
+      repoTestEntityRel.update(testEntityRel)
+      println(testEntityRel.getUnderlyingVertex.toJSON)
+
+      // Breaking save
+      repoTestEntityRel.update(testEntityRel)
+      println(testEntityRel.getUnderlyingVertex.toJSON)
+
+      true must_==true
     }
 
     "drop all entities properly" in {

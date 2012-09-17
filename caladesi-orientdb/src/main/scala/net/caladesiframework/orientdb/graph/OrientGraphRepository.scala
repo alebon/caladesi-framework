@@ -155,36 +155,22 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity]
           case clazz: OClass => // Everything is fine
         }
 
-        var existing = false
         // Decide by internal id: create or update
         val vertex: ODocument =  entity.hasInternalId() match {
-          case true => //db.load[ODocument](entity.getUnderlyingVertex.getIdentity)
-            //println("before: " + entity.getUnderlyingVertex.getIdentity.toString())
-            existing = true
+          case true =>
+            if (entity.getUnderlyingVertex.getIdentity.isValid) {
+              // Refresh the vertex (version)
+              entity.getUnderlyingVertex.reload()
+            }
             entity.getUnderlyingVertex
-            //db.load[ODocument](entity.getUnderlyingVertex.getIdentity)
 
-          case false => db.createVertex(repositoryEntityClass)
+          case false =>
+            db.createVertex(repositoryEntityClass).save
         }
 
         // Set the new fields and save
         setVertexFields(vertex, entity)
-        if (existing) {
-          val check = db.load[ODocument](entity.getUnderlyingVertex.getIdentity)
-          //println("after: " + entity.getUnderlyingVertex.getIdentity.toString())
-
-          if (check.getVersion == vertex.getVersion) {
-            vertex.save
-          } else {
-            vertex.reload()
-            vertex.save()
-          }
-
-        } else {
-          vertex.save
-        }
-
-        vertex
+        vertex.save
       })
       entity.setUnderlyingVertex(vertex)
 
@@ -380,7 +366,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity]
     } catch {
       case e:Exception =>
         db.rollback()
-        throw new Exception("Failure during execution: " + e.getMessage + " STACKTRACE: " + e.getStackTraceString)
+        throw new Exception("Failure during execution (%s) : %s - STACKTRACE: %s".format(e.getClass, e.getMessage, e.getStackTraceString))
     } finally {
       db.close()
     }

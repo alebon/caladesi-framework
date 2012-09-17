@@ -22,8 +22,6 @@ import net.caladesiframework.orientdb.index.UniqueIndexed
 
 trait UUIDPk extends Entity {
 
-  object uuid extends UuidField(this) with UniqueIndexed {
-    override def name = "_uuid"
-  }
+  object uuid extends UuidField(this) with UniqueIndexed
 
 }
