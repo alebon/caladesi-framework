@@ -102,11 +102,14 @@ trait EdgeHandler {
    field.is.hasInternalId() match {
       case true =>
 
-        val edges = db.getEdgesBetweenVertexes(vertex, field.is.getUnderlyingVertex)
-        //println("Found %s edges for field processing %s".format(edges.size(), field.name))
+        val edges = db.getInEdges(vertex).asScala
+        edges.++(db.getOutEdges(vertex).asScala)
+
+        // Removing since the .getEdgesBetweenVertexes is buggy, again
+        //val edges = db.getEdgesBetweenVertexes(vertex, field.is.getUnderlyingVertex)
 
         val relationshipName = edgeName(field.asInstanceOf[Field[AnyRef] with Relation])
-        edges.asScala foreach  {
+        edges foreach  {
           entry => {
             entry match {
               case oDoc: ODocument if (oDoc.getClassName == relationshipName) =>
