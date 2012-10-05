@@ -24,14 +24,12 @@ import com.orientechnologies.orient.core.record.impl.ODocument
 import net.caladesiframework.orientdb.field._
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert
 import com.orientechnologies.orient.core.metadata.schema.OClass
-import scala.collection.JavaConversions._
-import java.util
-import util.Locale
 import net.caladesiframework.orientdb.query.{IndexQueryBuilder, QueryBuilder}
 import net.caladesiframework.orientdb.relation.{Relation, RelatedToOne}
 import com.orientechnologies.orient.core.tx.OTransaction
 import net.caladesiframework.orientdb.index.{IndexedField, IndexManager}
 import net.caladesiframework.orientdb.db.OrientConfiguration
+import java.util.{UUID, Locale}
 
 abstract class OrientGraphRepository[EntityType <: OrientGraphEntity]
   (implicit m:scala.reflect.Manifest[EntityType], configuration: OrientConfiguration)
@@ -250,7 +248,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity]
   def drop : Unit = {
     transactional(implicit db => {
 
-      val documents : util.List[ODocument] = db.queryBySql("SELECT FROM " + repositoryEntityClass + " LIMIT 100")
+      val documents : List[ODocument] = db.queryBySql("SELECT FROM " + repositoryEntityClass + " LIMIT 100")
       documents foreach {
         doc => {
           db.removeVertex(doc)
@@ -323,7 +321,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity]
             if (vertex.field(field.name) == null) {
               throw new Exception(vertex.toJSON)
             }
-            field.set(util.UUID.fromString(vertex.field(field.name)))
+            field.set(UUID.fromString(vertex.field(field.name)))
           case field: LongField =>
             field.set(vertex.field(field.name))
           case field: LocaleField =>

@@ -23,6 +23,7 @@ object Dependencies {
   lazy val slf4jVersion  = "1.6.4"
   lazy val liftVersion   = "2.4"
   lazy val orientVersion = "1.2.0-SNAPSHOT"
+  lazy val neo4jVersion  = "1.8"
 
   // Compile scope:
   // Scope available in all classpath, transitive by default.
@@ -34,6 +35,9 @@ object Dependencies {
   lazy val orient_commons       = "com.orientechnologies" % "orient-commons" % orientVersion
   lazy val orientdb_core        = "com.orientechnologies" % "orientdb-core" % orientVersion
   lazy val orientdb_client      = "com.orientechnologies" % "orientdb-client" % orientVersion
+
+  // Neo4j
+  lazy val neo4j_all		= "org.neo4j" % "neo4j" % neo4jVersion
 
   // Provided scope:
 

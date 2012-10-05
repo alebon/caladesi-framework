@@ -102,11 +102,11 @@ trait EdgeHandler {
    field.is.hasInternalId() match {
       case true =>
 
-        val edges = db.getInEdges(vertex).asScala
-        edges.++(db.getOutEdges(vertex).asScala)
+        val edges = db.getOutEdges(vertex).asScala
+        val targetVertex = db.load[ODocument](field.is.getUnderlyingVertex.getIdentity)
 
         // Removing since the .getEdgesBetweenVertexes is buggy, again
-        //val edges = db.getEdgesBetweenVertexes(vertex, field.is.getUnderlyingVertex)
+        //val edges = db.getEdgesBetweenVertexes(vertex, field.is.getUnderlyingVertex).asScala
 
         val relationshipName = edgeName(field.asInstanceOf[Field[AnyRef] with Relation])
         edges foreach  {
@@ -114,9 +114,11 @@ trait EdgeHandler {
             entry match {
               case oDoc: ODocument if (oDoc.getClassName == relationshipName) =>
                 // Maybe the relation was already updated
-                oDoc.reload()
-                //println("Removing oDoc %s for relationShip %s".format(oDoc.getIdentity.toString(), relationshipName))
+                //oDoc.reload()
+                //vertex.load()
+                println("Removing oDoc %s for relationShip %s".format(oDoc.getIdentity.toString(), relationshipName))
                 db.removeEdge(oDoc)
+                println(vertex.toJSON)
               case _ => // Skip
             }
           }
@@ -125,7 +127,7 @@ trait EdgeHandler {
         db.getLevel1Cache().invalidate()
 
         // Update versions of the nodes
-        val targetVertex = db.load[ODocument](field.is.getUnderlyingVertex.getIdentity)
+
         if (vertex.getIdentity.isValid) {
           //val dbVertex: ODocument = db.load(vertex.getIdentity)
           //vertex.setVersion(dbVertex.getVersion)
@@ -136,11 +138,15 @@ trait EdgeHandler {
 
         // Create relationship here
         val edge = db.createEdge(vertex, targetVertex, relationshipName)
-        vertex.save
-        targetVertex.save
+
         edge.save
 
-        val edgesAfter = db.getEdgesBetweenVertexes(vertex, field.is.getUnderlyingVertex)
+        val edgesForCleanUp = db.getOutEdges(vertex).asScala.map(edge => if (null != edge) edge)
+        println(edges.mkString("---"))
+        vertex.getDirtyFields
+
+
+        //val edgesAfter = db.getEdgesBetweenVertexes(vertex, field.is.getUnderlyingVertex)
         //println("After saving new edge we have %s edges for field %s".format(edgesAfter.size(), field.name))
 
       case _ => throw new Exception("Please update the related entity first")

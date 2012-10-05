@@ -18,10 +18,10 @@ package net.caladesiframework.orientdb.graph
 
 import org.specs2.mutable._
 import testkit._
-import java.util
-import util.UUID
+
 import scala.Some
 import com.orientechnologies.orient.core.record.impl.ODocument
+import java.util.UUID
 
 class OrientGraphRepositorySpec extends SpecificationWithJUnit
   with OrientDatabaseTestKit {
@@ -74,7 +74,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
             vertex.field("entityCount", i)
             vertex.field("price", 1.60 + i)
             vertex.field("name", "Product Test Bla bli Lorem ipsum dolor" + i)
-            vertex.field("lastUpdate", new util.Date().toString)
+            vertex.field("lastUpdate", new Date().toString)
             vertex.save
 
             val vertexEdge: ODocument = db.createEdge(repoVertex, vertex)
@@ -134,7 +134,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       val preCount = repo.count
 
       val testEntity = new TestEntity
-      testEntity.uuid.set(util.UUID.randomUUID())
+      testEntity.uuid.set(UUID.randomUUID())
       testEntity.stringField.set("This is the name of the test entity")
       testEntity.doubleField.set(1.337)
       testEntity.intField.set(1337)
@@ -158,7 +158,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       val preCount = repo.count
 
       val testEntity = repo.create
-      testEntity.uuid.set(util.UUID.randomUUID())
+      testEntity.uuid.set(UUID.randomUUID())
       testEntity.stringField.set("This is the name of the test entity")
       testEntity.doubleField.set(1.337)
       testEntity.intField.set(1337)
@@ -191,7 +191,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       for (i <- 0 to 1000) {
         val e = repo.create
 
-        e.uuid.set(util.UUID.randomUUID())
+        e.uuid.set(UUID.randomUUID())
         e.stringField.set("This is the name of the test entity from list test " + i)
         e.doubleField.set(1.337 + i)
         e.intField.set(1337 + i)
@@ -214,7 +214,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       repo.init
 
       val testEntity = repo.create
-      testEntity.uuid.set(util.UUID.randomUUID())
+      testEntity.uuid.set(UUID.randomUUID())
       testEntity.stringField.set("This is the name of the test entity")
 
       repo.update(testEntity)
@@ -239,19 +239,19 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       repo.init
 
       val testEntity = repo.create
-      testEntity.uuid.set(util.UUID.randomUUID())
+      testEntity.uuid.set(UUID.randomUUID())
       testEntity.stringField.set("QueryByFieldTest-Positive")
 
       repo.update(testEntity)
 
       val testEntity2 = repo.create
-      testEntity2.uuid.set(util.UUID.randomUUID())
+      testEntity2.uuid.set(UUID.randomUUID())
       testEntity2.stringField.set("QueryByFieldTest-Positive")
 
       repo.update(testEntity2)
 
       val testEntity3 = repo.create
-      testEntity3.uuid.set(util.UUID.randomUUID())
+      testEntity3.uuid.set(UUID.randomUUID())
       testEntity3.stringField.set("QueryByFieldTest-Negative")
 
       repo.update(testEntity3)
@@ -268,21 +268,21 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       repo.init
 
       val testEntity = repo.create
-      testEntity.uuid.set(util.UUID.randomUUID())
+      testEntity.uuid.set(UUID.randomUUID())
       testEntity.stringField.set("something")
       testEntity.stringFieldIndexed.set("QueryByFieldTest Positive")
 
       repo.update(testEntity)
 
       val testEntity2 = repo.create
-      testEntity2.uuid.set(util.UUID.randomUUID())
+      testEntity2.uuid.set(UUID.randomUUID())
       testEntity2.stringField.set("something")
       testEntity2.stringFieldIndexed.set("QueryByFieldTest Positive")
 
       repo.update(testEntity2)
 
       val testEntity3 = repo.create
-      testEntity3.uuid.set(util.UUID.randomUUID())
+      testEntity3.uuid.set(UUID.randomUUID())
       testEntity3.stringField.set("something")
       testEntity3.stringFieldIndexed.set("QueryByFieldTest Negative")
 
@@ -294,6 +294,8 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     }
 
     "create relations to assigned entities properly" in {
+      checkOrientDBIsRunning
+
 
       val repoTestEntity = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
       repoTestEntity.init
@@ -321,6 +323,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     }
 
     "assign RelatedToOne only one time on several updates" in {
+      checkOrientDBIsRunning
 
       val repoTestEntity = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
       repoTestEntity.init
@@ -346,6 +349,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     }
 
     "re assign RelatedToOne properly" in {
+      checkOrientDBIsRunning
 
       val repoTestEntity = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
       repoTestEntity.init
@@ -390,6 +394,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     }
 
     "handle concurrent RelatedToOne modification properly" in {
+      checkOrientDBIsRunning
 
       val repoTestEntity = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
       repoTestEntity.init
@@ -422,6 +427,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     }
 
     "update related entities properly if parent entity was loaded by index query" in {
+      checkOrientDBIsRunning
 
       val repoTestEntity = new OrientGraphRepository[TestEntity]() { override def repositoryEntityClass = "TestEntity"}
       repoTestEntity.init
@@ -465,7 +471,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       repo.init
 
       val testEntity = new TestEntity
-      testEntity.uuid.set(util.UUID.randomUUID())
+      testEntity.uuid.set(UUID.randomUUID())
       testEntity.stringField.set("This is the name of the test entity")
       testEntity.doubleField.set(1.337)
       testEntity.intField.set(1334)
@@ -478,6 +484,8 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     }
 
     "create more than 10 relations properly to one node" in {
+      checkOrientDBIsRunning
+
       val repoTestEntity = new OrientGraphRepository[TestEntity]() {
         override def repositoryEntityClass = "TestEntityEDGETEST"
       }
@@ -522,6 +530,8 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     }
 
     "load related entities properly on index queries by custom fields" in {
+      checkOrientDBIsRunning
+
 
       val repoTestEntity = new OrientGraphRepository[TestEntity]() { }
       repoTestEntity.init
@@ -561,6 +571,7 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
     }
 
     "keep outgoing relations after update" in {
+      checkOrientDBIsRunning
 
       // Related entity
       val repoTestEntity = new OrientGraphRepository[TestEntity]() { }
@@ -592,6 +603,26 @@ class OrientGraphRepositorySpec extends SpecificationWithJUnit
       println(testEntityRel.getUnderlyingVertex.toJSON)
 
       // Breaking save
+      repoTestEntityRel.update(testEntityRel)
+      println(testEntityRel.getUnderlyingVertex.toJSON)
+
+      // Breaking save II
+      repoTestEntityRel.update(testEntityRel)
+      println(testEntityRel.getUnderlyingVertex.toJSON)
+
+      // Breaking save III
+      repoTestEntityRel.update(testEntityRel)
+      println(testEntityRel.getUnderlyingVertex.toJSON)
+
+      // Breaking save IV
+      repoTestEntityRel.update(testEntityRel)
+      println(testEntityRel.getUnderlyingVertex.toJSON)
+
+      // Breaking save V
+      repoTestEntityRel.update(testEntityRel)
+      println(testEntityRel.getUnderlyingVertex.toJSON)
+
+      // Breaking save VI
       repoTestEntityRel.update(testEntityRel)
       println(testEntityRel.getUnderlyingVertex.toJSON)
 
