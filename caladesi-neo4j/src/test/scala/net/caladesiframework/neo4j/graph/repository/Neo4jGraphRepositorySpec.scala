@@ -173,6 +173,34 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
       relatedUuid must_==(entity2.uuid.is.toString)
     }
 
+    "remove entities properly (entity and index cleanup)" in {
+
+      val entity = repository.create
+      entity.title.set("DELETIONTEST")
+      repository.update(entity)
+
+      val uuidString = entity.uuid.is.toString
+      val titleString = entity.title.is
+
+      repository.delete(entity)
+
+      val deletedEntity = repository.findIdx(Neo4jTestEntity.uuid, uuidString) match {
+        case Some(entity) =>
+          "Not Empty"
+        case None =>
+          ""
+      }
+
+      val deletedEntityByTitle = repository.findIdx(Neo4jTestEntity.title, titleString) match {
+        case Some(entity) =>
+          "Not Empty"
+        case None =>
+          ""
+      }
+
+      "" must_==(deletedEntity + deletedEntityByTitle)
+    }
+
     "count entities in repository properly" in {
 
       repositoryWithRel.count

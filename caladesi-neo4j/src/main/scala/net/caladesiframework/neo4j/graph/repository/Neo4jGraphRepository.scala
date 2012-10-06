@@ -233,7 +233,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
     }
 
     // Please check all incoming relations in repository
-
+    removeFromIndex(entity)
     entity.getUnderlyingNode.delete()
     true
   })
