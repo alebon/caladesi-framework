@@ -170,6 +170,18 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   }
 
   /**
+   *
+   * @param field
+   * @param value
+   * @return
+   */
+  def findIdxAll(field: Field[_] with IndexedField, value: Any): List[EntityType] = {
+    connected[List[EntityType]](implicit ds => {
+      findAllByIndex(field, value).map(node => transformToEntity(node))
+    })
+  }
+
+  /**
    * Get the list
    *
    * @param skip

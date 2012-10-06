@@ -104,6 +104,29 @@ trait IndexManager {
   }
 
   /**
+   * Searched in index for all nodes
+   *
+   * @param field
+   * @param value
+   * @param ds
+   * @return
+   */
+  def findAllByIndex(field: Field[_] with IndexedField, value: Any)(implicit ds: Neo4jDatabaseService): List[Node] = {
+    val indexName = NamingStrategy.indexName(field)
+    val idxForNode = ds.graphDatabase.index().forNodes(indexName)
+    var result: List[Node] = List()
+
+    val hits = idxForNode.query(field.name, value).iterator()
+    while(hits.hasNext) {
+      val node: Node = hits.next()
+      result = node :: result
+    }
+
+    result
+  }
+
+
+  /**
    * Drops field index for all fields
    *
    * @param entity
