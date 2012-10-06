@@ -23,6 +23,8 @@ import java.util.{HashMap => jMap}
 import java.util
 import org.neo4j.graphdb.Node
 import org.neo4j.graphdb.index.IndexHits
+import org.neo4j.index.lucene.QueryContext
+import org.apache.lucene.queryParser.QueryParser.Operator
 
 trait IndexManager {
 
@@ -74,7 +76,7 @@ trait IndexManager {
           val indexName = NamingStrategy.indexName(field)
           val nodeIdx = idx.forNodes(indexName)
           if (null != nodeIdx) {
-            nodeIdx.remove(entity.getUnderlyingNode)
+            nodeIdx.remove(entity.getUnderlyingNode, field.name)
             nodeIdx.add(entity.getUnderlyingNode, field.name, field.is)
           }
         case _ =>
@@ -125,6 +127,24 @@ trait IndexManager {
     result
   }
 
+  def findAllByIndexSet(field: Field[_] with IndexedField, values: List[String])(implicit ds: Neo4jDatabaseService): List[Node] = {
+    val indexName = NamingStrategy.indexName(field)
+    val idxForNode = ds.graphDatabase.index().forNodes(indexName)
+    var result: List[Node] = List()
+
+    val query: QueryContext = new QueryContext( values.map(value => field.name + ":\"" + value + "\"" ).mkString(" "))
+      .defaultOperator( Operator.OR )
+
+
+    val hits = idxForNode.query(query).iterator()
+    while(hits.hasNext) {
+      val node: Node = hits.next()
+      result = node :: result
+    }
+
+    result
+  }
+
 
   /**
    * Drops field index for all fields
@@ -152,6 +172,8 @@ trait IndexManager {
             val indexName = NamingStrategy.indexName(field)
             val idxForNode = ds.graphDatabase.index().forNodes(indexName)
             idxForNode.remove(entity.getUnderlyingNode)
+          case _ =>
+            // ignore it
         }
       }
     }

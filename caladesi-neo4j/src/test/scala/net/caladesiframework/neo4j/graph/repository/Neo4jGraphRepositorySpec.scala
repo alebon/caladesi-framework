@@ -17,8 +17,7 @@
 package net.caladesiframework.neo4j.graph.repository
 
 import org.specs2.mutable._
-import net.caladesiframework.neo4j.testkit.{Neo4jTestEntityWithRelation, Neo4jTestEntity, Neo4jDatabaseTestKit}
-import java.io.File
+import net.caladesiframework.neo4j.testkit.{Neo4jTestEntityExact, Neo4jTestEntityWithRelation, Neo4jTestEntity, Neo4jDatabaseTestKit}
 
 class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
   with Neo4jDatabaseTestKit {
@@ -31,6 +30,10 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
     override def RELATION_NAME = "TEST_ENTITY_WITH_REL"
   }
 
+  val repositoryWithExactIndex = new Neo4jGraphRepository[Neo4jTestEntityExact]() {
+    override def RELATION_NAME = "TEST_ENTITY_EXACT"
+  }
+
   sequential
 
   "Neo4j Repository" should {
@@ -40,6 +43,7 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
 
       repository.init
       repositoryWithRel.init
+      repositoryWithExactIndex.init
       true must_==true
     }
 
@@ -199,6 +203,74 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
       }
 
       "" must_==(deletedEntity + deletedEntityByTitle)
+    }
+
+    "remove related entities properly" in {
+
+      val entity = repository.create
+      entity.title.set("Test Title (i'll be related, target)")
+      repository.update(entity)
+
+      val entity2 = repository.create
+      entity2.title.set("Test Title (i'll be related, target2)")
+      repository.update(entity2)
+
+      val entityWithRel = repositoryWithRel.create
+      entityWithRel.relatedEntity.set(entity)
+      repositoryWithRel.update(entityWithRel)
+      repositoryWithRel.update(entityWithRel)
+      repositoryWithRel.update(entityWithRel)
+
+      entityWithRel.relatedEntity.set(entity2)
+      repositoryWithRel.update(entityWithRel)
+      repositoryWithRel.delete(entityWithRel)
+
+      true must_==(true)
+    }
+
+    "find entities by index IN query" in {
+
+      val entity = repository.create
+      entity.title.set("IndexTest 1")
+      repository.update(entity)
+
+      val entity2 = repository.create
+      entity2.title.set("ISO-8859-1")
+      repository.update(entity2)
+
+      val entity3 = repository.create
+      entity3.title.set("IndexTest 3")
+      repository.update(entity3)
+
+      val count = repository.findIdxAll(Neo4jTestEntity.title, List("IndexTest 1", "ISO-8859-1")).size
+
+      repository.findIdxAll(Neo4jTestEntity.title, List("IndexTest 1", "ISO-8859-1", "IndexTest 3")) foreach {
+        entity => repository.delete(entity)
+      }
+
+      count must_==2
+    }
+
+    "find entities by exact index properly" in {
+
+      val entity = repositoryWithExactIndex.create
+      entity.code.set("UTF-8")
+      repositoryWithExactIndex.update(entity)
+
+      val entity2 = repositoryWithExactIndex.create
+      entity2.code.set("ISO-8859-1")
+      repositoryWithExactIndex.update(entity2)
+
+      val code = repositoryWithExactIndex.findIdx(Neo4jTestEntityExact.code, "UTF-8") match {
+        case Some(entity) => entity.code.is
+        case None => ""
+      }
+
+      repositoryWithExactIndex.findIdxAll(Neo4jTestEntityExact.code, List("UTF-8", "ISO-8859-1")) foreach {
+        entity => repositoryWithExactIndex.delete(entity)
+      }
+
+      code must_==("UTF-8")
     }
 
     "count entities in repository properly" in {
