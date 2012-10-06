@@ -144,6 +144,35 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
       true must_==(true)
     }
 
+    "load related entities properly" in {
+
+      val entity = repository.create
+      entity.title.set("Test Title (i'll be related, target)")
+      repository.update(entity)
+
+      val entity2 = repository.create
+      entity2.title.set("Test Title (i'll be related, target2)")
+      repository.update(entity2)
+
+      val entityWithRel = repositoryWithRel.create
+      entityWithRel.relatedEntity.set(entity)
+      repositoryWithRel.update(entityWithRel)
+      repositoryWithRel.update(entityWithRel)
+      repositoryWithRel.update(entityWithRel)
+
+      entityWithRel.relatedEntity.set(entity2)
+      repositoryWithRel.update(entityWithRel)
+
+      val relatedUuid = repositoryWithRel.findIdx(Neo4jTestEntityWithRelation.uuid, entityWithRel.uuid.is.toString) match {
+        case Some(entity) =>
+          entity.relatedEntity.is.uuid.is.toString
+        case None =>
+          ""
+      }
+
+      relatedUuid must_==(entity2.uuid.is.toString)
+    }
+
     "count entities in repository properly" in {
 
       repositoryWithRel.count

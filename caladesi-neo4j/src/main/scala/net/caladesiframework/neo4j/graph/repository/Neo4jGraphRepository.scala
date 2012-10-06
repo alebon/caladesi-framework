@@ -109,7 +109,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @param node
    * @return
    */
-  def transformToEntity(node: Node, depth: Int = 0)(implicit ds: Neo4jDatabaseService) : EntityType = {
+  def transformToEntity(node: Node, depth: Int = 1)(implicit ds: Neo4jDatabaseService) : EntityType = {
     return setEntityFields(create, node, depth)
   }
 
@@ -122,7 +122,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
     m.erasure.newInstance().asInstanceOf[EntityType]
   }
 
-  def createFromNode(node: Node, depth: Int = 0)(implicit db: Neo4jDatabaseService): EntityType = {
+  def createFromNode(node: Node, depth: Int = 1)(implicit db: Neo4jDatabaseService): EntityType = {
     transformToEntity(node, depth)
   }
 
@@ -162,7 +162,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
     connected[Option[EntityType]](implicit ds => {
       findSingleByIndex(field, value) match {
         case Some(node) =>
-          Some(transformToEntity(node, 0))
+          Some(transformToEntity(node, 1))
         case None =>
           None
       }
@@ -292,8 +292,8 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
             node.setProperty(field.name, field.is.asInstanceOf[java.lang.Long])
           //case field:LocaleField =>
           //  vertex.field(field.name, field.is.toString)
-          //case field:DateTimeField =>
-          //  vertex.field(field.name, field.valueToDB)
+          case field:DateTimeField =>
+            node.setProperty(field.name, field.valueToDB.asInstanceOf[java.lang.Long])
           case field:Relation =>
             handleRelation(node, field)
           case _ =>
@@ -330,8 +330,8 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
             field.set(node.getProperty(field.name).asInstanceOf[Long])
           //case field: LocaleField =>
           //  field.set(new Locale(vertex.field(field.name)))
-          //case field: DateTimeField =>
-          //  field.valueFromDB(vertex.field(field.name))
+          case field: DateTimeField =>
+            field.valueFromDB(node.getProperty(field.name))
           case field:RelatedToOne[Neo4jGraphEntity] =>
             if (depth > 0) {
               // Load relation

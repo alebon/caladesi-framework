@@ -46,6 +46,6 @@ object Neo4jStore {
     /**
      * directory where to store the data files
      */
-    def neo4jStoreDir = "/Users/abondarenko/Projects/data/neo4j"
+    def neo4jStoreDir = "/Users/abondarenko/Projects/data/neo4j-test"
   }
 }
