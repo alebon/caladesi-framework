@@ -55,4 +55,14 @@ class OptionalRelatedToOne[EntityType <: Neo4jGraphEntity](implicit m:Manifest[E
   def clear: Unit = {
     this.value = None
   }
+
+  def targetClazz = m.erasure.newInstance().asInstanceOf[EntityType]
+
+  def set(value: EntityType) {
+    this.value = Some(value)
+    // Add field to owner entity
+    if (!owner.fields.contains(this)) {
+      owner attach me
+    }
+  }
 }

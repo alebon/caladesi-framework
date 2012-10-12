@@ -72,7 +72,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   }
 
   /**
-   * Creates the correct VertexType if missing
+   * Creates the correct SubRefs and Index if missing
    */
   def init = {
     transactional(implicit ds => {

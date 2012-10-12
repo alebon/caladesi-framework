@@ -116,7 +116,28 @@ trait RelationManager {
       }
 
     } else {
-      handleRelatedToOne(node, field.asInstanceOf[Field[RelatedEntityType] with Relation])
+      field.is.get.hasInternalId() match {
+        case true =>
+          val relations = node.getRelationships(relType, Direction.OUTGOING)
+
+          var alreadyPresent = false
+
+          // Remove all old relations of this type
+          while (relations.iterator().hasNext) {
+            val relation = relations.iterator().next()
+            if (relation.getEndNode.getId != field.is.get.getUnderlyingNode.getId) {
+              relation.delete()
+            } else {
+              alreadyPresent = true
+            }
+          }
+
+          if (!alreadyPresent) {
+            node.createRelationshipTo(field.is.get.getUnderlyingNode, relType)
+          }
+
+        case _ => throw new Exception("Please update the (optional) related entity first")
+      }
     }
   }
 
@@ -136,8 +157,8 @@ trait RelationManager {
     field match {
       case fld: OptionalRelatedToOne[RelatedEntity] =>
         if (rel != null) {
-          val targetRepo =  RepositoryRegistry.get(fld.value.get.clazz)
-          field.set(targetRepo.createFromNode(rel.getEndNode, depth))
+          val targetRepo =  RepositoryRegistry.get(fld.targetClazz.clazz)
+          fld.set(targetRepo.createFromNode(rel.getEndNode, depth))
         } else {
           fld.clear
         }

@@ -304,8 +304,8 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
       repositoryWithOptRel.update(entityWithOptRel)
 
       val result = repositoryWithOptRel.findIdx(Neo4jTestEntityWithOptionalRelation.uuid, entityWithOptRel.uuid.is.toString) match {
-        case Some(entity) =>
-          entity.optionalRelatedToOne.is.get.uuid.is.toString
+        case Some(loadedEntity) =>
+          loadedEntity.optionalRelatedToOne.is.get.uuid.is.toString
         case None =>
           ""
       }
@@ -327,7 +327,7 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
 
       val result = repositoryWithOptRel.findIdx(Neo4jTestEntityWithOptionalRelation.uuid, entityWithOptRel.uuid.is.toString) match {
         case Some(entity) =>
-          if (entity.optionalRelatedToOne.is == null) {
+          if (entity.optionalRelatedToOne.is == None) {
             ""
           } else {
             "FAIL"
