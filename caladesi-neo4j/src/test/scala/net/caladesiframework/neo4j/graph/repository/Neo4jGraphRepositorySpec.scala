@@ -17,7 +17,8 @@
 package net.caladesiframework.neo4j.graph.repository
 
 import org.specs2.mutable._
-import net.caladesiframework.neo4j.testkit.{Neo4jTestEntityExact, Neo4jTestEntityWithRelation, Neo4jTestEntity, Neo4jDatabaseTestKit}
+import net.caladesiframework.neo4j.testkit._
+import scala.Some
 
 class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
   with Neo4jDatabaseTestKit {
@@ -33,6 +34,10 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
   val repositoryWithExactIndex = new Neo4jGraphRepository[Neo4jTestEntityExact]() {
     override def RELATION_NAME = "TEST_ENTITY_EXACT"
   }
+  val repositoryWithOptRel = new Neo4jGraphRepository[Neo4jTestEntityWithOptionalRelation]() {
+    override def RELATION_NAME = "TEST_ENTITY_OPTIONAL"
+  }
+
 
   sequential
 
@@ -44,6 +49,7 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
       repository.init
       repositoryWithRel.init
       repositoryWithExactIndex.init
+      repositoryWithOptRel.init
       true must_==true
     }
 
@@ -285,6 +291,51 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
       println(list.size)
 
       true must_==(true)
+    }
+
+    "load optional related entities properly" in {
+
+      val entity = repository.create
+      entity.title.set("Test Title (i'll be related, target)")
+      repository.update(entity)
+
+      val entityWithOptRel = repositoryWithOptRel.create
+      entityWithOptRel.optionalRelatedToOne.set(Some(entity))
+      repositoryWithOptRel.update(entityWithOptRel)
+
+      val result = repositoryWithOptRel.findIdx(Neo4jTestEntityWithOptionalRelation.uuid, entityWithOptRel.uuid.is.toString) match {
+        case Some(entity) =>
+          entity.optionalRelatedToOne.is.get.uuid.is.toString
+        case None =>
+          ""
+      }
+      result must_==(entity.uuid.is.toString)
+    }
+
+    "reset optional related entities properly" in {
+
+      val entity = repository.create
+      entity.title.set("Test Title (i'll be related, target)")
+      repository.update(entity)
+
+      val entityWithOptRel = repositoryWithOptRel.create
+      entityWithOptRel.optionalRelatedToOne.set(Some(entity))
+      repositoryWithOptRel.update(entityWithOptRel)
+
+      entityWithOptRel.optionalRelatedToOne.clear
+      repositoryWithOptRel.update(entityWithOptRel)
+
+      val result = repositoryWithOptRel.findIdx(Neo4jTestEntityWithOptionalRelation.uuid, entityWithOptRel.uuid.is.toString) match {
+        case Some(entity) =>
+          if (entity.optionalRelatedToOne.is == null) {
+            ""
+          } else {
+            "FAIL"
+          }
+        case None =>
+          "FAILED TO LOAD ENTITY"
+      }
+      result must_==("")
     }
 
     "shutdown properly" in {

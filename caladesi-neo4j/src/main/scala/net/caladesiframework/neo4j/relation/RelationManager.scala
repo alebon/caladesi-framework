@@ -19,7 +19,7 @@ package net.caladesiframework.neo4j.relation
 import scala.collection.JavaConverters._
 import java.util
 import net.caladesiframework.neo4j.field.Field
-import net.caladesiframework.neo4j.graph.entity.Neo4jGraphEntity
+import net.caladesiframework.neo4j.graph.entity.{GraphEntity, Neo4jGraphEntity}
 import org.neo4j.graphdb.{Direction, DynamicRelationshipType, Node}
 import net.caladesiframework.neo4j.db.Neo4jDatabaseService
 import net.caladesiframework.neo4j.repository.RepositoryRegistry
@@ -51,8 +51,8 @@ trait RelationManager {
     field match {
       case fld: RelatedToOne[RelatedEntityType] =>
         handleRelatedToOne(node, fld)
-      //case fld: OptionalRelatedToOne[RelatedEntityType] =>
-      //  handleOptionalRelatedToOne(vertex, fld)
+      case fld: OptionalRelatedToOne[RelatedEntityType] =>
+        handleOptionalRelatedToOne(node, fld)
       //case fld: RelatedToMany[RelatedEntityType] =>
       case _ =>
         throw new Exception("Can't handle this relation type")
@@ -72,42 +72,80 @@ trait RelationManager {
    * @return
    */
   protected def handleRelatedToOne[RelatedEntityType <: Neo4jGraphEntity](node: Node,
-    field: RelatedToOne[RelatedEntityType])(implicit db: Neo4jDatabaseService) = {
+    field: Field[RelatedEntityType] with Relation)(implicit db: Neo4jDatabaseService) = {
+
     val relType = DynamicRelationshipType.withName( relationName(field) )
 
     field.is.hasInternalId() match {
       case true =>
         val relations = node.getRelationships(relType, Direction.OUTGOING)
 
+        var alreadyPresent = false
+
         // Remove all old relations of this type
         while (relations.iterator().hasNext) {
           val relation = relations.iterator().next()
-          relation.delete()
+          if (relation.getEndNode.getId != field.is.getUnderlyingNode.getId) {
+            relation.delete()
+          } else {
+            alreadyPresent = true
+          }
         }
 
-        node.createRelationshipTo(field.is.getUnderlyingNode, relType)
-
-
+        if (!alreadyPresent) {
+          node.createRelationshipTo(field.is.getUnderlyingNode, relType)
+        }
 
       case _ => throw new Exception("Please update the related entity first")
     }
 
   }
 
+  protected def handleOptionalRelatedToOne[RelatedEntityType <: Neo4jGraphEntity](node: Node,
+    field: OptionalRelatedToOne[RelatedEntityType])(implicit db: Neo4jDatabaseService) = {
+
+    val relType = DynamicRelationshipType.withName( relationName(field) )
+
+    if (field.is == None || !field.is.get.hasInternalId()) {
+      val relations = node.getRelationships(relType, Direction.OUTGOING)
+
+      // Remove all old relations of this type
+      while (relations.iterator().hasNext) {
+        val relation = relations.iterator().next()
+        relation.delete()
+      }
+
+    } else {
+      handleRelatedToOne(node, field.asInstanceOf[Field[RelatedEntityType] with Relation])
+    }
+  }
+
   /**
-   * Loads target node for RelatedToOne relations
+   * Loads target node for RelatedToOne or OptionalRelatedToOne relations
    *
    * @param field
    * @param node
    * @param db
    * @return
    */
-  protected def loadRelation(field: Field[AnyRef] with Relation,
+  protected def loadRelation[RelatedEntity <: Neo4jGraphEntity](field: Field[_] with Relation,
                              node: Node, depth: Int = 0)(implicit db: Neo4jDatabaseService) = {
+
     val rel = node.getSingleRelationship(DynamicRelationshipType.withName( relationName(field) ), Direction.OUTGOING)
 
-    val targetRepo =  RepositoryRegistry.get(field.defaultValue.asInstanceOf[Neo4jGraphEntity].clazz)
-    field.set(targetRepo.createFromNode(rel.getEndNode, depth))
+    field match {
+      case fld: OptionalRelatedToOne[RelatedEntity] =>
+        if (rel != null) {
+          val targetRepo =  RepositoryRegistry.get(fld.value.get.clazz)
+          field.set(targetRepo.createFromNode(rel.getEndNode, depth))
+        } else {
+          fld.clear
+        }
+      case fld: RelatedToOne[RelatedEntity] =>
+        val targetRepo =  RepositoryRegistry.get(fld.defaultValue.clazz)
+        field.set(targetRepo.createFromNode(rel.getEndNode, depth))
+    }
+
   }
 
 }

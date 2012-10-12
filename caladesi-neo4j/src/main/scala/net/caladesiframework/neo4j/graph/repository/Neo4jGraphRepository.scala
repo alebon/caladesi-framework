@@ -18,7 +18,7 @@ package net.caladesiframework.neo4j.graph.repository
 
 import java.util
 import net.caladesiframework.neo4j.index.{IndexManager, IndexedField}
-import net.caladesiframework.neo4j.graph.entity.Neo4jGraphEntity
+import net.caladesiframework.neo4j.graph.entity.{GraphEntity, Neo4jGraphEntity}
 import net.caladesiframework.neo4j.db.{Neo4jDatabaseService}
 import net.caladesiframework.neo4j.repository.{RepositoryRegistry, CRUDRepository}
 import org.neo4j.graphdb.{Direction, DynamicRelationshipType, Node}
@@ -356,10 +356,10 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
           //  field.set(new Locale(vertex.field(field.name)))
           case field: DateTimeField =>
             field.valueFromDB(node.getProperty(field.name))
-          case field:RelatedToOne[Neo4jGraphEntity] =>
+          case field:Relation =>
             if (depth > 0) {
               // Load relation
-              loadRelation(field.asInstanceOf[Field[AnyRef] with Relation], node, depth - 1)
+              loadRelation(field.asInstanceOf[Field[Neo4jGraphEntity] with Relation], node, depth - 1)
             }
           case field: Field[_] =>
             throw new Exception("Not supported Field %s".format(field.name))
