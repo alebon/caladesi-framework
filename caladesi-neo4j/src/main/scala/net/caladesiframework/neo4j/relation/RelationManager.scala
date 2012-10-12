@@ -49,6 +49,8 @@ trait RelationManager {
     field: Relation)(implicit db: Neo4jDatabaseService) = {
 
     field match {
+      case fld: RelatedToMany[RelatedEntityType] =>
+        handleRelatedToMany(node, fld)
       case fld: RelatedToOne[RelatedEntityType] =>
         handleRelatedToOne(node, fld)
       case fld: OptionalRelatedToOne[RelatedEntityType] =>
@@ -101,6 +103,17 @@ trait RelationManager {
 
   }
 
+  /**
+   * 0..1 Relation
+   *
+   * Saves the relation if the target node is existent. Removes it, if value is empty
+   *
+   * @param node
+   * @param field
+   * @param db
+   * @tparam RelatedEntityType
+   * @return
+   */
   protected def handleOptionalRelatedToOne[RelatedEntityType <: Neo4jGraphEntity](node: Node,
     field: OptionalRelatedToOne[RelatedEntityType])(implicit db: Neo4jDatabaseService) = {
 
@@ -142,6 +155,47 @@ trait RelationManager {
   }
 
   /**
+   * 0..n Relation
+   *
+   * Saves the relations if the target nodes are existent
+   *
+   * @param node
+   * @param field
+   * @param db
+   * @tparam RelatedEntityType
+   * @return
+   */
+  protected def handleRelatedToMany[RelatedEntityType <: Neo4jGraphEntity](node: Node,
+    field: RelatedToMany[RelatedEntityType])(implicit db: Neo4jDatabaseService) = {
+
+    val relType = DynamicRelationshipType.withName( relationName(field) )
+    val alreadyPresent = scala.collection.mutable.HashMap[Long, Boolean]()
+
+    val relations = node.getRelationships(relType, Direction.OUTGOING)
+
+    while (relations.iterator().hasNext) {
+      val relation = relations.iterator().next()
+      if (!field.is.contains(relation.getEndNode.getId)) {
+        // This relation seems to be removed, remove the relation also
+        relation.delete()
+      } else {
+        alreadyPresent.put(relation.getEndNode.getId, true)
+      }
+    }
+
+    // Update relationships
+    field.is foreach {
+      entry => {
+        // Create the new relation
+        if (!alreadyPresent.contains(entry._1)) {
+          node.createRelationshipTo(entry._2.getUnderlyingNode, relType)
+        }
+      }
+    }
+
+  }
+
+  /**
    * Loads target node for RelatedToOne or OptionalRelatedToOne relations
    *
    * @param field
@@ -151,18 +205,30 @@ trait RelationManager {
    */
   protected def loadRelation[RelatedEntity <: Neo4jGraphEntity](field: Field[_] with Relation,
                              node: Node, depth: Int = 0)(implicit db: Neo4jDatabaseService) = {
-
-    val rel = node.getSingleRelationship(DynamicRelationshipType.withName( relationName(field) ), Direction.OUTGOING)
+    val relType = DynamicRelationshipType.withName( relationName(field) )
 
     field match {
+      case fld: RelatedToMany[RelatedEntity] =>
+        val targetRepo =  RepositoryRegistry.get(fld.targetClazz.clazz)
+        val relations = node.getRelationships(relType, Direction.OUTGOING)
+        while (relations.iterator().hasNext) {
+          val relation = relations.iterator().next()
+          fld.put(targetRepo.createFromNode(relation.getEndNode, depth))
+        }
+
       case fld: OptionalRelatedToOne[RelatedEntity] =>
+        val rel = node.getSingleRelationship(relType, Direction.OUTGOING)
+
         if (rel != null) {
           val targetRepo =  RepositoryRegistry.get(fld.targetClazz.clazz)
           fld.set(targetRepo.createFromNode(rel.getEndNode, depth))
         } else {
           fld.clear
         }
+
       case fld: RelatedToOne[RelatedEntity] =>
+        val rel = node.getSingleRelationship(relType, Direction.OUTGOING)
+
         val targetRepo =  RepositoryRegistry.get(fld.defaultValue.clazz)
         field.set(targetRepo.createFromNode(rel.getEndNode, depth))
     }

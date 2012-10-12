@@ -34,8 +34,13 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
   val repositoryWithExactIndex = new Neo4jGraphRepository[Neo4jTestEntityExact]() {
     override def RELATION_NAME = "TEST_ENTITY_EXACT"
   }
+
   val repositoryWithOptRel = new Neo4jGraphRepository[Neo4jTestEntityWithOptionalRelation]() {
     override def RELATION_NAME = "TEST_ENTITY_OPTIONAL"
+  }
+
+  val repositoryWithManyRel = new Neo4jGraphRepository[Neo4jTestEntityWithManyRelations]() {
+    override def RELATION_NAME = "TEST_ENTITY_MANY"
   }
 
 
@@ -50,6 +55,7 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
       repositoryWithRel.init
       repositoryWithExactIndex.init
       repositoryWithOptRel.init
+      repositoryWithManyRel.init
       true must_==true
     }
 
@@ -336,6 +342,57 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
           "FAILED TO LOAD ENTITY"
       }
       result must_==("")
+    }
+
+    "save and load many related entities properly" in {
+
+      val entity = repository.create
+      entity.title.set("Test Many (i'll be many related, target 1)")
+      repository.update(entity)
+
+      val entity2 = repository.create
+      entity2.title.set("Test Many (i'll be many related, target 2)")
+      repository.update(entity2)
+
+      val entityWithManyRel = repositoryWithManyRel.create
+      entityWithManyRel.relationSet.put(entity)
+      entityWithManyRel.relationSet.put(entity2)
+      repositoryWithManyRel.update(entityWithManyRel)
+
+      val result = repositoryWithManyRel.findIdx(Neo4jTestEntityWithManyRelations.uuid, entityWithManyRel.uuid.is.toString) match {
+        case Some(loadedEntity) =>
+          loadedEntity.relationSet.is.size
+        case None =>
+          -1
+      }
+      result must_==(2)
+    }
+
+    "remove many related entities properly" in {
+
+      val entity = repository.create
+      entity.title.set("Test Many (i'll be many related, target 1)")
+      repository.update(entity)
+
+      val entity2 = repository.create
+      entity2.title.set("Test Many (i'll be many related, target 2)")
+      repository.update(entity2)
+
+      val entityWithManyRel = repositoryWithManyRel.create
+      entityWithManyRel.relationSet.put(entity)
+      entityWithManyRel.relationSet.put(entity2)
+      repositoryWithManyRel.update(entityWithManyRel)
+
+      entityWithManyRel.relationSet.remove(entity)
+      repositoryWithManyRel.update(entityWithManyRel)
+
+      val result = repositoryWithManyRel.findIdx(Neo4jTestEntityWithManyRelations.uuid, entityWithManyRel.uuid.is.toString) match {
+        case Some(loadedEntity) =>
+          loadedEntity.relationSet.is.size
+        case None =>
+          -1
+      }
+      result must_==(1)
     }
 
     "shutdown properly" in {
