@@ -100,9 +100,9 @@ You can use the Neo4j Component by adding the dependency to your project.
 ### SBT 0.11.3 (Simple Build Tool)
 Modify your build.sbt
 
-    libraryDependencies += "net.caladesiframework" % "caladesi-common_2.9.1" % "0.3.0-SNAPSHOT" % "compile"
+    libraryDependencies += "net.caladesiframework" % "caladesi-common_2.9.1" % "0.3.0" % "compile"
 
-    libraryDependencies += "net.caladesiframework" % "caladesi-neo4j_2.9.1" % "0.3.0-SNAPSHOT" % "compile"
+    libraryDependencies += "net.caladesiframework" % "caladesi-neo4j_2.9.1" % "0.3.0" % "compile"
 
 ###Maven:
 Add the framework to your pom.xml:
@@ -111,13 +111,13 @@ Add the framework to your pom.xml:
 <dependency>
   <groupId>net.caladesiframework</groupId>
   <artifactId>caladesi-common_${scala.version}</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
+  <version>0.3.0</version>
 </dependency>
 
 <dependency>
   <groupId>net.caladesiframework</groupId>
   <artifactId>caladesi-neo4j_${scala.version}</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
+  <version>0.3.0</version>
 </dependency>
 ```
 
@@ -125,8 +125,8 @@ Add the framework to your pom.xml:
 ```groovy
 dependencies {
     // Caladesi Framework
-    compile "net.caladesiframework:caladesi-common_2.9.1:0.3.0-SNAPSHOT",
-        "net.caladesiframework:caladesi-neo4j_2.9.1:0.3.0-SNAPSHOT"
+    compile "net.caladesiframework:caladesi-common_2.9.1:0.3.0",
+        "net.caladesiframework:caladesi-neo4j_2.9.1:0.3.0"
 }
 ```
 
