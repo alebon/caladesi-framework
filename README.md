@@ -3,10 +3,15 @@
 The Caladesi Framework is written in Scala and is intended to be used in other Scala projects. It is inspired by the liftweb framework. 
 Hence it uses some parts of it (lift-json, ...).
 
-##What you'll find here in future:
 
-caladesi-orientdb,
-caladesi-web, and more to come later
+###Components
+
+Please check the sub folders/projects for detailed information
+
+- caladesi-common
+- caladesi-neo4j
+- caladesi-orientdb
+- caladesi-web
 
 ##Getting Started with Caladesi Framework
 You can use the caladesi framework by adding the dependency to your project:
