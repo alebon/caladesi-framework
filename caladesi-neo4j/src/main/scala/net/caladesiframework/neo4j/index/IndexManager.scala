@@ -25,6 +25,7 @@ import org.neo4j.graphdb.Node
 import org.neo4j.graphdb.index.IndexHits
 import org.neo4j.index.lucene.QueryContext
 import org.apache.lucene.queryParser.QueryParser.Operator
+import org.apache.lucene.queryParser.QueryParser
 
 trait IndexManager {
 
@@ -97,7 +98,7 @@ trait IndexManager {
     val indexName = NamingStrategy.indexName(field)
     val idxForNode = ds.graphDatabase.index().forNodes(indexName)
 
-    idxForNode.query(field.name, value) match {
+    idxForNode.query(field.name, QueryParser.escape(value.asInstanceOf[String])) match {
       case hits: IndexHits[Node] if (hits.size() > 0) =>
         Some(hits.next())
       case _ =>
@@ -118,7 +119,7 @@ trait IndexManager {
     val idxForNode = ds.graphDatabase.index().forNodes(indexName)
     var result: List[Node] = List()
 
-    val hits = idxForNode.query(field.name, value).iterator()
+    val hits = idxForNode.query(field.name, QueryParser.escape(value.asInstanceOf[String])).iterator()
     while(hits.hasNext) {
       val node: Node = hits.next()
       result = node :: result
@@ -132,7 +133,7 @@ trait IndexManager {
     val idxForNode = ds.graphDatabase.index().forNodes(indexName)
     var result: List[Node] = List()
 
-    val query: QueryContext = new QueryContext( values.map(value => field.name + ":\"" + value + "\"" ).mkString(" "))
+    val query: QueryContext = new QueryContext( values.map(value => field.name + ":\"" + QueryParser.escape(value) + "\"" ).mkString(" "))
       .defaultOperator( Operator.OR )
 
 

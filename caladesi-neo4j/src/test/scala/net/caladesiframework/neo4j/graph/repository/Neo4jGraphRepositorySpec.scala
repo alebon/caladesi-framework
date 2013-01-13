@@ -97,6 +97,27 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
       resultTitle must_==("Test Title UUID Test")
     }
 
+    "escape search queries for index properly" in {
+
+      val entity = repository.create
+      entity.title.set("Apple iPhone 5")
+      repository.update(entity)
+
+      val entity2 = repository.create
+      entity2.title.set("quiet!")
+      repository.update(entity2)
+
+      val title = entity2.title.is
+      val resultTitle = repository.findIdx(Neo4jTestEntity.title, title) match {
+        case Some(entity) =>
+          entity.title.is
+        case None =>
+          ""
+      }
+
+      resultTitle must_==("quiet!")
+    }
+
     "update entity fields properly" in {
 
       val entity = repository.create
@@ -344,7 +365,7 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
       result must_==("")
     }
 
-    "save and load many related entities properly" in {
+    "save many related entities properly" in {
 
       val entity = repository.create
       entity.title.set("Test Many (i'll be many related, target 1)")
@@ -393,6 +414,30 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
           -1
       }
       result must_==(1)
+    }
+
+    "load many related entities properly" in {
+
+      val entity = repository.create
+      entity.title.set("Test Many (i'll be many related, target 1)")
+      repository.update(entity)
+
+      //val entity2 = repository.create
+      //entity2.title.set("Test Many (i'll be many related, target 2)")
+      //repository.update(entity2)
+
+      val entityWithManyRel = repositoryWithManyRel.create
+      entityWithManyRel.relationSet.put(entity)
+      //entityWithManyRel.relationSet.put(entity2)
+      repositoryWithManyRel.update(entityWithManyRel)
+
+      val result = repositoryWithManyRel.findIdx(Neo4jTestEntityWithManyRelations.uuid, entityWithManyRel.uuid.is.toString) match {
+        case Some(loadedEntity) if (loadedEntity.relationSet.is.size == 1) =>
+          loadedEntity.relationSet.is.map(entry => entry._2).toList.head.title.is
+        case None =>
+          -1
+      }
+      result must_==("Test Many (i'll be many related, target 1)")
     }
 
     "shutdown properly" in {

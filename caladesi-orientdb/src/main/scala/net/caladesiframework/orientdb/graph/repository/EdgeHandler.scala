@@ -247,7 +247,10 @@ trait EdgeHandler {
 }
 
 sealed class SingleRelationCommand extends OCommandPredicate {
-  def evaluate(oRecord: ORecord[_], iContext: OCommandContext): Boolean = {
-    return ((iContext.getVariable("depth").asInstanceOf[Int]) <= 1);
+
+  override def evaluate(iRecord: ORecord[_], iCurrentResult: ODocument, iContext: OCommandContext) = {
+    val result = ((iContext.getVariable("depth").asInstanceOf[Int]) <= 1)
+
+    result.asInstanceOf[AnyRef]
   }
 }

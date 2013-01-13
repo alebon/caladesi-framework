@@ -22,7 +22,7 @@ object Dependencies {
   lazy val scalaVersion  = "2.9.1"
   lazy val slf4jVersion  = "1.6.4"
   lazy val liftVersion   = "2.4"
-  lazy val orientVersion = "1.2.0"
+  lazy val orientVersion = "1.3.0"
   lazy val neo4jVersion  = "1.8"
 
   // Compile scope:
