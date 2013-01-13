@@ -17,7 +17,9 @@ The following examples should give you an idea of how to use the caladesi framew
 class ShipEntity extends OrientGraphEntity with UuidPk {
 
   // We want the ship to have a name that we can search for
-  object name extends StringField(this) extends FulltextIndexed
+  object name extends StringField(this) with FulltextIndexed
+
+  object uniqueTag extends StringField(this) with ExactIndexed
 
   // Color of the ship
   object color extends StringField(this)
@@ -147,36 +149,6 @@ dependencies {
     compile "net.caladesiframework:caladesi-common_2.9.1:0.4.0-SNAPHOT",
         "net.caladesiframework:caladesi-orientdb_2.9.1:0.4.0-SNAPHOT"
 }
-```
-
-##Drafts (features for next versions)
-
-```scala
-class ShipEntity extends OrientGraphEntity with UuidPk {
-
-  // Defines 1:N relations: Ship -[HAS]-> Container*
-  object containerList extends RelatedToMany[Container](this, "HAS")
-
-  // Defines remote 1:1 directed relations: Ship-[OWNED_BY]->Company
-  // Remote means that the ShipEntity has to lookup for a REST service and perform a call
-  object remoteCompany extends RelatedToOne[Company](this, "OWNED_BY")
-}
-```
-
-```scala
-// Usage
-ship.containerList.add(containerRepository.create)
-
-val specialContainer = containerRepository.create
-specialContainer.color.set("red")
-
-ship.singleContainer.reAssign(specialContainer)
-
-// Perform REST call to create a new Company entity
-ship.remoteCompany.reAssign(CompanyAPI.create)
-
-// Ship and new container are updated
-shipRepository.update(ship)
 ```
 
 ##License

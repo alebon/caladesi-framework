@@ -17,7 +17,7 @@ The following examples should give you an idea of how to use the caladesi framew
 class ShipEntity extends Neo4jGraphEntity with UuidPk {
 
   // We want the ship to have a name that we can search for
-  object name extends StringField(this) extends FulltextIndexed
+  object name extends StringField(this) with FulltextIndexed
 
   // Color of the ship
   object color extends StringField(this)
