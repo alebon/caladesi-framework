@@ -41,6 +41,6 @@ pomExtra in ThisBuild             := (
   </developers>
 )
 
-libraryDependencies += "org.scalatest" % "scalatest_2.9.1" % "1.8" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 
-libraryDependencies += "junit" % "junit" % "4.5" % "test"
+libraryDependencies += "junit" % "junit" % "4.11" % "test"
