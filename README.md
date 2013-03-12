@@ -19,7 +19,7 @@ You can use the caladesi framework by adding the dependency to your project:
 ### SBT 0.11.3 (Simple Build Tool)
 Modify your build.sbt
 
-    libraryDependencies += "net.caladesiframework" % "caladesi-web_2.9.1" % "0.4.0-SNAPHOT" % "compile"
+    libraryDependencies += "net.caladesiframework" %% "caladesi-web" % "0.4.0-SNAPHOT" % "compile"
 
 ###Maven:
 Add the framework to your pom.xml:

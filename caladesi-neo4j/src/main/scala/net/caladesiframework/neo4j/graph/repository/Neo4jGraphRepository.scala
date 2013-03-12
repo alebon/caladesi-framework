@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Caladesi Framework
+ * Copyright 2013 Caladesi Framework
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@ package net.caladesiframework.neo4j.graph.repository
 
 import java.util
 import net.caladesiframework.neo4j.index.{IndexManager, IndexedField}
-import net.caladesiframework.neo4j.graph.entity.{GraphEntity, Neo4jGraphEntity}
-import net.caladesiframework.neo4j.db.{Neo4jDatabaseService}
+import net.caladesiframework.neo4j.graph.entity.Neo4jGraphEntity
+import net.caladesiframework.neo4j.db.Neo4jDatabaseService
 import net.caladesiframework.neo4j.repository.{RepositoryRegistry, CRUDRepository}
 import org.neo4j.graphdb.{Direction, DynamicRelationshipType, Node}
 import net.caladesiframework.neo4j.field._
 import net.caladesiframework.neo4j.db.Neo4jConfiguration
-import net.caladesiframework.neo4j.relation.{RelatedToOne, RelationManager, Relation}
+import net.caladesiframework.neo4j.relation.{RelationManager, Relation}
 import org.neo4j.cypher.javacompat.{ExecutionResult, ExecutionEngine}
 
 abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
@@ -272,24 +272,9 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * Drops all entities in the repository (use with care)
    */
   def drop : Unit = {
-    //transactional(implicit db => {
-
-    //  val documents : util.List[ODocument] = db.queryBySql("SELECT FROM " + repositoryEntityClass + " LIMIT 100")
-    //  documents foreach {
-    //    doc => {
-    //      db.removeVertex(doc)
-    //   }
-    //  }
-
-    //})
-
-    //if (count >= 1) {
-    // this.drop
-    //} else {
-    //  connected(implicit dbName => {
-    //    dropIndex(create)
-    //  })
-    //}
+    transactional(implicit db => {
+      // @TODO drop all entities from repository
+    })
 
   }
 
@@ -318,6 +303,10 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
           //  vertex.field(field.name, field.is.toString)
           case field:DateTimeField =>
             node.setProperty(field.name, field.valueToDB.asInstanceOf[java.lang.Long])
+          case field:BooleanField =>
+            node.setProperty(field.name, field.is)
+          case field: DoubleField =>
+            node.setProperty(field.name, field.is)
           case field:Relation =>
             handleRelation(node, field)
           case _ =>
@@ -356,6 +345,10 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
           //  field.set(new Locale(vertex.field(field.name)))
           case field: DateTimeField =>
             field.valueFromDB(node.getProperty(field.name))
+          case field: BooleanField =>
+            field.set(node.getProperty(field.name).asInstanceOf[Boolean])
+          case field: DoubleField =>
+            field.set(node.getProperty(field.name).asInstanceOf[Double])
           case field:Relation =>
             if (depth > 0) {
               // Load relation
