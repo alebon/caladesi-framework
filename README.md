@@ -16,7 +16,7 @@ Please check the sub folders/projects for detailed information
 ##Getting Started with Caladesi Framework
 You can use the caladesi framework by adding the dependency to your project:
 
-### SBT 0.11.3 (Simple Build Tool)
+### SBT 0.12.1 (Simple Build Tool)
 Modify your build.sbt
 
     libraryDependencies += "net.caladesiframework" %% "caladesi-web" % "0.4.0-SNAPHOT" % "compile"
