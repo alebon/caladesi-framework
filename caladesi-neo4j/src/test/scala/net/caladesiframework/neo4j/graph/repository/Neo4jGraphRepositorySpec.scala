@@ -315,7 +315,7 @@ class Neo4jGraphRepositorySpec extends SpecificationWithJUnit
     "return entity lists for repository properly" in {
 
       val list = repositoryWithRel.find(0,5)
-      println(list.size)
+      //println(list.size)
 
       true must_==(true)
     }

@@ -19,8 +19,11 @@ package net.caladesiframework.neo4j.repository
 import collection.mutable.HashMap
 import net.caladesiframework.neo4j.graph.entity.Neo4jGraphEntity
 import net.caladesiframework.neo4j.graph.repository.Neo4jGraphRepository
+import org.slf4j.LoggerFactory
 
 object RepositoryRegistry {
+
+  private val LOG = LoggerFactory.getLogger("Neo4j Repository Registry")
 
   // Private map ClassName -> Repository
   private val map = new HashMap[String, Any]()
@@ -33,7 +36,7 @@ object RepositoryRegistry {
    * @return
    */
   def register[EntityType <: Neo4jGraphEntity](repository: Neo4jGraphRepository[EntityType]) = {
-    println("Registering " + repository.create.clazz)
+    LOG.debug("Registering %s".format(repository.create.clazz))
     map.put(repository.create.clazz, repository)
   }
 
@@ -55,11 +58,6 @@ object RepositoryRegistry {
    */
   def remove[EntityType <: Neo4jGraphEntity](repository: Neo4jGraphRepository[EntityType]) = {
     map.remove(repository.create.clazz)
-
-    //this.contains(t.getClass.getName) match {
-    //  case true => map.remove(t.getClass.getName)
-    //  case _ => // Ok, fine, nothing to remove
-    //}
   }
 
   /**
@@ -77,6 +75,6 @@ object RepositoryRegistry {
   }
 
   def dumpRegisteredServices = {
-    println(map.flatMap(repo => repo.toString()))
+    LOG.debug(map.flatMap(repo => repo.toString()).toString())
   }
 }

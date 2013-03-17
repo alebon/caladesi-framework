@@ -257,12 +257,12 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    */
   def count: Long = connected(implicit ds => {
     val engine: ExecutionEngine = new ExecutionEngine( ds.graphDatabase );
-    val result: ExecutionResult = engine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN count(entity) AS COUNT"
+    val result: ExecutionResult = engine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN count(entity) AS countAll"
       .format(subReferenceNode.getId, ENTITY_RELATION.name) )
 
     if (result.iterator().hasNext) {
       val row = result.iterator().next()
-      return row.get("COUNT").asInstanceOf[Long]
+      return row.get("countAll").asInstanceOf[Long]
     }
 
     0

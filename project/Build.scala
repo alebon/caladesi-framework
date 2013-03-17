@@ -34,7 +34,7 @@ object BuildDef extends Build {
       base = file("caladesi-common"),
       settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework Common Utilities‚",
-      libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit))
+      libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit, logback))
 
   lazy val web =
      Project(id = "caladesi-web",

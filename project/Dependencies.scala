@@ -19,11 +19,12 @@ import Keys._
 
 object Dependencies {
 
-  lazy val scalaVersion  = "2.9.2"
-  lazy val slf4jVersion  = "1.7.2"
-  lazy val liftVersion   = "2.5-M4"
-  lazy val orientVersion = "1.3.0"
-  lazy val neo4jVersion  = "1.8.2"
+  lazy val scalaVersion   = "2.9.2"
+  lazy val slf4jVersion   = "1.7.2"
+  lazy val liftVersion    = "2.5-M4"
+  lazy val orientVersion  = "1.3.0"
+  lazy val neo4jVersion   = "1.8.2"
+  lazy val logbackVersion = "1.0.6"
 
   // Compile scope:
   // Scope available in all classpath, transitive by default.
@@ -40,6 +41,9 @@ object Dependencies {
   lazy val neo4j_all		= "org.neo4j" % "neo4j" % neo4jVersion
 
   // Provided scope:
+  lazy val logback = "ch.qos.logback"    % "logback-classic"     % logbackVersion % "provided"
+
+  // Provided scope:
 
   // Runtime scope:
   // Scope provided in runtime, available only in runtime and test classpath, not compile classpath, non-transitive by default.
@@ -50,5 +54,4 @@ object Dependencies {
   lazy val scalacheck  = "org.scalacheck"  %% "scalacheck"   % "1.9"        % "test"
   lazy val specs2      = "org.specs2"      %% "specs2"   	  % "1.11"       % "test"
   lazy val junit       = "junit"           % "junit"              % "4.11"        % "test"
-
 }
