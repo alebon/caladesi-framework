@@ -9,8 +9,12 @@ Hence it uses some parts of it (lift-json, ...).
 Please check the sub folders/projects for detailed information
 
 - caladesi-common
-- caladesi-neo4j
-- caladesi-orientdb
+- caladesi-field
+- caladesi-record
+- caladesi-repository
+- caladesi-neo4j-graph
+- caladesi-orientdb-graph
+- caladesi-orientdb-document
 - caladesi-web
 
 ##Getting Started with Caladesi Framework
@@ -19,7 +23,7 @@ You can use the caladesi framework by adding the dependency to your project:
 ### SBT 0.12.1 (Simple Build Tool)
 Modify your build.sbt
 
-    libraryDependencies += "net.caladesiframework" %% "caladesi-web" % "0.4.0" % "compile"
+    libraryDependencies += "net.caladesiframework" %% "caladesi-web" % "0.5.0-SNAPSHOT" % "compile"
 
 ###Maven:
 Add the framework to your pom.xml:
@@ -28,7 +32,7 @@ Add the framework to your pom.xml:
 <dependency>
   <groupId>net.caladesiframework</groupId>
   <artifactId>caladesi-web_${scala.version}</artifactId>
-  <version>0.4.0</version>
+  <version>0.5.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -36,7 +40,7 @@ Add the framework to your pom.xml:
 ```groovy
 dependencies {
     // Caladesi Framework
-    compile "net.caladesiframework:caladesi-web_$scalaVersion:0.4.0"
+    compile "net.caladesiframework:caladesi-web_$scalaVersion:0.5.0-SNAPSHOT"
 }
 ```
 

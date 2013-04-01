@@ -26,14 +26,35 @@ object BuildDef extends Build {
 
   lazy val root = Project(id = "caladesi-framework",
                           base = file("."))
-                    .aggregate(common, web, orientdb, neo4j)
+                    .aggregate(common, field, repository, record, web, orientdbdocument, orientdbgraph, neo4jgraph)
                     .settings(publishArtifact := false)
 
   lazy val common =
     Project(id = "caladesi-common",
       base = file("caladesi-common"),
       settings = Project.defaultSettings)
-      .settings(description := "Caladesi Framework Common Utilities‚",
+      .settings(description := "Caladesi Framework Common Utilities",
+      libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit, logback))
+
+  lazy val field =
+    Project(id = "caladesi-field",
+      base = file("caladesi-field"),
+      settings = Project.defaultSettings)
+      .settings(description := "Caladesi Framework Field",
+      libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit, logback))
+
+  lazy val repository =
+    Project(id = "caladesi-repository",
+      base = file("caladesi-repository"),
+      settings = Project.defaultSettings)
+      .settings(description := "Caladesi Framework Repository",
+      libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit, logback))
+
+  lazy val record =
+    Project(id = "caladesi-record",
+      base = file("caladesi-record"),
+      settings = Project.defaultSettings)
+      .settings(description := "Caladesi Framework Record",
       libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit, logback))
 
   lazy val web =
@@ -43,19 +64,27 @@ object BuildDef extends Build {
        .settings(description := "Caladesi Framework Web Utilities",
                  libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit))
 
-  lazy val orientdb =
-    Project(id = "caladesi-orientdb",
-            base = file("caladesi-orientdb"),
+  lazy val orientdbdocument =
+    Project(id = "caladesi-orientdb-document",
+      base = file("caladesi-orientdb-document"),
+      settings = Project.defaultSettings)
+      .settings(description := "Caladesi Framework OrientDB Document",
+      libraryDependencies ++= Seq(orient_commons, orientdb_core, orientdb_client, slf4j_api, scalacheck, specs2, junit))
+      .dependsOn(common, field, repository, record)
+
+  lazy val orientdbgraph =
+    Project(id = "caladesi-orientdb-graph",
+            base = file("caladesi-orientdb-graph"),
             settings = Project.defaultSettings)
-      .settings(description := "Caladesi Framework OrientDB",
+      .settings(description := "Caladesi Framework OrientDB Graph",
                 libraryDependencies ++= Seq(orient_commons, orientdb_core, orientdb_client, slf4j_api, scalacheck, specs2, junit))
       .dependsOn(common)
 
-  lazy val neo4j =
-    Project(id = "caladesi-neo4j",
-            base = file("caladesi-neo4j"),
+  lazy val neo4jgraph =
+    Project(id = "caladesi-neo4j-graph",
+            base = file("caladesi-neo4j-graph"),
             settings = Project.defaultSettings)
-      .settings(description := "Caladesi Framework Neo4j",
+      .settings(description := "Caladesi Framework Neo4j Graph",
                 libraryDependencies ++= Seq(neo4j_all, slf4j_api, scalacheck, specs2, junit))
       .dependsOn(common)
 }
