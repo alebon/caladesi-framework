@@ -13,6 +13,7 @@ Please check the sub folders/projects for detailed information
 - caladesi-record
 - caladesi-repository
 - caladesi-neo4j-graph
+- caladesi-orientdb-common
 - caladesi-orientdb-graph
 - caladesi-orientdb-document
 - caladesi-web

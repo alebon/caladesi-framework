@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Caladesi Framework
+ * Copyright 2013 Caladesi Framework
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ object BuildDef extends Build {
 
   lazy val root = Project(id = "caladesi-framework",
                           base = file("."))
-                    .aggregate(common, field, repository, record, web, orientdbdocument, orientdbgraph, neo4jgraph)
+                    .aggregate(common, field, repository, record, web, orientdbcommon, orientdbdocument, orientdbgraph, neo4jgraph)
                     .settings(publishArtifact := false)
 
   lazy val common =
@@ -64,13 +64,21 @@ object BuildDef extends Build {
        .settings(description := "Caladesi Framework Web Utilities",
                  libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit))
 
+  lazy val orientdbcommon =
+    Project(id = "caladesi-orientdb-common",
+      base = file("caladesi-orientdb-common"),
+      settings = Project.defaultSettings)
+      .settings(description := "Caladesi Framework OrientDB Common",
+      libraryDependencies ++= Seq(orient_commons, orientdb_core, orientdb_client, slf4j_api, scalacheck, specs2, junit))
+      .dependsOn(common, field, repository, record)
+
   lazy val orientdbdocument =
     Project(id = "caladesi-orientdb-document",
       base = file("caladesi-orientdb-document"),
       settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework OrientDB Document",
-      libraryDependencies ++= Seq(orient_commons, orientdb_core, orientdb_client, slf4j_api, scalacheck, specs2, junit))
-      .dependsOn(common, field, repository, record)
+      libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit))
+      .dependsOn(common, field, repository, record, orientdbcommon)
 
   lazy val orientdbgraph =
     Project(id = "caladesi-orientdb-graph",
