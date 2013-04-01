@@ -16,11 +16,60 @@
 
 package net.caladesiframework.orientdb.document.record
 
-trait OrientMetaRecord[RecordType] {
+import net.caladesiframework.document.Field
+
+/**
+ * Holds meta information and operations on a record
+ *
+ * @tparam RecordType
+ */
+trait OrientMetaRecord[RecordType] extends OrientRecord[RecordType] {
   self: RecordType =>
 
-  def createRecord[RecordType](implicit m: Manifest[RecordType]): RecordType = {
-    m.erasure.newInstance.asInstanceOf[RecordType]
+  def createRecord: RecordType = {
+    val record = this.getClass.getSuperclass.newInstance().asInstanceOf[RecordType]
+    initFields(record)
+
+    record
+  }
+
+  private [this] val fieldMap: scala.collection.mutable.Map[String, Field[_, RecordType]]
+    = new scala.collection.mutable.HashMap[String, Field[_, RecordType]]()
+
+  def fields = this.fieldMap.toSeq
+
+  private def initFields(record: Any) = {
+    record.getClass.getDeclaredFields foreach {
+      field => {
+        field.getType.getMethods foreach {
+
+          // If field contains a method for initialization, call it and add field to meta fields
+          method => {
+            if  (method.getName.equals("initField")) {
+              field.setAccessible(true)
+              val m = record.getClass.getMethod(field.getName.replace("$module", ""))
+
+              val fieldObj: Field[_, RecordType] = m.invoke(record).asInstanceOf[Field[_, RecordType]]
+              fieldObj.initField
+              attach(fieldObj)
+            }
+          }
+        }
+
+      }
+    }
+  }
+
+  /**
+   * Adds the field to the meta fields
+   *
+   * @param field
+   * @return
+   */
+  private def attach(field: Field[_, RecordType]) = {
+    if (this.fieldMap.get(field.name).isEmpty) {
+      this.fieldMap.put(field.name, field)
+    }
   }
 
 }

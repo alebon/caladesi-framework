@@ -18,7 +18,7 @@ package net.caladesiframework.orientdb.document.record
 
 import net.caladesiframework.record.Record
 
-abstract class OrientRecord[RecordType](implicit mf: Manifest[RecordType]) extends Record[RecordType] {
+trait OrientRecord[RecordType] extends Record[RecordType] {
   self: RecordType =>
 
   def meta: OrientMetaRecord[RecordType]

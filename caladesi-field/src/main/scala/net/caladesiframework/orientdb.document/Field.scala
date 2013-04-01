@@ -19,6 +19,8 @@ package net.caladesiframework.document
 trait Field[FieldType, OwnerType] {
   def name: String
   def owner: OwnerType
+
+  def initField: Unit = {}
 }
 
 trait OptionalField[FieldType, OwnerType] extends Field[FieldType, OwnerType]

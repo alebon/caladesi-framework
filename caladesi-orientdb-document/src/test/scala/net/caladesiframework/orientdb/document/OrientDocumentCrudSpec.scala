@@ -28,4 +28,14 @@ class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
     }
   }
 
+  "Caladesi Oriendb Record" should {
+    "have the correct defined amount of fields" in OrientEmbeddedTestContext {
+
+      val document = SimpleOrientDocument.create
+
+      SimpleOrientDocument.fields.count(p => true) must_==(1)
+
+    }
+  }
+
 }

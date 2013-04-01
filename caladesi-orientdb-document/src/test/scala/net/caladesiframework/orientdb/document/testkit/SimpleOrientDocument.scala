@@ -11,13 +11,25 @@
 package net.caladesiframework.orientdb.document.testkit
 
 import net.caladesiframework.orientdb.document.record.{OrientMetaRecord, OrientRecord}
+import net.caladesiframework.document.Field
 
 class SimpleOrientDocument extends OrientRecord[SimpleOrientDocument] {
 
   def meta = SimpleOrientDocument
 
+  object name extends SimpleField(this)
+
+  val testValue: String = "String value"
+
 }
 
 object SimpleOrientDocument extends SimpleOrientDocument with OrientMetaRecord[SimpleOrientDocument] {
 
+}
+
+class SimpleField[OwnerType](ownerConstruct: OwnerType) extends Field[String, OwnerType]{
+
+  def name = null
+
+  def owner = ownerConstruct
 }
