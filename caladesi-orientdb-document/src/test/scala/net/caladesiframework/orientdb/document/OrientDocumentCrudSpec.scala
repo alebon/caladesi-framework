@@ -19,7 +19,7 @@ class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
 
 
   "Caladesi Oriendb Record" should {
-    "be able to create records" in OrientEmbeddedTestContext {
+    "be able to create records" in OrientMemoryTestContext {
 
       val document = SimpleOrientDocument.create
 
@@ -28,12 +28,58 @@ class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
     }
   }
 
-  "Caladesi Oriendb Record" should {
-    "have the correct defined amount of fields" in OrientEmbeddedTestContext {
+  "Caladesi Orientdb Record" should {
+    "have the correct defined amount of fields" in OrientMemoryTestContext {
 
       val document = SimpleOrientDocument.create
 
       SimpleOrientDocument.fields.count(p => true) must_==(1)
+
+    }
+  }
+
+  "Caladesi Orientdb Record" should  {
+    "have a correct collection name" in OrientMemoryTestContext {
+
+      val document = SimpleOrientDocument.create
+
+      SimpleOrientDocument.collectionName must_==("SimpleOrientDocument")
+
+    }
+  }
+
+  "Caladesi Orientdb Record" should {
+    "return the correct count before insertion of records" in OrientMemoryTestContext {
+
+      val document = SimpleOrientDocument.create
+
+      SimpleOrientDocument.count() must_==(0)
+
+    }
+  }
+
+  "Caladesi Orientdb Record" should {
+
+
+    "return the correct count after insertion of records" in OrientMemoryTestContext {
+
+      val document = SimpleOrientDocument.create
+      document.save()
+
+      SimpleOrientDocument.count() must_==(1)
+
+    }
+  }
+
+  "Caladesi Orientdb Record" should {
+    "return the correct count after deletion of records" in OrientMemoryTestContext {
+
+      val document = SimpleOrientDocument.create
+      document.save
+
+      document.delete
+
+      SimpleOrientDocument.count() must_==(0)
 
     }
   }

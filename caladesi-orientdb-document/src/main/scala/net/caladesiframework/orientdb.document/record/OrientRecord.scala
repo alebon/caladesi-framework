@@ -17,6 +17,7 @@
 package net.caladesiframework.orientdb.document.record
 
 import net.caladesiframework.record.Record
+import com.orientechnologies.orient.core.record.impl.ODocument
 
 trait OrientRecord[RecordType] extends Record[RecordType] {
   self: RecordType =>
@@ -25,9 +26,51 @@ trait OrientRecord[RecordType] extends Record[RecordType] {
 
   def create = meta.createRecord
 
-  def delete = false
+  def delete = {
+    meta.transactional(implicit db => {
+      db.delete(this.dbRecord.get)
+      true
+    })
+  }
 
-  def save(record: RecordType) = false
+  private [this] var dbRecord: Option[ODocument] = None
+
+  override def internalId = {
+    if (!dbRecord.isEmpty) {
+      Some(dbRecord.get.getIdentity.toString)
+    } else {
+      None
+    }
+  }
+
+  def save = {
+
+    // Initial class creation
+    val clazz = meta.connected(implicit db => {
+      db.getMetadata.getSchema.getOrCreateClass(meta.collectionName)
+    })
+
+
+
+    meta.transactional(implicit db => {
+      if (this.internalId().isEmpty) {
+        // Record is detached, Create new record in DB
+        val doc = new ODocument(clazz)
+
+        // Force create
+        doc.save()
+
+        // Bind record to dbRecord
+        dbRecord = Some(doc)
+      } else {
+        // Update dbRecord
+      }
+
+      true
+    })
+  }
 
   def find(id: String) = None
+
+
 }

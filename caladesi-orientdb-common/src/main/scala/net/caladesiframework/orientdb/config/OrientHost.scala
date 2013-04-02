@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.record
+package net.caladesiframework.orientdb.config
 
-trait Record[RecordType] {
+import net.caladesiframework.common.db.DbHostBase
+import net.caladesiframework.common.server.ServerAddress
 
-  def create: RecordType
+case class OrientHost(server: ServerAddress = ServerAddress("localhost", 2480)) extends DbHostBase {
 
-  def delete: Boolean
+}
 
-  def save(): Boolean
+/**
+ * The OrientDB Host Helper
+ */
+object OrientHost {
+  // Use default port
+  def apply(host: String): OrientHost = OrientHost(ServerAddress(host, 2480))
 
-  def find(id: String): Option[RecordType]
-
-  def internalId(): Option[String]
+  // Create host with given host and port
+  def apply(host: String, port: Int): OrientHost = OrientHost(ServerAddress(host, port))
 }

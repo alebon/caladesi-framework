@@ -18,16 +18,37 @@ package net.caladesiframework.orientdb.document.testkit
 
 import org.specs2.mutable.{Around, SpecificationWithJUnit}
 import org.specs2.execute.Result
+import net.caladesiframework.orientdb.config.{OrientDbEmbeddedConfiguration, OrientDbMemoryConfiguration, OrientConfigurationRegistry}
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 
 trait OrientDocumentTestKit {
 
-  //this: SpecificationWithJUnit =>
+  def initMemoryDatabase() = {
+    OrientConfigurationRegistry.register(OrientDbMemoryConfiguration(name = "inmemorytest"), "memoryDB")
+  }
+
+  def destroyMemoryDatabase() {
+    val config = OrientConfigurationRegistry.loadByName("memoryDB").asInstanceOf[OrientDbMemoryConfiguration]
+    val db = new ODatabaseDocumentTx("memory:%s".format(config.name))
+    if (db.exists()) {
+      if (db.isClosed) {
+        db.open("admin", "admin")
+      }
+      db.drop()
+    }
+  }
 
   def initDatabase() = {
-
+    OrientConfigurationRegistry.register(OrientDbEmbeddedConfiguration(location = "/Users/abondarenko/Projects/data/orientdb-test"))
   }
 
   def destroyDatabase() {
+    val config = OrientConfigurationRegistry.loadByName("default").asInstanceOf[OrientDbEmbeddedConfiguration]
+    //val db = new ODatabaseDocumentTx("memory:%s".format(config.name))
+    //if (db.exists()) {
+    //  db.drop()
+    //  db.close()
+    //}
 
   }
 
@@ -40,6 +61,20 @@ trait OrientDocumentTestKit {
         testToRun
       } finally {
         destroyDatabase()
+      }
+    }
+
+  }
+
+  object OrientMemoryTestContext extends Around {
+
+    def around[T <% Result](testToRun: => T)  = {
+      initMemoryDatabase()
+
+      try {
+        testToRun
+      } finally {
+        destroyMemoryDatabase()
       }
     }
 

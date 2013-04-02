@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.record
+package net.caladesiframework.orientdb.document.field
 
-trait Record[RecordType] {
+import net.caladesiframework.document.OptionalField
 
-  def create: RecordType
+class OptionalIntField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Int, OwnerType]{
 
-  def delete: Boolean
+  def name = null
 
-  def save(): Boolean
-
-  def find(id: String): Option[RecordType]
-
-  def internalId(): Option[String]
+  def owner = ownerConstruct
 }
