@@ -11,7 +11,7 @@
 package net.caladesiframework.orientdb.document
 
 import org.specs2.mutable.Specification
-import testkit.{SimpleOrientDocument, OrientDocumentTestKit}
+import testkit.{OrientMemoryStringRecord, OrientMemoryBooleanRecord, SimpleOrientDocument, OrientDocumentTestKit}
 
 class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
 
@@ -81,6 +81,78 @@ class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
 
       SimpleOrientDocument.count() must_==(0)
 
+    }
+  }
+
+  "Caladesi Oriendb Record with Boolean fields" should {
+    "save and load boolean values properly" in OrientMemoryTestContext {
+
+      val booleanRecord = OrientMemoryBooleanRecord.create
+      booleanRecord.booleanField.set(true)
+      booleanRecord.save
+
+      true must_==(true)
+    }
+
+    "return the correct default value for a BooleanField" in OrientMemoryTestContext {
+
+      val booleanRecord = OrientMemoryBooleanRecord.create
+      booleanRecord.save
+
+      booleanRecord.booleanFieldWithDefault.get must_==(true)
+    }
+
+    "save and load optional boolean value properly" in OrientMemoryTestContext {
+
+      val booleanRecord = OrientMemoryBooleanRecord.create
+      booleanRecord.optionalBooleanField.set(true)
+      booleanRecord.save
+
+      booleanRecord.optionalBooleanField.getOrElse(false) must_==(true)
+    }
+
+    "save and load optional (not set) boolean value properly" in OrientMemoryTestContext {
+
+      val booleanRecord = OrientMemoryBooleanRecord.create
+      booleanRecord.save
+
+      booleanRecord.optionalBooleanField.getOrElse(false) must_==(false)
+    }
+  }
+
+  "Caladesi Oriendb Record with String fields" should {
+    "save and load boolean values properly" in OrientMemoryTestContext {
+
+      val stringRecord = OrientMemoryStringRecord.create
+      stringRecord.stringField.set("string-field-test")
+      stringRecord.save
+
+      true must_==(true)
+    }
+
+    "return the correct default value for a StringField" in OrientMemoryTestContext {
+
+      val stringRecord = OrientMemoryStringRecord.create
+      stringRecord.save
+
+      stringRecord.stringFieldWithCustomDefault.get must_==("customDefault")
+    }
+
+    "save and load optional string value properly" in OrientMemoryTestContext {
+
+      val stringRecord = OrientMemoryStringRecord.create
+      stringRecord.optionalStringField.set("this-is-optional")
+      stringRecord.save
+
+      stringRecord.optionalStringField.getOrElse("alternative-value") must_==("this-is-optional")
+    }
+
+    "save and load optional (not set) string value properly" in OrientMemoryTestContext {
+
+      val stringRecord = OrientMemoryStringRecord.create
+      stringRecord.save
+
+      stringRecord.optionalStringField.getOrElse("alternative-value") must_==("alternative-value")
     }
   }
 

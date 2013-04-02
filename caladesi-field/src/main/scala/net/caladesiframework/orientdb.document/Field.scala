@@ -17,14 +17,51 @@
 package net.caladesiframework.document
 
 trait Field[FieldType, OwnerType] {
+
   def name: String
   def owner: OwnerType
 
   def initField: Unit = {}
 }
 
-trait OptionalField[FieldType, OwnerType] extends Field[FieldType, OwnerType]
+/**
+ * Optional Field handling
+ *
+ * @tparam FieldType
+ * @tparam OwnerType
+ */
+trait OptionalField[FieldType, OwnerType] extends Field[FieldType, OwnerType] {
+
+  protected var value: Option[FieldType] = None
+
+  def set(value: FieldType) = {
+    this.value = Some(value)
+  }
+
+  def reset = {
+    this.value = None
+  }
+
+  def getOrElse(alternativeValue: FieldType): FieldType = {
+    if (this.value.isEmpty) {
+      return alternativeValue
+    }
+    return this.value.get
+  }
+
+}
 
 trait RequiredField[FieldType, OwnerType] extends Field[FieldType, OwnerType] {
+
+  protected var value: FieldType = defaultValue
+
   def defaultValue: FieldType
+
+  def set(value: FieldType) = {
+    this.value = value
+  }
+
+  def get: FieldType = {
+    this.value
+  }
 }

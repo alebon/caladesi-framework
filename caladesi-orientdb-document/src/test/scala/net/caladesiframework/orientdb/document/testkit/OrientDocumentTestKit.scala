@@ -35,6 +35,7 @@ trait OrientDocumentTestKit {
         db.open("admin", "admin")
       }
       db.drop()
+      db.close()
     }
   }
 
