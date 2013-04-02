@@ -16,13 +16,11 @@
 
 package net.caladesiframework.orientdb.document.field
 
-import net.caladesiframework.document.{RequiredField}
+import net.caladesiframework.document.OptionalField
 
-class StringField[OwnerType](ownerConstruct: OwnerType, default: String = "undefined") extends RequiredField[String, OwnerType]{
+class OptionalDoubleField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Double, OwnerType]{
 
   def name = null
 
   def owner = ownerConstruct
-
-  def defaultValue = default
 }
