@@ -20,7 +20,7 @@ import org.specs2.mutable._
 
 class SlugifySpec extends SpecificationWithJUnit {
 
-  "Slugify Helper" should {
+  "Caladesi Slugify Helper" should {
     "return a lower cased string slug" in {
       val slug = Slugify.string("A small rabbit")
 
@@ -36,7 +36,7 @@ class SlugifySpec extends SpecificationWithJUnit {
     "replace non latin (russian) strings" in {
       val slug = Slugify.string("Что мы делаем")
 
-      slug must_==("--")
+      slug must_==("-")
     }
 
     "take only the specified size of the string into slug" in {

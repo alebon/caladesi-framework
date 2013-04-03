@@ -121,9 +121,12 @@ trait OrientMetaRecord[RecordType] extends OrientRecord[RecordType] {
    */
   def countClass() = connected(implicit db => {
     // Initial class creation
-    val clazz = db.getMetadata.getSchema.getOrCreateClass(collectionName)
+    val clazz = db.getMetadata.getSchema.getOrCreateClass(meta.collectionName)
 
-    db.countClass(clazz.getName)
+    val count = db.countClass(clazz.getName)
+    println("Amount for clazz  %s: %s".format(clazz.getName, count))
+
+    count
   })
 
   /**

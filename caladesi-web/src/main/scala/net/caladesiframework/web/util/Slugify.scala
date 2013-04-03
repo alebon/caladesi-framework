@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Caladesi Framework
+ * Copyright 2013 Caladesi Framework
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,16 @@ object Slugify {
     def normalize(phrase: String) = Normalizer.normalize(phrase, Form.NFD)
     def removeNotLatin(phrase : String) = NonLatin.matcher(phrase).replaceAll("")
     def removeWhiteSpaces(phrase : String) = Whitespace.matcher(phrase).replaceAll("-")
+    def connect(phrase: String) = {
+      var result = phrase
+      while (result.contains("--")) {
+        result = result.replaceAll("--", "-")
+      }
 
-    val slug = removeNotLatin (normalize(removeSpecialChars(removeWhiteSpaces(phrase))))
+      result
+    }
+
+    val slug = connect(removeNotLatin (normalize(removeSpecialChars(removeWhiteSpaces(phrase)))))
     
     // Restricted to maxLength (in future versions)
     slug.toLowerCase.take(maxLength)

@@ -64,9 +64,12 @@ class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
     "return the correct count after insertion of records" in OrientMemoryTestContext {
 
       val document = SimpleOrientDocument.create
-      document.save()
+      document.save
 
-      SimpleOrientDocument.count() must_==(1)
+      val document2 = SimpleOrientDocument.create
+      document2.save
+
+      SimpleOrientDocument.countClass() must_==(2)
 
     }
   }
@@ -121,7 +124,7 @@ class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
   }
 
   "Caladesi Oriendb Record with String fields" should {
-    "save and load boolean values properly" in OrientMemoryTestContext {
+    "save and load string values properly" in OrientMemoryTestContext {
 
       val stringRecord = OrientMemoryStringRecord.create
       stringRecord.stringField.set("string-field-test")
