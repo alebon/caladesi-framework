@@ -54,8 +54,6 @@ trait OrientRecord[RecordType] extends Record[RecordType] {
       db.getMetadata.getSchema.getOrCreateClass(meta.collectionName)
     })
 
-    println("Count before save: %s".format(meta.count()))
-
     meta.transactional(implicit db => {
 
       val doc = this.dbRecord match {
@@ -63,7 +61,6 @@ trait OrientRecord[RecordType] extends Record[RecordType] {
         case _ => val document = new ODocument()
           document.setClassName(clazz.getName)
           this.dbRecord = Some(document)
-          println("Created DB document")
           document
       }
 
@@ -72,7 +69,6 @@ trait OrientRecord[RecordType] extends Record[RecordType] {
 
       // Save record to DB
       doc.save(true)
-      println("Count after save: %s".format(meta.count()))
       true
 
 

@@ -14,7 +14,7 @@ import org.specs2.mutable.Specification
 import testkit._
 import java.util.UUID
 
-class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
+class OrientMemorySuiteSpec extends Specification with OrientDocumentTestKit {
 
   sequential
 
@@ -27,9 +27,7 @@ class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
       document.getClass.getSimpleName must_==("SimpleOrientDocument")
 
     }
-  }
 
-  "Caladesi Orientdb Record" should {
     "have the correct defined amount of fields" in OrientMemoryTestContext {
 
       val document = SimpleOrientDocument.create
@@ -37,9 +35,7 @@ class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
       SimpleOrientDocument.fields.count(p => true) must_==(1)
 
     }
-  }
 
-  "Caladesi Orientdb Record" should  {
     "have a correct collection name" in OrientMemoryTestContext {
 
       val document = SimpleOrientDocument.create
@@ -47,9 +43,7 @@ class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
       SimpleOrientDocument.collectionName must_==("SimpleOrientDocument")
 
     }
-  }
 
-  "Caladesi Orientdb Record" should {
     "return the correct count before insertion of records" in OrientMemoryTestContext {
 
       val document = SimpleOrientDocument.create
@@ -57,10 +51,6 @@ class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
       SimpleOrientDocument.count() must_==(0)
 
     }
-  }
-
-  "Caladesi Orientdb Record" should {
-
 
     "return the correct count after insertion of records" in OrientMemoryTestContext {
 
@@ -73,9 +63,7 @@ class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
       SimpleOrientDocument.countClass() must_==(2)
 
     }
-  }
 
-  "Caladesi Orientdb Record" should {
     "return the correct count after deletion of records" in OrientMemoryTestContext {
 
       val document = SimpleOrientDocument.create
