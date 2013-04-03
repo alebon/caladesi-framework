@@ -20,6 +20,11 @@ import net.caladesiframework.record.Record
 import com.orientechnologies.orient.core.record.impl.ODocument
 import net.caladesiframework.document.Field
 import net.caladesiframework.orientdb.document.field.{OptionalBooleanField, BooleanField, OptionalStringField, StringField}
+import com.orientechnologies.orient.core.id.{ORecordId, ORID}
+import com.orientechnologies.orient.core.record.ORecord
+import java.lang.StringBuilder
+import com.orientechnologies.orient.core.db.record.OIdentifiable
+import java.io.OutputStream
 
 trait OrientRecord[RecordType] extends Record[RecordType] {
   self: RecordType =>
@@ -53,20 +58,19 @@ trait OrientRecord[RecordType] extends Record[RecordType] {
     })
 
     meta.transactional(implicit db => {
-      if (this.internalId().isEmpty) {
-        // Record is detached, Create new record in DB
-        val doc = new ODocument(clazz)
 
-        fieldsToDb(doc)
-
-        // Force create
-        doc.save()
-
-        // Bind record to dbRecord
-        dbRecord = Some(doc)
-      } else {
-        // Update dbRecord
+      val doc = this.internalId match {
+        case Some(id) => this.dbRecord.get
+        case _ => val document = new ODocument()
+          this.dbRecord = Some(document)
+          document
       }
+
+      // Copy field from record to DB Document
+      fieldsToDb(doc)
+
+      // Save record to DB
+      doc.save()
 
       true
     })
@@ -109,7 +113,9 @@ trait OrientRecord[RecordType] extends Record[RecordType] {
 
   }
 
-  def find(id: String) = None
+  def find(id: String): Option[RecordType] = meta.connected(implicit db => {
+    None
+  })
 
 
 }
