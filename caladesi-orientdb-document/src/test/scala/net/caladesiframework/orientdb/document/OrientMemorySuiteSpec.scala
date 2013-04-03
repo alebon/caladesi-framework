@@ -1,25 +1,32 @@
 /*
-* Copyright (c) 2012 Sheeprice Ltd.
-* All rights reserved.
-*
-* http://license.sheeprice.com/LICENSE-1.0
-*
-* COPYING, REDISTRIBUTION AND USE IN ANY FORM ARE PROHIBITED WITHOUT AN
-* EXPLICIT WRITTEN PERMISSION.
-*/
+ * Copyright 2013 Caladesi Framework
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package net.caladesiframework.orientdb.document
 
 import org.specs2.mutable.Specification
 import testkit._
 import java.util.UUID
+import memory.{OrientMemoryUuidRecord, OrientMemoryStringRecord, OrientMemoryBooleanRecord}
 
 class OrientMemorySuiteSpec extends Specification with OrientDocumentTestKit {
 
   sequential
 
 
-  "Caladesi Oriendb Record" should {
+  "Caladesi Oriendb (In Memory) Record" should {
     "be able to create records" in OrientMemoryTestContext {
 
       val document = SimpleOrientDocument.create
@@ -76,7 +83,7 @@ class OrientMemorySuiteSpec extends Specification with OrientDocumentTestKit {
     }
   }
 
-  "Caladesi Oriendb Record with Boolean fields" should {
+  "Caladesi Oriendb (In Memory) Record with Boolean fields" should {
     "save and load boolean values properly" in OrientMemoryTestContext {
 
       val booleanRecord = OrientMemoryBooleanRecord.create
@@ -112,7 +119,7 @@ class OrientMemorySuiteSpec extends Specification with OrientDocumentTestKit {
     }
   }
 
-  "Caladesi Oriendb Record with String fields" should {
+  "Caladesi Oriendb (In Memory) Record with String fields" should {
     "save and load string values properly" in OrientMemoryTestContext {
 
       val stringRecord = OrientMemoryStringRecord.create
@@ -148,7 +155,7 @@ class OrientMemorySuiteSpec extends Specification with OrientDocumentTestKit {
     }
   }
 
-  "Caladesi Oriendb Record with UUID fields" should {
+  "Caladesi Oriendb (In Memory) Record with UUID fields" should {
     "save and load UUID values properly" in OrientMemoryTestContext {
 
       val uuid = UUID.randomUUID()

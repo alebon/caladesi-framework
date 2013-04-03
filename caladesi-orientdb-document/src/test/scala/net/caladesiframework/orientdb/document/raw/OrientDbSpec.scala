@@ -19,17 +19,19 @@ class OrientDbSpec extends Specification {
   "OrientDb in Embedded Mode" should {
     "work as expected" in {
       // OPEN THE DATABASE
-      val db: ODatabaseDocumentTx = new ODatabaseDocumentTx("local:/tmp/orient-data");
+      val db: ODatabaseDocumentTx = new ODatabaseDocumentTx("local:/%s/orient-raw-data".format(System.getProperty("java.io.tmpdir")));
       if (!db.exists()) {
         db.create()
       }
-      db.open("admin", "admin");
+      if (db.isClosed) {
+        db.open("admin", "admin")
+      }
 
       // CREATE A NEW DOCUMENT AND FILL IT
-      val doc = new ODocument("Person");
-      doc.field( "name", "Luke" );
-      doc.field( "surname", "Skywalker" );
-      doc.field( "city", new ODocument("City").field("name","Rome").field("country", "Italy") );
+      val doc = new ODocument("Person")
+      doc.field( "name", "Luke" )
+      doc.field( "surname", "Skywalker" )
+      doc.field( "city", new ODocument("City").field("name","Rome").field("country", "Italy") )
 
       // SAVE THE DOCUMENT
       doc.save();
@@ -48,19 +50,19 @@ class OrientDbSpec extends Specification {
         db.create()
       }
       if (db.isClosed) {
-        db.open("admin", "admin");
+        db.open("admin", "admin")
       }
 
       // CREATE A NEW DOCUMENT AND FILL IT
-      val doc = new ODocument("Person");
-      doc.field( "name", "Luke" );
-      doc.field( "surname", "Skywalker" );
-      doc.field( "city", new ODocument("City").field("name","Rome").field("country", "Italy") );
+      val doc = new ODocument("Person")
+      doc.field( "name", "Luke" )
+      doc.field( "surname", "Skywalker" )
+      doc.field( "city", new ODocument("City").field("name","Rome").field("country", "Italy") )
 
       // SAVE THE DOCUMENT
-      doc.save();
+      doc.save()
 
-      db.close();
+      db.close()
 
       "Fake" must_==("Fake")
     }

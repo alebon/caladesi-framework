@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.orientdb.document.testkit
+package net.caladesiframework.orientdb.document.testkit.embedded
 
 import net.caladesiframework.orientdb.document.record.{OrientMetaRecord, OrientRecord}
 import net.caladesiframework.orientdb.document.field.{OptionalBooleanField, BooleanField}
 
-class OrientMemoryBooleanRecord extends OrientRecord[OrientMemoryBooleanRecord] {
+class OrientEmbeddedBooleanRecord extends OrientRecord[OrientEmbeddedBooleanRecord] {
 
-  def meta = OrientMemoryBooleanRecord
+  def meta = OrientEmbeddedBooleanRecord
 
   object booleanField extends BooleanField(this)
 
@@ -30,6 +30,6 @@ class OrientMemoryBooleanRecord extends OrientRecord[OrientMemoryBooleanRecord] 
   object optionalBooleanField extends OptionalBooleanField(this)
 }
 
-object OrientMemoryBooleanRecord extends OrientMemoryBooleanRecord with OrientMetaRecord[OrientMemoryBooleanRecord] {
-  override def databaseName = "memoryDB"
+object OrientEmbeddedBooleanRecord extends OrientEmbeddedBooleanRecord with OrientMetaRecord[OrientEmbeddedBooleanRecord] {
+
 }

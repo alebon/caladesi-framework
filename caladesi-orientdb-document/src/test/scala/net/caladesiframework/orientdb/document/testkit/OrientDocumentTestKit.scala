@@ -40,17 +40,19 @@ trait OrientDocumentTestKit {
   }
 
   def initDatabase() = {
-    OrientConfigurationRegistry.register(OrientDbEmbeddedConfiguration(location = "/Users/abondarenko/Projects/data/orientdb-test"))
+    OrientConfigurationRegistry.register(OrientDbEmbeddedConfiguration(location = "/%s/orientdb-test".format(System.getProperty("java.io.tmpdir"))))
   }
 
   def destroyDatabase() {
     val config = OrientConfigurationRegistry.loadByName("default").asInstanceOf[OrientDbEmbeddedConfiguration]
-    //val db = new ODatabaseDocumentTx("memory:%s".format(config.name))
-    //if (db.exists()) {
-    //  db.drop()
-    //  db.close()
-    //}
-
+    val db = new ODatabaseDocumentTx("local::%s".format(config.location))
+    if (db.exists()) {
+      if (db.isClosed) {
+        db.open("admin", "admin")
+      }
+      db.drop()
+      db.close()
+    }
   }
 
   object OrientEmbeddedTestContext extends Around {
