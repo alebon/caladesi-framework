@@ -11,7 +11,8 @@
 package net.caladesiframework.orientdb.document
 
 import org.specs2.mutable.Specification
-import testkit.{OrientMemoryStringRecord, OrientMemoryBooleanRecord, SimpleOrientDocument, OrientDocumentTestKit}
+import testkit._
+import java.util.UUID
 
 class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
 
@@ -156,6 +157,37 @@ class OrientDocumentCrudSpec extends Specification with OrientDocumentTestKit {
       stringRecord.save
 
       stringRecord.optionalStringField.getOrElse("alternative-value") must_==("alternative-value")
+    }
+  }
+
+  "Caladesi Oriendb Record with UUID fields" should {
+    "save and load UUID values properly" in OrientMemoryTestContext {
+
+      val uuid = UUID.randomUUID()
+      val uuidRecord = OrientMemoryUuidRecord.create
+      uuidRecord.uuid.set(uuid)
+      uuidRecord.save
+
+      uuidRecord.uuid.get.toString must_==(uuid.toString)
+    }
+
+    "save and load optional UUID value properly" in OrientMemoryTestContext {
+
+      val uuid = UUID.randomUUID()
+      val uuidRecord = OrientMemoryUuidRecord.create
+      uuidRecord.optionalUuidField.set(uuid)
+      uuidRecord.save
+
+      uuidRecord.optionalUuidField.getOrElse(UUID.randomUUID()).toString must_==(uuid.toString)
+    }
+
+    "save and load optional (not set) UUID value properly" in OrientMemoryTestContext {
+
+      val uuid = UUID.randomUUID()
+      val uuidRecord = OrientMemoryUuidRecord.create
+      uuidRecord.save
+
+      uuidRecord.optionalUuidField.getOrElse(uuid).toString must_==(uuid.toString)
     }
   }
 

@@ -19,7 +19,9 @@ package net.caladesiframework.orientdb.document.record
 import net.caladesiframework.record.Record
 import com.orientechnologies.orient.core.record.impl.ODocument
 import net.caladesiframework.document.Field
-import net.caladesiframework.orientdb.document.field.{OptionalBooleanField, BooleanField, OptionalStringField, StringField}
+import net.caladesiframework.orientdb.document.field._
+import scala.Some
+import java.util.UUID
 
 trait OrientRecord[RecordType] extends Record[RecordType] {
   self: RecordType =>
@@ -101,11 +103,21 @@ trait OrientRecord[RecordType] extends Record[RecordType] {
               if (doc.fieldNames().contains(fieldName)) {doc.removeField(fieldName)}
             }
 
+          case f: OptionalUuidField[RecordType] =>
+            if (f.hasValue) {
+              doc.field(fieldName, fieldObj.asInstanceOf[OptionalUuidField[RecordType]].getOrElse(UUID.randomUUID()).toString)
+            } else {
+              if (doc.fieldNames().contains(fieldName)) {doc.removeField(fieldName)}
+            }
+
           case f: StringField[RecordType] =>
             doc.field(fieldName, fieldObj.asInstanceOf[StringField[RecordType]].get)
 
           case f: BooleanField[RecordType] =>
             doc.field(fieldName, fieldObj.asInstanceOf[BooleanField[RecordType]].get.asInstanceOf[java.lang.Boolean])
+
+          case f: UuidField[RecordType] =>
+            doc.field(fieldName, fieldObj.asInstanceOf[UuidField[RecordType]].get.toString)
 
           case _ => throw new RuntimeException("Unhandled field!")
         }
