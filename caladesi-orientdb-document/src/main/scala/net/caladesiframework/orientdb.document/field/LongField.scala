@@ -20,8 +20,6 @@ import net.caladesiframework.document.RequiredField
 
 class LongField[OwnerType](ownerConstruct: OwnerType, default: Long = 0L) extends RequiredField[Long, OwnerType]{
 
-   def name = null
-
    def owner = ownerConstruct
 
    def defaultValue = default

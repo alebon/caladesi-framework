@@ -20,8 +20,6 @@ import net.caladesiframework.document.RequiredField
 
 class DoubleField[OwnerType](ownerConstruct: OwnerType, default: Double = 0.0) extends RequiredField[Double, OwnerType]{
 
-   def name = null
-
    def owner = ownerConstruct
 
    def defaultValue = default

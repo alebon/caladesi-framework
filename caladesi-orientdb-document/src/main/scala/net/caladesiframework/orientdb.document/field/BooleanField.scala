@@ -20,8 +20,6 @@ import net.caladesiframework.document.RequiredField
 
 class BooleanField[OwnerType](ownerConstruct: OwnerType, default: Boolean = false) extends RequiredField[Boolean, OwnerType]{
 
-   def name = null
-
    def owner = ownerConstruct
 
    def defaultValue = default

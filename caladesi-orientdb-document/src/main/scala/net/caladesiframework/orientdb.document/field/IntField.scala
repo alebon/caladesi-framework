@@ -20,8 +20,6 @@ import net.caladesiframework.document.RequiredField
 
 class IntField[OwnerType](ownerConstruct: OwnerType, default: Int = 0) extends RequiredField[Int, OwnerType]{
 
-   def name = null
-
    def owner = ownerConstruct
 
    def defaultValue = default

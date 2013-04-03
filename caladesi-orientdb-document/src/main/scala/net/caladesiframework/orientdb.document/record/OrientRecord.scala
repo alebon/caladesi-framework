@@ -18,6 +18,8 @@ package net.caladesiframework.orientdb.document.record
 
 import net.caladesiframework.record.Record
 import com.orientechnologies.orient.core.record.impl.ODocument
+import net.caladesiframework.document.Field
+import net.caladesiframework.orientdb.document.field.{OptionalBooleanField, BooleanField, OptionalStringField, StringField}
 
 trait OrientRecord[RecordType] extends Record[RecordType] {
   self: RecordType =>
@@ -50,12 +52,12 @@ trait OrientRecord[RecordType] extends Record[RecordType] {
       db.getMetadata.getSchema.getOrCreateClass(meta.collectionName)
     })
 
-
-
     meta.transactional(implicit db => {
       if (this.internalId().isEmpty) {
         // Record is detached, Create new record in DB
         val doc = new ODocument(clazz)
+
+        fieldsToDb(doc)
 
         // Force create
         doc.save()
@@ -68,6 +70,43 @@ trait OrientRecord[RecordType] extends Record[RecordType] {
 
       true
     })
+  }
+
+  private def fieldsToDb(doc: ODocument) = {
+
+    meta.fields foreach {
+      metaField => {
+        val fieldName = metaField._1
+
+        val m = this.getClass.getMethod(metaField._1)
+        val fieldObj: Field[_, RecordType] = m.invoke(this).asInstanceOf[Field[_, RecordType]]
+
+        fieldObj match {
+          case f: OptionalStringField[RecordType] =>
+            if (f.hasValue) {
+              doc.field(fieldName, fieldObj.asInstanceOf[OptionalStringField[RecordType]].getOrElse("undefined"))
+            } else {
+              if (doc.fieldNames().contains(fieldName)) {doc.removeField(fieldName)}
+            }
+
+          case f: OptionalBooleanField[RecordType] =>
+            if (f.hasValue) {
+              doc.field(fieldName, fieldObj.asInstanceOf[OptionalBooleanField[RecordType]].getOrElse(false).asInstanceOf[java.lang.Boolean])
+            } else {
+              if (doc.fieldNames().contains(fieldName)) {doc.removeField(fieldName)}
+            }
+
+          case f: StringField[RecordType] =>
+            doc.field(fieldName, fieldObj.asInstanceOf[StringField[RecordType]].get)
+
+          case f: BooleanField[RecordType] =>
+            doc.field(fieldName, fieldObj.asInstanceOf[BooleanField[RecordType]].get.asInstanceOf[java.lang.Boolean])
+
+          case _ => throw new RuntimeException("Unhandled field!")
+        }
+      }
+    }
+
   }
 
   def find(id: String) = None

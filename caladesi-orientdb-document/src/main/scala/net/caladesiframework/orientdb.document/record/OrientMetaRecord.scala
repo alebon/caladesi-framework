@@ -46,10 +46,10 @@ trait OrientMetaRecord[RecordType] extends OrientRecord[RecordType] {
     val record = this.getClass.getSuperclass.newInstance().asInstanceOf[RecordType]
 
     // Avoid iterating all fields
-    if (!initComplete) {
+    //if (!initComplete) {
       initFields(record)
-      initComplete = true
-    }
+    //  initComplete = true
+    //}
 
     record
   }
@@ -79,8 +79,14 @@ trait OrientMetaRecord[RecordType] extends OrientRecord[RecordType] {
               val m = record.getClass.getMethod(field.getName.replace("$module", ""))
 
               val fieldObj: Field[_, RecordType] = m.invoke(record).asInstanceOf[Field[_, RecordType]]
+
+              // Apply default naming
+              if (fieldObj.name == null) {
+                fieldObj.applyName(field.getName.replace("$module", ""))
+              }
+
               fieldObj.initField
-              attach(fieldObj)
+              attach(field.getName.replace("$module", ""), fieldObj)
             }
           }
         }
@@ -95,9 +101,9 @@ trait OrientMetaRecord[RecordType] extends OrientRecord[RecordType] {
    * @param field
    * @return
    */
-  private def attach(field: Field[_, RecordType]) = {
-    if (this.fieldMap.get(field.name).isEmpty) {
-      this.fieldMap.put(field.name, field)
+  private def attach(key: String, field: Field[_, RecordType]) = {
+    if (this.fieldMap.get(key).isEmpty) {
+      this.fieldMap.put(key, field)
     }
   }
 

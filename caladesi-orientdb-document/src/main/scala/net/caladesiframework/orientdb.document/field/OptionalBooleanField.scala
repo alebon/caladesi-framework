@@ -20,7 +20,5 @@ import net.caladesiframework.document.OptionalField
 
 class OptionalBooleanField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Boolean, OwnerType]{
 
-  def name = null
-
   def owner = ownerConstruct
 }

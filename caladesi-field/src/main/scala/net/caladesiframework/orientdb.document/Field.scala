@@ -18,10 +18,16 @@ package net.caladesiframework.document
 
 trait Field[FieldType, OwnerType] {
 
-  def name: String
+  private var fieldName: String = null
+
+  def name: String = fieldName
   def owner: OwnerType
 
   def initField: Unit = {}
+
+  def applyName(name: String) = {
+    this.fieldName = name
+  }
 }
 
 /**
@@ -47,6 +53,13 @@ trait OptionalField[FieldType, OwnerType] extends Field[FieldType, OwnerType] {
       return alternativeValue
     }
     return this.value.get
+  }
+
+  def hasValue: Boolean = {
+    if (this.value.isEmpty) {
+      return false
+    }
+    true
   }
 
 }

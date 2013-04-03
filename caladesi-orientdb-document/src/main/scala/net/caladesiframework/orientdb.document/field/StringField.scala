@@ -20,8 +20,6 @@ import net.caladesiframework.document.{RequiredField}
 
 class StringField[OwnerType](ownerConstruct: OwnerType, default: String = "undefined") extends RequiredField[String, OwnerType]{
 
-  def name = null
-
   def owner = ownerConstruct
 
   def defaultValue = default

@@ -20,7 +20,5 @@ import net.caladesiframework.document.OptionalField
 
 class OptionalDoubleField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Double, OwnerType]{
 
-  def name = null
-
   def owner = ownerConstruct
 }
