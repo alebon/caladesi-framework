@@ -20,11 +20,6 @@ import net.caladesiframework.record.Record
 import com.orientechnologies.orient.core.record.impl.ODocument
 import net.caladesiframework.document.Field
 import net.caladesiframework.orientdb.document.field.{OptionalBooleanField, BooleanField, OptionalStringField, StringField}
-import com.orientechnologies.orient.core.id.{ORecordId, ORID}
-import com.orientechnologies.orient.core.record.ORecord
-import java.lang.StringBuilder
-import com.orientechnologies.orient.core.db.record.OIdentifiable
-import java.io.OutputStream
 
 trait OrientRecord[RecordType] extends Record[RecordType] {
   self: RecordType =>
