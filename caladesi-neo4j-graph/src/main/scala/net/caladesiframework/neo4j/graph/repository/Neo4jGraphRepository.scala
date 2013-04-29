@@ -328,11 +328,9 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
       fieldObj => {
         fieldObj match {
           case field: IntField =>
-            field.set(node.getProperty(field.name).asInstanceOf[Int])
+            field.set(node.getProperty(field.name).toString.toInt)
           case field: StringField =>
             field.set(node.getProperty(field.name).asInstanceOf[String])
-          //case field: DoubleField =>
-          //  field.set(vertex.field(field.name))
           case field: UuidField =>
             // Strict: uuid is required
             if (!node.hasProperty(field.name)) {
@@ -340,13 +338,13 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
             }
             field.set(util.UUID.fromString(node.getProperty(field.name).asInstanceOf[String]))
           case field: LongField =>
-            field.set(node.getProperty(field.name).asInstanceOf[Long])
+            field.set(node.getProperty(field.name).toString.toLong)
           //case field: LocaleField =>
           //  field.set(new Locale(vertex.field(field.name)))
           case field: DateTimeField =>
             field.valueFromDB(node.getProperty(field.name))
           case field: BooleanField =>
-            field.set(node.getProperty(field.name).asInstanceOf[Boolean])
+            field.set(node.getProperty(field.name).toString.toBoolean)
           case field: DoubleField =>
             field.set(node.getProperty(field.name).asInstanceOf[Double])
           case field:Relation =>
