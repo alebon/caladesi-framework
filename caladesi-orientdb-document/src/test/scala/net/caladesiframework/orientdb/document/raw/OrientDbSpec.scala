@@ -13,13 +13,14 @@ package net.caladesiframework.orientdb.document.raw
 import org.specs2.mutable.Specification
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 import com.orientechnologies.orient.core.record.impl.ODocument
+import java.util.UUID
 
 class OrientDbSpec extends Specification {
 
   "OrientDb in Embedded Mode" should {
     "work as expected" in {
       // OPEN THE DATABASE
-      val db: ODatabaseDocumentTx = new ODatabaseDocumentTx("local:/%s/orient-raw-data".format(System.getProperty("java.io.tmpdir")));
+      val db: ODatabaseDocumentTx = new ODatabaseDocumentTx("local:%sorient-raw-data-%s".format(System.getProperty("java.io.tmpdir"), UUID.randomUUID().toString()));
       if (!db.exists()) {
         db.create()
       }
