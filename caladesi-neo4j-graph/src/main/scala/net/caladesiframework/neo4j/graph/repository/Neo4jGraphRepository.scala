@@ -25,7 +25,7 @@ import org.neo4j.graphdb.{Direction, DynamicRelationshipType, Node}
 import net.caladesiframework.neo4j.field._
 import net.caladesiframework.neo4j.db.Neo4jConfiguration
 import net.caladesiframework.neo4j.relation.{RelationManager, Relation}
-import org.neo4j.cypher.javacompat.{ExecutionResult, ExecutionEngine}
+import org.neo4j.kernel.impl.util.StringLogger
 
 abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   (implicit m:scala.reflect.Manifest[EntityType], configuration: Neo4jConfiguration)
@@ -201,18 +201,18 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def find(skip: Long = 0L, limit : Long = 10): List[EntityType] = transactional(implicit ds => {
-    val engine: ExecutionEngine = new ExecutionEngine( ds.graphDatabase );
-    val result: ExecutionResult = engine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN entity SKIP %s LIMIT %s"
+    val engine = new org.neo4j.cypher.ExecutionEngine(ds.graphDatabase)
+    val result: org.neo4j.cypher.ExecutionResult = engine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN entity SKIP %s LIMIT %s"
       .format(subReferenceNode.getId, ENTITY_RELATION.name, skip, limit) )
 
     //println("Executing query: " + "START n=node(%s) MATCH n<-[:%s]-entity RETURN entity SKIP %s LIMIT %s"
     //  .format(subReferenceNode.getId, ENTITY_RELATION.name, skip, limit))
 
-    val iterator: java.util.Iterator[Node] = result.columnAs[Node]("entity")
+    val nodes = result.columnAs[Node]("entity")
 
     var list: List[EntityType] = List()
-    while (iterator.hasNext) {
-      val node = iterator.next()
+    while (nodes.hasNext) {
+      val node = nodes.next()
       list = transformToEntity(node) :: list
     }
 
@@ -256,13 +256,15 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def count: Long = connected(implicit ds => {
-    val engine: ExecutionEngine = new ExecutionEngine( ds.graphDatabase );
-    val result: ExecutionResult = engine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN count(entity) AS countAll"
+    val engine = new org.neo4j.cypher.ExecutionEngine(ds.graphDatabase)
+    val result: org.neo4j.cypher.ExecutionResult = engine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN count(entity) AS countAll"
       .format(subReferenceNode.getId, ENTITY_RELATION.name) )
 
-    if (result.iterator().hasNext) {
-      val row = result.iterator().next()
-      return row.get("countAll").asInstanceOf[Long]
+    //val iterator = result.iterator().asScala
+
+    if (result.hasNext) {
+      val row = result.next()
+      return row.get("countAll").get.asInstanceOf[Long]
     }
 
     0
