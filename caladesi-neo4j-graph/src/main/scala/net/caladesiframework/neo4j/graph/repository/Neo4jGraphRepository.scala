@@ -201,7 +201,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def find(skip: Long = 0L, limit : Long = 10): List[EntityType] = transactional(implicit ds => {
-    val engine = new org.neo4j.cypher.ExecutionEngine(ds.graphDatabase)
+    val engine = new org.neo4j.cypher.ExecutionEngine(ds.graphDatabase, StringLogger.DEV_NULL)
     val result: org.neo4j.cypher.ExecutionResult = engine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN entity SKIP %s LIMIT %s"
       .format(subReferenceNode.getId, ENTITY_RELATION.name, skip, limit) )
 
@@ -256,7 +256,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def count: Long = connected(implicit ds => {
-    val engine = new org.neo4j.cypher.ExecutionEngine(ds.graphDatabase)
+    val engine = new org.neo4j.cypher.ExecutionEngine(ds.graphDatabase, StringLogger.DEV_NULL)
     val result: org.neo4j.cypher.ExecutionResult = engine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN count(entity) AS countAll"
       .format(subReferenceNode.getId, ENTITY_RELATION.name) )
 

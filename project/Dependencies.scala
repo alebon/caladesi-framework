@@ -25,6 +25,7 @@ object Dependencies {
   lazy val orientVersion  = "1.4.0-SNAPSHOT"
   lazy val neo4jVersion   = "1.8.2"
   lazy val logbackVersion = "1.0.6"
+  lazy val elasticVersion = "0.90.1"
 
   // Compile scope:
   // Scope available in all classpath, transitive by default.
@@ -39,6 +40,9 @@ object Dependencies {
 
   // Neo4j
   lazy val neo4j_all		= "org.neo4j" % "neo4j" % neo4jVersion
+
+  // Elastic search
+  lazy val elastic = "org.elasticsearch" % "elasticsearch" % elasticVersion
 
   // Provided scope:
   lazy val logback = "ch.qos.logback"    % "logback-classic"     % logbackVersion % "provided"
