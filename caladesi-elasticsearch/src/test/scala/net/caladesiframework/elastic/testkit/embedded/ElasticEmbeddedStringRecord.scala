@@ -17,7 +17,9 @@ class ElasticEmbeddedStringRecord extends ElasticRecord[ElasticEmbeddedStringRec
 
   def meta = ElasticEmbeddedStringRecord
 
-  object stringField extends StringField(this)
+  object stringField extends StringField(this) {
+    override def name = "stringField"
+  }
 
 }
 

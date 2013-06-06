@@ -26,6 +26,7 @@ import org.elasticsearch.action.search.SearchResponse
 import net.caladesiframework.elastic.search.TermMatchType
 import org.elasticsearch.common.xcontent.XContentBuilder
 import net.caladesiframework.document.Field
+import org.elasticsearch.search.SearchHitField
 
 case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boolean = false) {
 
@@ -71,6 +72,8 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
 
     //debug("Ensuring index '%s' for %s".format(indexName, entityName))
 
+    node.client().admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet()
+
     val map: java.util.Map[String, ClusterIndexHealth] = client.admin().cluster().health(new
         ClusterHealthRequest(indexName)).actionGet().getIndices()
 
@@ -97,11 +100,11 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
   def addItem(indexName: String, itemType: String, id: String, dbValues: XContentBuilder) = {
     val start = System.currentTimeMillis()
 
-    client.prepareIndex(indexName, itemType, id).setSource(dbValues).setRefresh(true).execute().actionGet()
+    client.prepareIndex(indexName, itemType, id).setSource(dbValues).execute().actionGet()
 
     val end = System.currentTimeMillis()
 
-    client.admin().indices().prepareRefresh(indexName).execute().actionGet()
+    client.admin().indices().prepareRefresh().execute().actionGet()
   }
 
   /**
@@ -134,27 +137,16 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
       .id(id)
 
     client.delete(request).actionGet()
-    client.admin().indices().prepareRefresh(indexName).execute().actionGet()
+    client.admin().indices().prepareRefresh().execute().actionGet()
   }
 
-  /**
-   * Performs a query and return an elastic SearchResponse
-   *
-   * @param queryTerm
-   * @param indexName
-   * @param itemType
-   * @return
-   */
-  def query(field: Field[_, _], queryTerm : String, indexName: String, itemType: String, termMatchType: String = TermMatchType.FUZZY): SearchResponse = {
-
+  def executeFuzzyQuery(fieldName: String, queryTerm : String, indexName: String, itemType: String): SearchResponse = {
     import org.elasticsearch.index.query.QueryBuilders._
-
-    //debug("Query for term '%s'".format(queryTerm))
 
     val response: SearchResponse = client.prepareSearch(indexName)
       .setTypes(itemType)
       //.setSearchType(SearchType.DEFAULT)
-      .setQuery(fuzzyQuery(field.name, queryTerm).maxExpansions(5)) // Query
+      .setQuery(fuzzyQuery(fieldName, queryTerm).maxExpansions(5)) // Query
       //.setFrom(0).setSize(60).setExplain(true)
       .execute()
       .actionGet()
@@ -174,5 +166,4 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
 
     return countResponse.getCount
   }
-
 }

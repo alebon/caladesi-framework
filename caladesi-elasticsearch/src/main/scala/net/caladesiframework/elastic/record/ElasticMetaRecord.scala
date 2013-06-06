@@ -104,6 +104,42 @@ trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
       return None
     }
 
+    val record = getRecord(response.getSourceAsMap.asInstanceOf[java.util.HashMap[String, AnyRef]])
+    Some(record)
+  }
+
+  /**
+   * Returns al count for this record type
+   *
+   * @return
+   */
+  def count: Long = provider.countAll(indexName, itemTypeName)
+
+  /**
+   * Search a specific field
+   *
+   * @param field
+   * @param queryTerm
+   * @return
+   */
+  def query(field: Field[_, _], queryTerm : String): List[RecordType] = {
+
+    val response = provider.executeFuzzyQuery(field.name, queryTerm, indexName, itemTypeName)
+    val result: List[RecordType] = response.getHits.getHits.map(hit => {
+      getRecord(hit.getSource.asInstanceOf[java.util.HashMap[String, AnyRef]])
+    }).toList
+
+
+    return result
+  }
+
+  /**
+   * Returns record by given fields
+   *
+   * @param fields
+   * @return
+   */
+  protected def getRecord(fields: java.util.HashMap[String, AnyRef]): RecordType = {
     val record = create
 
     meta.fields.map(
@@ -112,7 +148,7 @@ trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
 
         val m = this.getClass.getMethod(metaField._1)
         val fieldObj: Field[_, RecordType] = m.invoke(record).asInstanceOf[Field[_, RecordType]]
-        val indexedValue = response.getSourceAsMap.get(fieldName).asInstanceOf[String]
+        val indexedValue = fields.get(fieldName).asInstanceOf[String]
 
         fieldObj match {
 
@@ -125,16 +161,8 @@ trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
           case _ => throw new RuntimeException("Unhandled field!")
         }
 
-    })
+      })
 
-    Some(record)
+    record
   }
-
-  /**
-   * Returns al count for this record type
-   *
-   * @return
-   */
-  def count: Long = provider.countAll(indexName, itemTypeName)
-
 }
