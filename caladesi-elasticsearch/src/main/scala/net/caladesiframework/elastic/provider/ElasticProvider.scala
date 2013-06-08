@@ -146,7 +146,8 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
     val response: SearchResponse = client.prepareSearch(indexName)
       .setTypes(itemType)
       //.setSearchType(SearchType.DEFAULT)
-      .setQuery(fuzzyQuery(fieldName, queryTerm).maxExpansions(5)) // Query
+      .setQuery(queryString("%s*".format(queryTerm)).field(fieldName))
+      //.setQuery(fuzzyQuery(fieldName, "%s*".format(queryTerm)).maxExpansions(100)) // Query
       //.setFrom(0).setSize(60).setExplain(true)
       .execute()
       .actionGet()

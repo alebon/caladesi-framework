@@ -22,7 +22,7 @@ class ElasticEmbeddedSuiteSpec extends Specification with ElasticTestKit {
 
       val record = ElasticEmbeddedStringRecord.createRecord
       record._uuid.set(UUID.randomUUID())
-      record.stringField.set("test22")
+      record.stringField.set("A text with some words")
       record.save
 
 
@@ -32,7 +32,9 @@ class ElasticEmbeddedSuiteSpec extends Specification with ElasticTestKit {
       ElasticEmbeddedStringRecord.count must_== 1
       foundRecord.get._uuid.get.toString must_==(recordUuid)
 
-      ElasticEmbeddedStringRecord.query(ElasticEmbeddedStringRecord.stringField, "test").size must_==(1)
+      ElasticEmbeddedStringRecord.query(ElasticEmbeddedStringRecord.stringField, "xyz").size must_==(0)
+      ElasticEmbeddedStringRecord.query(ElasticEmbeddedStringRecord.stringField, "with words").size must_==(1)
+      ElasticEmbeddedStringRecord.query(ElasticEmbeddedStringRecord.stringField, "some").size must_==(1)
     }
   }
 
