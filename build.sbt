@@ -2,6 +2,8 @@ import Dependencies._
 
 organization in ThisBuild	:= "net.caladesiframework"
 
+scalaVersion in ThisBuild       := "2.10.1"
+
 version in ThisBuild		:= "0.5.0-SNAPSHOT"
 
 homepage in ThisBuild		:= Some(url("http://caladesiframework.net"))
@@ -41,6 +43,6 @@ pomExtra in ThisBuild             := (
   </developers>
 )
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
+libraryDependencies in ThisBuild += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 
 libraryDependencies += "junit" % "junit" % "4.11" % "test"

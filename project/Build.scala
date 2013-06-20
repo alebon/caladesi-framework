@@ -34,42 +34,42 @@ object BuildDef extends Build {
       base = file("caladesi-common"),
       settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework Common Utilities",
-      libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit, logback))
+      libraryDependencies ++= Seq(slf4j_api, specs2, junit, logback))
 
   lazy val field =
     Project(id = "caladesi-field",
       base = file("caladesi-field"),
       settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework Field",
-      libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit, logback))
+      libraryDependencies ++= Seq(slf4j_api, specs2, junit, logback))
 
   lazy val repository =
     Project(id = "caladesi-repository",
       base = file("caladesi-repository"),
       settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework Repository",
-      libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit, logback))
+      libraryDependencies ++= Seq(slf4j_api, specs2, junit, logback))
 
   lazy val record =
     Project(id = "caladesi-record",
       base = file("caladesi-record"),
       settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework Record",
-      libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit, logback))
+      libraryDependencies ++= Seq(slf4j_api, specs2, junit, logback))
 
   lazy val web =
      Project(id = "caladesi-web",
              base = file("caladesi-web"),
              settings = Project.defaultSettings)
        .settings(description := "Caladesi Framework Web Utilities",
-                 libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit))
+                 libraryDependencies ++= Seq(slf4j_api, specs2, junit))
 
   lazy val orientdbcommon =
     Project(id = "caladesi-orientdb-common",
       base = file("caladesi-orientdb-common"),
       settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework OrientDB Common",
-      libraryDependencies ++= Seq(orient_commons, orientdb_core, orientdb_client, slf4j_api, scalacheck, specs2, junit))
+      libraryDependencies ++= Seq(orient_commons, orientdb_core, orientdb_client, slf4j_api, specs2, junit))
       .dependsOn(common, field, repository, record)
 
   lazy val orientdbdocument =
@@ -77,7 +77,7 @@ object BuildDef extends Build {
       base = file("caladesi-orientdb-document"),
       settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework OrientDB Document",
-      libraryDependencies ++= Seq(slf4j_api, scalacheck, specs2, junit))
+      libraryDependencies ++= Seq(slf4j_api, specs2, junit))
       .dependsOn(common, field, repository, record, orientdbcommon)
 
   lazy val orientdbgraph =
@@ -85,7 +85,7 @@ object BuildDef extends Build {
             base = file("caladesi-orientdb-graph"),
             settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework OrientDB Graph",
-                libraryDependencies ++= Seq(orient_commons, orientdb_core, orientdb_client, slf4j_api, scalacheck, specs2, junit))
+                libraryDependencies ++= Seq(orient_commons, orientdb_core, orientdb_client, slf4j_api, specs2, junit))
       .dependsOn(common)
 
   lazy val neo4jgraph =
@@ -93,7 +93,7 @@ object BuildDef extends Build {
             base = file("caladesi-neo4j-graph"),
             settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework Neo4j Graph",
-                libraryDependencies ++= Seq(neo4j_all, slf4j_api, scalacheck, specs2, junit))
+                libraryDependencies ++= Seq(neo4j_all, slf4j_api, specs2, junit))
       .dependsOn(common)
 
   lazy val elasticsearch =
@@ -101,6 +101,6 @@ object BuildDef extends Build {
       base = file("caladesi-elasticsearch"),
       settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework Elasticsearch",
-      libraryDependencies ++= Seq(elastic, slf4j_api, scalacheck, specs2, junit, logback))
+      libraryDependencies ++= Seq(elastic, slf4j_api, specs2, junit, logback))
       .dependsOn(field, record)
 }

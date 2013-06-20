@@ -12,7 +12,7 @@ package net.caladesiframework.elastic.testkit
 
 import java.io.{IOException, File}
 import org.specs2.mutable.Around
-import org.specs2.execute.Result
+import org.specs2.execute.{AsResult, Result}
 import java.util.UUID
 import net.caladesiframework.elastic.provider.{Elastic, ElasticProvider}
 import net.caladesiframework.elastic.DefaultElasticProviderIdentifier
@@ -45,8 +45,7 @@ trait ElasticTestKit {
 
   object ElasticEmbeddedTestContext extends Around {
 
-    def around[T <% Result](testToRun: => T)  = {
-
+    def around[T](t: => T)(implicit evidence$1: AsResult[T]) = {
       val storeDirPathRandom = storeDirPath + UUID.randomUUID().toString
       val provider = ElasticProvider("elasticTestNode", storeDirPathRandom, false )
       provider.startUp()
@@ -54,12 +53,11 @@ trait ElasticTestKit {
       Elastic.defineProvider(DefaultElasticProviderIdentifier, provider)
 
       try {
-        testToRun
+        AsResult(t)
       } finally {
         destroyProviderAndDatabase(Elastic.getProvider(DefaultElasticProviderIdentifier).get)
       }
     }
-
   }
 
   private def delete(file: File) {

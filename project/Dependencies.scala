@@ -19,17 +19,17 @@ import Keys._
 
 object Dependencies {
 
-  lazy val scalaVersion   = "2.9.2"
+  lazy val scalaDepVersion   = "2.10.1"
   lazy val slf4jVersion   = "1.7.2"
-  lazy val liftVersion    = "2.5-RC5"
+  lazy val liftVersion    = "2.5"
   lazy val orientVersion  = "1.4.0"
-  lazy val neo4jVersion   = "1.8.2"
+  lazy val neo4jVersion   = "1.9"
   lazy val logbackVersion = "1.0.6"
   lazy val elasticVersion = "0.90.1"
 
   // Compile scope:
   // Scope available in all classpath, transitive by default.
-  lazy val scalaLib             = "org.scala-lang" % "scala-library"	           % scalaVersion
+  lazy val scalaLib             = "org.scala-lang" % "scala-library"	           % scalaDepVersion
   lazy val slf4j_api            = "org.slf4j"      % "slf4j-api"                 % slf4jVersion
   lazy val lift_common          = "net.liftweb"    %% "lift-common"         % liftVersion
 
@@ -55,7 +55,7 @@ object Dependencies {
   // Test scope:
   // Scope available only in test classpath, non-transitive by default.
   lazy val mockito_all = "org.mockito"     % "mockito-all"        % "1.8.5"      % "test"
-  lazy val scalacheck  = "org.scalacheck"  %% "scalacheck"   % "1.9"        % "test"
-  lazy val specs2      = "org.specs2"      %% "specs2"   	  % "1.11"       % "test"
+//  lazy val scalacheck  = "org.scalacheck"  %% "scalacheck"   % "1.10.1"        % "test"
+  lazy val specs2      = "org.specs2"      %% "specs2"   	  % "2.0"       % "test"
   lazy val junit       = "junit"           % "junit"              % "4.11"        % "test"
 }

@@ -17,7 +17,7 @@
 package net.caladesiframework.orientdb.document.testkit
 
 import org.specs2.mutable.{Around, SpecificationWithJUnit}
-import org.specs2.execute.Result
+import org.specs2.execute.{AsResult, Result}
 import net.caladesiframework.orientdb.config.{OrientDbEmbeddedConfiguration, OrientDbMemoryConfiguration, OrientConfigurationRegistry}
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx
 
@@ -57,11 +57,11 @@ trait OrientDocumentTestKit {
 
   object OrientEmbeddedTestContext extends Around {
 
-    def around[T <% Result](testToRun: => T)  = {
+    def around[T](t: => T)(implicit evidence$1: AsResult[T]) = {
       initDatabase()
 
       try {
-        testToRun
+        AsResult(t)
       } finally {
         destroyDatabase()
       }
@@ -71,11 +71,11 @@ trait OrientDocumentTestKit {
 
   object OrientMemoryTestContext extends Around {
 
-    def around[T <% Result](testToRun: => T)  = {
+    def around[T](t: => T)(implicit evidence$1: AsResult[T]) = {
       initMemoryDatabase()
 
       try {
-        testToRun
+        AsResult(t)
       } finally {
         destroyMemoryDatabase()
       }
