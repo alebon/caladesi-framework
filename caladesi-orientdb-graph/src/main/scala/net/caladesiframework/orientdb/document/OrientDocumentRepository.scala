@@ -19,13 +19,13 @@ package net.caladesiframework.orientdb.document
 import entity.Document
 import net.caladesiframework.orientdb.repository.CRUDRepository
 
-class OrientDocumentRepository[T <: Document](implicit m:scala.reflect.Manifest[T]) extends CRUDRepository[T] {
+class OrientDocumentRepository[T <: Document](implicit tag: scala.reflect.ClassTag[T]) extends CRUDRepository[T] {
 
   /**
    * Create a fresh document
    * @return
    */
-  def create = m.erasure.newInstance().asInstanceOf[T]
+  def create = tag.runtimeClass.newInstance().asInstanceOf[T]
 
   def update(document: T) = {
     document.fields foreach {

@@ -37,7 +37,7 @@ import net.caladesiframework.orientdb.db.OrientDbRemoteConfiguration
 import net.caladesiframework.orientdb.db.OrientDbEmbeddedType
 
 abstract class OrientGraphRepository[EntityType <: OrientGraphEntity]
-  (implicit m:scala.reflect.Manifest[EntityType], configuration: OrientConfiguration)
+  (implicit tag:scala.reflect.ClassTag[EntityType], configuration: OrientConfiguration)
   extends GraphRepository[EntityType]
   with CRUDRepository[EntityType]
   with OrientGraphDbWrapper
@@ -135,7 +135,7 @@ abstract class OrientGraphRepository[EntityType <: OrientGraphEntity]
    * @return
    */
   def create : EntityType = {
-    m.erasure.newInstance().asInstanceOf[EntityType]
+    tag.runtimeClass.newInstance().asInstanceOf[EntityType]
   }
 
   def createFromVertex(vertex: ODocument, depth: Int = 0)(implicit db: OGraphDatabase): EntityType = {

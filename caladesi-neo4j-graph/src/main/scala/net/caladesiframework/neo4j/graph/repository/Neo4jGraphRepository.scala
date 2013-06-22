@@ -28,7 +28,7 @@ import net.caladesiframework.neo4j.relation.{RelationManager, Relation}
 import org.neo4j.kernel.impl.util.StringLogger
 
 abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
-  (implicit m:scala.reflect.Manifest[EntityType], configuration: Neo4jConfiguration)
+  (implicit tag: scala.reflect.ClassTag[EntityType], configuration: Neo4jConfiguration)
   extends GraphRepository[EntityType]
   with CRUDRepository[EntityType]
   with IndexManager
@@ -119,7 +119,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def create : EntityType = {
-    m.erasure.newInstance().asInstanceOf[EntityType]
+    tag.runtimeClass.newInstance().asInstanceOf[EntityType]
   }
 
   def createFromNode(node: Node, depth: Int = 1)(implicit db: Neo4jDatabaseService): EntityType = {

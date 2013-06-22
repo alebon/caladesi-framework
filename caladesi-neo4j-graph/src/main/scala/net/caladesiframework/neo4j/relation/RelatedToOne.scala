@@ -20,11 +20,11 @@ import net.caladesiframework.neo4j.graph.entity.Neo4jGraphEntity
 import net.caladesiframework.neo4j.field.Field
 import net.caladesiframework.neo4j.entity.Entity
 
-class RelatedToOne[EntityType <: Neo4jGraphEntity](implicit m:Manifest[EntityType])
+class RelatedToOne[EntityType <: Neo4jGraphEntity](implicit tag: scala.reflect.ClassTag[EntityType])
   extends Field[EntityType] with Relation {
 
   override lazy val defaultValue : EntityType =
-      m.erasure.newInstance().asInstanceOf[EntityType]
+      tag.runtimeClass.newInstance().asInstanceOf[EntityType]
 
   override val optional = false
 
@@ -33,7 +33,7 @@ class RelatedToOne[EntityType <: Neo4jGraphEntity](implicit m:Manifest[EntityTyp
    *
    * @param ownerEntity
    */
-  def this(ownerEntity: Entity, relation: String)(implicit m:Manifest[EntityType]) = {
+  def this(ownerEntity: Entity, relation: String)(implicit tag: scala.reflect.ClassTag[EntityType]) = {
     this()
     owner = ownerEntity
     set(defaultValue)
@@ -46,7 +46,7 @@ class RelatedToOne[EntityType <: Neo4jGraphEntity](implicit m:Manifest[EntityTyp
    * @param ownerEntity
    * @param value
    */
-  def this(ownerEntity: Entity, value: EntityType, relation: String)(implicit m:Manifest[EntityType]) = {
+  def this(ownerEntity: Entity, value: EntityType, relation: String)(implicit tag: scala.reflect.ClassTag[EntityType]) = {
     this()
     owner = ownerEntity
     set(value)

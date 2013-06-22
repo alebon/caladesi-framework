@@ -15,7 +15,7 @@ import net.caladesiframework.neo4j.field.Field
 import net.caladesiframework.neo4j.entity.Entity
 import collection.mutable.HashMap
 
-class RelatedToMany[EntityType <: Neo4jGraphEntity](implicit m:Manifest[EntityType])
+class RelatedToMany[EntityType <: Neo4jGraphEntity](implicit tag: scala.reflect.ClassTag[EntityType])
   extends Field[HashMap[Long, EntityType]] with Relation {
 
   override lazy val defaultValue : HashMap[Long, EntityType] = HashMap()
@@ -27,7 +27,7 @@ class RelatedToMany[EntityType <: Neo4jGraphEntity](implicit m:Manifest[EntityTy
    *
    * @param ownerEntity
    */
-  def this(ownerEntity: Entity, relation: String)(implicit m:Manifest[EntityType]) = {
+  def this(ownerEntity: Entity, relation: String)(implicit tag: scala.reflect.ClassTag[EntityType]) = {
     this()
     owner = ownerEntity
     set(defaultValue)
@@ -40,7 +40,7 @@ class RelatedToMany[EntityType <: Neo4jGraphEntity](implicit m:Manifest[EntityTy
    * @param ownerEntity
    * @param value
    */
-  def this(ownerEntity: Entity, value: HashMap[Long, EntityType], relation: String)(implicit m:Manifest[EntityType]) = {
+  def this(ownerEntity: Entity, value: HashMap[Long, EntityType], relation: String)(implicit tag: scala.reflect.ClassTag[EntityType]) = {
     this()
     owner = ownerEntity
     set(value)
@@ -83,5 +83,5 @@ class RelatedToMany[EntityType <: Neo4jGraphEntity](implicit m:Manifest[EntityTy
     this.value.contains(key)
   }
 
-  def targetClazz = m.erasure.newInstance().asInstanceOf[EntityType]
+  def targetClazz = tag.runtimeClass.newInstance().asInstanceOf[EntityType]
 }

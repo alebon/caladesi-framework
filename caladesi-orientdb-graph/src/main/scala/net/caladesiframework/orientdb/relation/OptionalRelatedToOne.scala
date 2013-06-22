@@ -20,11 +20,11 @@ import net.caladesiframework.orientdb.field.Field
 import net.caladesiframework.orientdb.graph.entity.OrientGraphEntity
 import net.caladesiframework.orientdb.entity.Entity
 
-class OptionalRelatedToOne[EntityType <: OrientGraphEntity](implicit m:Manifest[EntityType])
+class OptionalRelatedToOne[EntityType <: OrientGraphEntity](implicit tag: scala.reflect.ClassTag[EntityType])
   extends Field[EntityType] with Relation {
 
   override lazy val defaultValue : EntityType =
-    m.erasure.newInstance().asInstanceOf[EntityType]
+    tag.runtimeClass.newInstance().asInstanceOf[EntityType]
 
   override val optional = true
 
@@ -35,7 +35,7 @@ class OptionalRelatedToOne[EntityType <: OrientGraphEntity](implicit m:Manifest[
    *
    * @param ownerEntity
    */
-  def this(ownerEntity: Entity, relation: String)(implicit m:Manifest[EntityType]) = {
+  def this(ownerEntity: Entity, relation: String)(implicit tag: scala.reflect.ClassTag[EntityType]) = {
     this()
     owner = ownerEntity
     set(defaultValue)
@@ -48,7 +48,7 @@ class OptionalRelatedToOne[EntityType <: OrientGraphEntity](implicit m:Manifest[
    * @param ownerEntity
    * @param value
    */
-  def this(ownerEntity: Entity, value: EntityType, relation: String)(implicit m:Manifest[EntityType]) = {
+  def this(ownerEntity: Entity, value: EntityType, relation: String)(implicit tag: scala.reflect.ClassTag[EntityType]) = {
     this()
     owner = ownerEntity
     set(value)
