@@ -27,6 +27,7 @@ import net.caladesiframework.elastic.search.TermMatchType
 import org.elasticsearch.common.xcontent.XContentBuilder
 import net.caladesiframework.document.Field
 import org.elasticsearch.search.SearchHitField
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
 
 case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boolean = false) {
 
@@ -87,6 +88,24 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
       client.admin().indices().create(request).actionGet()
     }
 
+  }
+
+  /**
+   * Removes the index if present in health response
+   *
+   * @param indexName
+   * @return
+   */
+  def deleteIndex(indexName: String) = {
+    node.client().admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet()
+
+    val map: java.util.Map[String, ClusterIndexHealth] = client.admin().cluster().health(new
+        ClusterHealthRequest(indexName)).actionGet().getIndices()
+
+    if (map.containsKey(indexName)) {
+      val request: DeleteIndexRequest = Requests.deleteIndexRequest(indexName)
+      client.admin().indices().delete(request).actionGet()
+    }
   }
 
   /**

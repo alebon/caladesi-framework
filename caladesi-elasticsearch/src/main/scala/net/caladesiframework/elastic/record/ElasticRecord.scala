@@ -42,6 +42,10 @@ trait ElasticRecord[RecordType] extends Record[RecordType] {
     true
   }
 
+  /**
+   * Deletes the item its called on
+   * @return
+   */
   def delete = {
     meta.provider.removeItem(indexName, itemTypeName, _uuid.get.toString)
     true

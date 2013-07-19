@@ -17,6 +17,8 @@ import java.util.UUID
 
 class ElasticEmbeddedSuiteSpec extends Specification with ElasticTestKit {
 
+  sequential
+
   "Caladesi Elastic (Embedded) Record" should {
     "be able to store records in index" in ElasticEmbeddedTestContext {
 
@@ -25,8 +27,14 @@ class ElasticEmbeddedSuiteSpec extends Specification with ElasticTestKit {
       record.stringField.set("A text with some words")
       record.save
 
+      ElasticEmbeddedStringRecord.deleteAll
 
-      val recordUuid = record._uuid.get.toString
+      val record2 = ElasticEmbeddedStringRecord.createRecord
+      record2._uuid.set(UUID.randomUUID())
+      record2.stringField.set("A text with some words 2")
+      record2.save
+
+      val recordUuid = record2._uuid.get.toString
       val foundRecord = ElasticEmbeddedStringRecord.findById(recordUuid)
 
       ElasticEmbeddedStringRecord.count must_== 1
@@ -37,5 +45,4 @@ class ElasticEmbeddedSuiteSpec extends Specification with ElasticTestKit {
       ElasticEmbeddedStringRecord.query(ElasticEmbeddedStringRecord.stringField, "some").size must_==(1)
     }
   }
-
 }

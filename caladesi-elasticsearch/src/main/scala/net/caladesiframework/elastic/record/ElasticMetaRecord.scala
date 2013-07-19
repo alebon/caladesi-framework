@@ -116,6 +116,15 @@ trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
   def count: Long = provider.countAll(indexName, itemTypeName)
 
   /**
+   * Clears all items
+   *
+   * @return
+   */
+  def deleteAll = {
+    provider.deleteIndex(indexName)
+  }
+
+  /**
    * Search a specific field
    *
    * @param field
