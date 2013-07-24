@@ -18,12 +18,13 @@ package net.caladesiframework.elastic.record
 
 import net.caladesiframework.elastic.provider.{Elastic, ElasticProvider}
 import net.caladesiframework.document.Field
-import net.caladesiframework.elastic.field.{StringField, UuidField}
+import net.caladesiframework.elastic.field.{DynamicPropertiesField, StringField, UuidField}
 import java.util.UUID
 import org.elasticsearch.search.facet.terms.TermsFacet
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.action.search.SearchResponse
 import scala.collection.immutable.HashMap
+import scala.collection.mutable
 
 trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
   self: RecordType =>
@@ -196,6 +197,15 @@ trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
 
           case f: StringField[RecordType] =>
             fieldObj.asInstanceOf[StringField[RecordType]].set(indexedValue)
+
+          case f: DynamicPropertiesField[RecordType] =>
+            val values = new mutable.HashMap[String, AnyRef]()
+            fields.keySet().toArray().foreach(key => {
+              if (key.asInstanceOf[String].startsWith(f.name)) {
+                values.put(key.asInstanceOf[String].replace(f.name, ""), fields.get(key.asInstanceOf[String]))
+              }
+            })
+            fieldObj.asInstanceOf[DynamicPropertiesField[RecordType]].set(values.toMap)
 
           case _ => throw new RuntimeException("Unhandled field!")
         }

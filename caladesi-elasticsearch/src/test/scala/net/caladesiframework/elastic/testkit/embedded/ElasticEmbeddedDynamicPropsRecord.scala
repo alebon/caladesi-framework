@@ -17,24 +17,13 @@
 package net.caladesiframework.elastic.testkit.embedded
 
 import net.caladesiframework.elastic.record.{ElasticMetaRecord, ElasticRecord}
-import net.caladesiframework.elastic.field.StringField
+import net.caladesiframework.elastic.field.DynamicPropertiesField
 
-class ElasticEmbeddedStringRecord extends ElasticRecord[ElasticEmbeddedStringRecord] {
+class ElasticEmbeddedDynamicPropsRecord extends ElasticRecord[ElasticEmbeddedDynamicPropsRecord] {
+  def meta = ElasticEmbeddedDynamicPropsRecord
 
-  def meta = ElasticEmbeddedStringRecord
-
-  object stringField extends StringField(this) {
-    override def name = "stringField"
-  }
-
-  object facetField extends StringField(this) {
-    override def name = "facetField"
-  }
-
-  object tagField extends StringField(this) {
-    override def name = "tagField"
-  }
-
+  object dynamicProperties extends DynamicPropertiesField[ElasticEmbeddedDynamicPropsRecord](this)
 }
 
-object ElasticEmbeddedStringRecord extends ElasticEmbeddedStringRecord with ElasticMetaRecord[ElasticEmbeddedStringRecord]
+object ElasticEmbeddedDynamicPropsRecord extends ElasticEmbeddedDynamicPropsRecord
+  with ElasticMetaRecord[ElasticEmbeddedDynamicPropsRecord]

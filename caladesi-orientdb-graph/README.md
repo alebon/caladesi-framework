@@ -121,9 +121,9 @@ You can use the OrientDB Component by adding the dependency to your project.
 ### SBT 0.12.3 (Simple Build Tool)
 Modify your build.sbt
 
-    libraryDependencies += "net.caladesiframework" %% "caladesi-common" % "0.5.2" % "compile"
+    libraryDependencies += "net.caladesiframework" %% "caladesi-common" % "0.5.3" % "compile"
 
-    libraryDependencies += "net.caladesiframework" %% "caladesi-orientdb-graph" % "0.5.2" % "compile"
+    libraryDependencies += "net.caladesiframework" %% "caladesi-orientdb-graph" % "0.5.3" % "compile"
 
 ###Maven:
 Add the framework to your pom.xml:
@@ -132,13 +132,13 @@ Add the framework to your pom.xml:
 <dependency>
   <groupId>net.caladesiframework</groupId>
   <artifactId>caladesi-common_${scala.version}</artifactId>
-  <version>0.5.2</version>
+  <version>0.5.3</version>
 </dependency>
 
 <dependency>
   <groupId>net.caladesiframework</groupId>
   <artifactId>caladesi-orientdb-graph_${scala.version}</artifactId>
-  <version>0.5.2</version>
+  <version>0.5.3</version>
 </dependency>
 ```
 
@@ -146,8 +146,8 @@ Add the framework to your pom.xml:
 ```groovy
 dependencies {
     // Caladesi Framework
-    compile "net.caladesiframework:caladesi-common_2.10.1:0.5.2",
-        "net.caladesiframework:caladesi-orientdb-graph_2.10.1:0.5.2"
+    compile "net.caladesiframework:caladesi-common_2.10.1:0.5.3",
+        "net.caladesiframework:caladesi-orientdb-graph_2.10.1:0.5.3"
 }
 ```
 

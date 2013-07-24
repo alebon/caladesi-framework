@@ -1,18 +1,24 @@
 /*
-* Copyright (c) 2012 Sheeprice Ltd.
-* All rights reserved.
-*
-* http://license.sheeprice.com/LICENSE-1.0
-*
-* COPYING, REDISTRIBUTION AND USE IN ANY FORM ARE PROHIBITED WITHOUT AN
-* EXPLICIT WRITTEN PERMISSION.
-*/
+ * Copyright 2013 Caladesi Framework
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package net.caladesiframework.elastic
 
 import org.specs2.mutable.Specification
 import net.caladesiframework.elastic.testkit.ElasticTestKit
-import net.caladesiframework.elastic.testkit.embedded.ElasticEmbeddedStringRecord
+import net.caladesiframework.elastic.testkit.embedded.{ElasticEmbeddedDynamicPropsRecord, ElasticEmbeddedStringRecord}
 import java.util.UUID
 import org.elasticsearch.search.facet.terms.TermsFacet
 import scala.collection.immutable.HashMap
@@ -23,6 +29,11 @@ class ElasticEmbeddedSuiteSpec extends Specification with ElasticTestKit {
 
   "Caladesi Elastic (Embedded) Record" should {
     "be able to store records in index" in ElasticEmbeddedTestContext {
+
+      val recordDynamicProperties = ElasticEmbeddedDynamicPropsRecord.create
+      recordDynamicProperties._uuid.set(UUID.randomUUID())
+      recordDynamicProperties.dynamicProperties.set(Map("property1" -> "test1", "property2" -> "test2"))
+      recordDynamicProperties.save
 
       val record = ElasticEmbeddedStringRecord.createRecord
       record._uuid.set(UUID.randomUUID())
@@ -86,6 +97,12 @@ class ElasticEmbeddedSuiteSpec extends Specification with ElasticTestKit {
       )
       filterResult1.size must_==(1)
 
+      // Test dynamic properties
+      val recordDPUuid = recordDynamicProperties._uuid.get.toString
+      val foundRecordDP = ElasticEmbeddedDynamicPropsRecord.findById(recordDPUuid)
+
+      foundRecordDP must_!=(None)
+      foundRecordDP.get.dynamicProperties.get.size must_==(2)
     }
   }
 }

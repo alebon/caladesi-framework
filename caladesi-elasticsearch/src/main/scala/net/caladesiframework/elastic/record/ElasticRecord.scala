@@ -18,7 +18,7 @@ package net.caladesiframework.elastic.record
 
 import net.caladesiframework.record.Record
 import net.caladesiframework.elastic.{DefaultElasticProviderIdentifier, ElasticProviderIdentifier}
-import net.caladesiframework.elastic.field.{StringField, UuidField}
+import net.caladesiframework.elastic.field.{DynamicPropertiesField, StringField, UuidField}
 import net.caladesiframework.document.Field
 import org.elasticsearch.common.xcontent.XContentBuilder
 
@@ -75,6 +75,11 @@ trait ElasticRecord[RecordType] extends Record[RecordType] {
 
           case f: StringField[RecordType] =>
             builder.field(fieldName, fieldObj.asInstanceOf[StringField[RecordType]].get.toString)
+
+          case f:DynamicPropertiesField[RecordType] =>
+            fieldObj.asInstanceOf[DynamicPropertiesField[RecordType]].get.foreach(entry => {
+              builder.field(fieldName + entry._1, entry._2)
+            })
 
           case _ => throw new RuntimeException("Unhandled field!")
         }
