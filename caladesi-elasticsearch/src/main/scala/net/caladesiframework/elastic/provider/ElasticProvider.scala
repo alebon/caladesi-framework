@@ -28,6 +28,10 @@ import org.elasticsearch.common.xcontent.XContentBuilder
 import net.caladesiframework.document.Field
 import org.elasticsearch.search.SearchHitField
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
+import org.elasticsearch.index.query.{FilterBuilders, QueryBuilders}
+import org.elasticsearch.search.facet.terms.TermsFacet
+import org.elasticsearch.search.facet.FacetBuilders
+import scala.collection.immutable.HashMap
 
 case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boolean = false) {
 
@@ -165,13 +169,58 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
     val response: SearchResponse = client.prepareSearch(indexName)
       .setTypes(itemType)
       //.setSearchType(SearchType.DEFAULT)
-      .setQuery(queryString("%s*".format(queryTerm)).field(fieldName))
+      .setQuery(queryString("*%s*".format(queryTerm)).field(fieldName))
       //.setQuery(fuzzyQuery(fieldName, "%s*".format(queryTerm)).maxExpansions(100)) // Query
       //.setFrom(0).setSize(60).setExplain(true)
       .execute()
       .actionGet()
 
     response
+  }
+
+  /**
+   * Filters search request by given fields and its values
+   *
+   * @param indexName
+   * @param itemType
+   * @param filterMap
+   * @return
+   */
+  def executeFilterQuery(indexName: String, itemType: String, filterMap: HashMap[String, String]): SearchResponse = {
+
+    val filter = FilterBuilders.boolFilter()
+    val responsePrepare = client.prepareSearch(indexName)
+      .setTypes(itemType)
+
+    filterMap.toList.foreach(entry => {
+      filter.must(FilterBuilders.termFilter(entry._1, entry._2))
+      responsePrepare.addFacet(FacetBuilders.termsFacet(entry._1 + "Facet").field(entry._1))
+    })
+    responsePrepare.setFilter(filter)
+
+    val response: SearchResponse = responsePrepare.execute()
+      .actionGet()
+
+    response
+  }
+
+  /**
+   * Common facet query (get facets for a given field)
+   *
+   * @param fieldName
+   * @return
+   */
+  def executeFacetForFieldQuery(fieldName: String, indexName: String, itemType: String): TermsFacet = {
+
+    val matchAllQueryBuilder = QueryBuilders.matchAllQuery()
+    val fieldFacet = FacetBuilders.termsFacet(fieldName + "Facet").field(fieldName)
+    val response: SearchResponse = client.prepareSearch(indexName)
+      .setTypes(itemType)
+      .setQuery(matchAllQueryBuilder)
+      .addFacet(fieldFacet)
+      .execute().actionGet()
+
+    response.getFacets().facet(fieldName + "Facet")
   }
 
   /**

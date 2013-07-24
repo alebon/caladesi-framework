@@ -21,6 +21,14 @@ class ElasticEmbeddedStringRecord extends ElasticRecord[ElasticEmbeddedStringRec
     override def name = "stringField"
   }
 
+  object facetField extends StringField(this) {
+    override def name = "facetField"
+  }
+
+  object tagField extends StringField(this) {
+    override def name = "tagField"
+  }
+
 }
 
 object ElasticEmbeddedStringRecord extends ElasticEmbeddedStringRecord with ElasticMetaRecord[ElasticEmbeddedStringRecord]

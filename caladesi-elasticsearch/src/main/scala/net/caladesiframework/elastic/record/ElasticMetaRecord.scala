@@ -20,6 +20,10 @@ import net.caladesiframework.elastic.provider.{Elastic, ElasticProvider}
 import net.caladesiframework.document.Field
 import net.caladesiframework.elastic.field.{StringField, UuidField}
 import java.util.UUID
+import org.elasticsearch.search.facet.terms.TermsFacet
+import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.action.search.SearchResponse
+import scala.collection.immutable.HashMap
 
 trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
   self: RecordType =>
@@ -133,13 +137,39 @@ trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
    */
   def query(field: Field[_, _], queryTerm : String): List[RecordType] = {
 
-    val response = provider.executeFuzzyQuery(field.name, queryTerm, indexName, itemTypeName)
+    val response = provider.executeFuzzyQuery(field.name, queryTerm, this.indexName, this.itemTypeName)
     val result: List[RecordType] = response.getHits.getHits.map(hit => {
       getRecord(hit.getSource.asInstanceOf[java.util.HashMap[String, AnyRef]])
     }).toList
 
 
-    return result
+    result
+  }
+
+  /**
+   * Performs a query based on given field filters
+   * (Field1 -> value1, Field2 -> value2)
+   *
+   * @param filterMap map
+   * @return
+   */
+  def queryFiltered(filterMap: HashMap[Field[_, _], String]): List[RecordType] = {
+    val response = provider.executeFilterQuery(this.indexName, this.itemTypeName, filterMap.map(entry => (entry._1.name, entry._2)))
+    val result: List[RecordType] = response.getHits.getHits.map(hit => {
+      getRecord(hit.getSource.asInstanceOf[java.util.HashMap[String, AnyRef]])
+    }).toList
+
+    result
+  }
+
+  /**
+   * Returns TemsFacets for given field (More or less, wrapper)
+   *
+   * @param field Field
+   * @return
+   */
+  def getFacetsForField(field: Field[_, _]): TermsFacet = {
+    provider.executeFacetForFieldQuery(field.name, this.indexName, this.itemTypeName)
   }
 
   /**
