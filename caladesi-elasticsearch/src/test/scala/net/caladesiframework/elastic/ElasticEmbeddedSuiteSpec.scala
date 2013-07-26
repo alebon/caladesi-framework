@@ -64,10 +64,17 @@ class ElasticEmbeddedSuiteSpec extends Specification with ElasticTestKit {
       record3.facetField.set("")
       record3.save
 
+      val record4 = ElasticEmbeddedStringRecord.createRecord
+      record4._uuid.set(UUID.randomUUID())
+      record4.stringField.set("Different text 2")
+      record4.facetField.set("two")
+      record4.tagField.set("tag2")
+      record4.save
+
       val recordUuid = record2._uuid.get.toString
       val foundRecord = ElasticEmbeddedStringRecord.findById(recordUuid)
 
-      ElasticEmbeddedStringRecord.count must_== 3
+      ElasticEmbeddedStringRecord.count must_== 4
       foundRecord.get._uuid.get.toString must_==(recordUuid)
 
       ElasticEmbeddedStringRecord.query(ElasticEmbeddedStringRecord.stringField, "xyz").size must_==(0)
@@ -85,7 +92,7 @@ class ElasticEmbeddedSuiteSpec extends Specification with ElasticTestKit {
       termsFacet.getMissingCount must_==(1)
 
       // terms "one" and "two"
-      termsFacet.getTotalCount must_==(2)
+      termsFacet.getTotalCount must_==(3)
 
       val filterResult = ElasticEmbeddedStringRecord.queryFiltered(HashMap(ElasticEmbeddedStringRecord.tagField -> "tag1"))
       filterResult.size must_==(2)

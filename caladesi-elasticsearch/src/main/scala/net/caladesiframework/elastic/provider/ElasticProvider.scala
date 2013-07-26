@@ -205,6 +205,46 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
   }
 
   /**
+   * Executes a filtering search and returns the defined facets
+   *
+   * @param indexName
+   * @param itemType
+   * @param filterMap
+   * @param facets
+   * @return
+   */
+  def executeFacetFilterQuery(indexName: String, itemType: String, filterMap: HashMap[String, String], facets: List[String]): SearchResponse = {
+    val filter = FilterBuilders.andFilter()
+    val responsePrepare = client.prepareSearch(indexName)
+      .setTypes(itemType)
+
+    filterMap.toList.foreach(entry => {
+      //filter.must(FilterBuilders.termFilter(entry._1, entry._2))
+      responsePrepare.addFacet(FacetBuilders.termsFacet(entry._1 + "Facet").field(entry._1))
+    })
+
+    val mustTerms = filterMap.map(entry => FilterBuilders.termFilter(entry._1, entry._2))
+    mustTerms.map(entry => filter.add(entry))
+
+    responsePrepare.setFilter(filter)
+
+    facets foreach(facetField => {
+      val fieldFacet = FacetBuilders.termsFacet(facetField + "Facet")
+        .field(facetField)
+        .size(50)
+        .facetFilter(ElasticFilterBuilder.buildAndFacetFilter(facetField, filterMap.toMap))
+      responsePrepare.addFacet(fieldFacet)
+    })
+
+    responsePrepare.setSize(1000)
+
+    val response: SearchResponse = responsePrepare.execute()
+      .actionGet()
+
+    response
+  }
+
+  /**
    * Common facet query (get facets for a given field)
    *
    * @param fieldName
@@ -213,7 +253,7 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
   def executeFacetForFieldQuery(fieldName: String, indexName: String, itemType: String): TermsFacet = {
 
     val matchAllQueryBuilder = QueryBuilders.matchAllQuery()
-    val fieldFacet = FacetBuilders.termsFacet(fieldName + "Facet").field(fieldName)
+    val fieldFacet = FacetBuilders.termsFacet(fieldName + "Facet").field(fieldName).size(75)
     val response: SearchResponse = client.prepareSearch(indexName)
       .setTypes(itemType)
       .setQuery(matchAllQueryBuilder)

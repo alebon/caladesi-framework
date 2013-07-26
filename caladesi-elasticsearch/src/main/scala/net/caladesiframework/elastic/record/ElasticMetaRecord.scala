@@ -25,6 +25,7 @@ import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.action.search.SearchResponse
 import scala.collection.immutable.HashMap
 import scala.collection.mutable
+import org.elasticsearch.search.facet.Facets
 
 trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
   self: RecordType =>
@@ -161,6 +162,27 @@ trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
     }).toList
 
     result
+  }
+
+  /**
+   * Performs a query based on given field filters and returns the requested facets for the query
+   * Filtered fields: (Field1 -> value1, Field2 -> value2)
+   * Facets: (Field2, Field3)
+   *
+   * @param filterMap map
+   * @param facets list
+   * @return
+   */
+  def queryFilteredWithFacets(filterMap: HashMap[Field[_, _], String], facets: List[Field[_,_]]): (List[RecordType], Facets) = {
+    val response = provider.executeFacetFilterQuery(this.indexName,
+      this.itemTypeName, filterMap.map(entry => (entry._1.name, entry._2)),
+      facets.map(facetField => facetField.name))
+
+    val result: List[RecordType] = response.getHits.getHits.map(hit => {
+      getRecord(hit.getSource.asInstanceOf[java.util.HashMap[String, AnyRef]])
+    }).toList
+
+    (result, response.getFacets)
   }
 
   /**
