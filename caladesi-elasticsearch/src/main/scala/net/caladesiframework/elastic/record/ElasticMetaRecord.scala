@@ -37,9 +37,32 @@ trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
     }
   }
 
+  private var prototype: Option[RecordType] = None
+
+  private var indexApplied: Boolean = false
+
+  def isIndexCreationNeeded = indexApplied
+
+  def initIndex = {
+
+    prototype match {
+      case Some(record) => // Ok, fields already initialized
+      case None =>
+        this.prototype = Some(this.getClass.getSuperclass.newInstance().asInstanceOf[RecordType])
+        initFields(prototype.get)
+    }
+
+    provider.ensureIndex(this.indexName, this.itemTypeName, this.fieldMap.toMap.asInstanceOf[Map[String, AnyRef]])
+    indexApplied = true
+  }
+
   def createRecord: RecordType = {
     val record = this.getClass.getSuperclass.newInstance().asInstanceOf[RecordType]
-    provider.ensureIndex(this.indexName, this.itemTypeName)
+
+    // Ensure index was created properly
+    if (!indexApplied) {
+      initIndex
+    }
 
     // Avoid iterating all fields
     //if (!initComplete) {
@@ -128,6 +151,7 @@ trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
    */
   def deleteAll = {
     provider.deleteIndex(indexName)
+    indexApplied = false
   }
 
   /**
@@ -155,7 +179,7 @@ trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
    * @param filterMap map
    * @return
    */
-  def queryFiltered(filterMap: HashMap[Field[_, _], String]): List[RecordType] = {
+  def queryFiltered(filterMap: Map[Field[_, _], String]): List[RecordType] = {
     val response = provider.executeFilterQuery(this.indexName, this.itemTypeName, filterMap.map(entry => (entry._1.name, entry._2)))
     val result: List[RecordType] = response.getHits.getHits.map(hit => {
       getRecord(hit.getSource.asInstanceOf[java.util.HashMap[String, AnyRef]])
@@ -173,10 +197,25 @@ trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
    * @param facets list
    * @return
    */
-  def queryFilteredWithFacets(filterMap: HashMap[Field[_, _], String], facets: List[Field[_,_]]): (List[RecordType], Facets) = {
+  def queryFilteredWithFacets(filterMap: Map[AnyRef, String], facets: List[AnyRef]): (List[RecordType], Facets) = {
+    val preparedFilterMap = mutable.Map[String, String]()
+    filterMap.foreach(entry => {
+      if (entry._1.isInstanceOf[Field[_,_]]) {
+        preparedFilterMap.put(entry._1.asInstanceOf[Field[_,_]].name, entry._2)
+      } else {
+        preparedFilterMap.put(entry._1.toString, entry._2)
+      }
+    })
+
     val response = provider.executeFacetFilterQuery(this.indexName,
-      this.itemTypeName, filterMap.map(entry => (entry._1.name, entry._2)),
-      facets.map(facetField => facetField.name))
+      this.itemTypeName, preparedFilterMap.toMap,
+      facets.map(facetField => {
+        if (facetField.isInstanceOf[Field[_,_]]) {
+          facetField.asInstanceOf[Field[_,_]].name
+        } else {
+          facetField.toString
+        }
+      }))
 
     val result: List[RecordType] = response.getHits.getHits.map(hit => {
       getRecord(hit.getSource.asInstanceOf[java.util.HashMap[String, AnyRef]])
@@ -186,7 +225,7 @@ trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
   }
 
   /**
-   * Returns TemsFacets for given field (More or less, wrapper)
+   * Returns TermsFacets for given field (More or less a wrapper)
    *
    * @param field Field
    * @return

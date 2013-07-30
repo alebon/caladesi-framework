@@ -32,7 +32,7 @@ class ElasticEmbeddedSuiteSpec extends Specification with ElasticTestKit {
 
       val recordDynamicProperties = ElasticEmbeddedDynamicPropsRecord.create
       recordDynamicProperties._uuid.set(UUID.randomUUID())
-      recordDynamicProperties.dynamicProperties.set(Map("property1" -> "test1", "property2" -> "test2"))
+      recordDynamicProperties.dynamicProperties.set(Map("property1" -> "test1", "property2" -> "test2", "property3" -> "test with words"))
       recordDynamicProperties.save
 
       val record = ElasticEmbeddedStringRecord.createRecord
@@ -94,22 +94,31 @@ class ElasticEmbeddedSuiteSpec extends Specification with ElasticTestKit {
       // terms "one" and "two"
       termsFacet.getTotalCount must_==(3)
 
-      val filterResult = ElasticEmbeddedStringRecord.queryFiltered(HashMap(ElasticEmbeddedStringRecord.tagField -> "tag1"))
+      val filterResult = ElasticEmbeddedStringRecord.queryFiltered(Map(ElasticEmbeddedStringRecord.tagField -> "tag1"))
       filterResult.size must_==(2)
 
-      val filterResult1 = ElasticEmbeddedStringRecord.queryFiltered(
-        HashMap(ElasticEmbeddedStringRecord.tagField -> "tag1",
+      val filterResult1 = ElasticEmbeddedStringRecord.queryFilteredWithFacets(
+        Map(ElasticEmbeddedStringRecord.tagField -> "tag1",
           ElasticEmbeddedStringRecord.facetField -> "two"
-        )
+        ),
+        List(ElasticEmbeddedStringRecord.facetField)
       )
-      filterResult1.size must_==(1)
+      filterResult1._1.size must_==(1)
+      filterResult1._2.getFacets()
+        .get(ElasticEmbeddedStringRecord.facetField.name + "Facet").asInstanceOf[TermsFacet].getEntries.toArray.foreach(term => {
+
+        val facetTerm = term.asInstanceOf[TermsFacet.Entry]
+        if (facetTerm.getTerm.toString.equals("two")) {
+          facetTerm.getCount must_==(1)
+        }
+      })
 
       // Test dynamic properties
       val recordDPUuid = recordDynamicProperties._uuid.get.toString
       val foundRecordDP = ElasticEmbeddedDynamicPropsRecord.findById(recordDPUuid)
 
       foundRecordDP must_!=(None)
-      foundRecordDP.get.dynamicProperties.get.size must_==(2)
+      foundRecordDP.get.dynamicProperties.get.size must_==(3)
     }
   }
 }

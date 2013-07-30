@@ -23,21 +23,20 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexRequest
 import org.elasticsearch.client.Requests
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.search.SearchResponse
-import net.caladesiframework.elastic.search.TermMatchType
-import org.elasticsearch.common.xcontent.XContentBuilder
+import org.elasticsearch.common.xcontent.{XContentFactory, XContentBuilder}
 import net.caladesiframework.document.Field
-import org.elasticsearch.search.SearchHitField
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
 import org.elasticsearch.index.query.{FilterBuilders, QueryBuilders}
 import org.elasticsearch.search.facet.terms.TermsFacet
 import org.elasticsearch.search.facet.FacetBuilders
-import scala.collection.immutable.HashMap
+import net.caladesiframework.elastic.field.analyzer.NotAnalyzed
+import net.caladesiframework.elastic.builder.FieldSettingsBuilder
 
 case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boolean = false) {
 
   private lazy val node = startUp()
   private lazy val client = node.client()
-
+  private lazy val fieldSettingsBuilder = new FieldSettingsBuilder
   /**
    * Setup
    *
@@ -73,7 +72,9 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
    * @param itemType
    * @return
    */
-  def ensureIndex(indexName: String, itemType: String) = {
+  def ensureIndex[RecordType <: AnyRef](indexName: String, itemType: String, fieldMap: Map[String, AnyRef]) = {
+
+    import org.elasticsearch.common.xcontent.XContentFactory._;
 
     //debug("Ensuring index '%s' for %s".format(indexName, entityName))
 
@@ -84,9 +85,39 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
 
     if (!map.containsKey(indexName)) {
       val settings: ImmutableSettings.Builder = ImmutableSettings.settingsBuilder()
+
       settings.put("_index", indexName)
       settings.put("_type", itemType)
-      val request: CreateIndexRequest = Requests.createIndexRequest(indexName).settings(settings)
+
+      // Create new builder
+      val builder = jsonBuilder()
+
+
+      // Start main mappings object
+      builder.startObject().field(itemType).startObject()
+        builder.startObject("_source").field("enabled", true).endObject()
+        builder.startObject("properties")
+
+        fieldMap.toList.foreach(mapEntry => {
+
+          var analyzedParam = "analyzed"
+          if (mapEntry._2.isInstanceOf[NotAnalyzed]) {
+            analyzedParam = "not_analyzed"
+          }
+          // Apply correct analyzer strategy
+          builder.startObject(mapEntry._2.asInstanceOf[Field[_,_]].name)
+            .field("type", "string").field("index", analyzedParam).endObject()
+        })
+
+        //End properties object
+        builder.endObject().endObject()
+
+      // End main mappings object
+      builder.endObject()
+
+      println("BUILDER::" + builder.string())
+
+      val request: CreateIndexRequest = Requests.createIndexRequest(indexName).settings(settings).mapping(itemType, builder)
 
       //debug("Creating index %s with type %s".format(indexName, entityName))
       client.admin().indices().create(request).actionGet()
@@ -120,8 +151,19 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
    * @param id
    * @param dbValues
    */
-  def addItem(indexName: String, itemType: String, id: String, dbValues: XContentBuilder) = {
+  def addItem(indexName: String, itemType: String, id: String, dbValues: XContentBuilder,
+              mappingUpdates: Option[XContentBuilder]) = {
     val start = System.currentTimeMillis()
+
+    mappingUpdates match {
+      case Some(jsonUpdateContent) =>
+        // Update mappings for dynamic properties
+        client.admin().indices().preparePutMapping(indexName).setType(itemType)
+          .setSource(jsonUpdateContent)
+          .execute().actionGet()
+      case None => // No need to update mappings, no dynamic properties defined
+    }
+
 
     client.prepareIndex(indexName, itemType, id).setSource(dbValues).execute().actionGet()
 
@@ -186,7 +228,7 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
    * @param filterMap
    * @return
    */
-  def executeFilterQuery(indexName: String, itemType: String, filterMap: HashMap[String, String]): SearchResponse = {
+  def executeFilterQuery(indexName: String, itemType: String, filterMap: Map[String, String]): SearchResponse = {
 
     val filter = FilterBuilders.boolFilter()
     val responsePrepare = client.prepareSearch(indexName)
@@ -213,15 +255,10 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
    * @param facets
    * @return
    */
-  def executeFacetFilterQuery(indexName: String, itemType: String, filterMap: HashMap[String, String], facets: List[String]): SearchResponse = {
+  def executeFacetFilterQuery(indexName: String, itemType: String, filterMap: Map[String, String], facets: List[String]): SearchResponse = {
     val filter = FilterBuilders.andFilter()
     val responsePrepare = client.prepareSearch(indexName)
       .setTypes(itemType)
-
-    filterMap.toList.foreach(entry => {
-      //filter.must(FilterBuilders.termFilter(entry._1, entry._2))
-      responsePrepare.addFacet(FacetBuilders.termsFacet(entry._1 + "Facet").field(entry._1))
-    })
 
     val mustTerms = filterMap.map(entry => FilterBuilders.termFilter(entry._1, entry._2))
     mustTerms.map(entry => filter.add(entry))
@@ -231,12 +268,14 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
     facets foreach(facetField => {
       val fieldFacet = FacetBuilders.termsFacet(facetField + "Facet")
         .field(facetField)
-        .size(50)
+        .size(100)
         .facetFilter(ElasticFilterBuilder.buildAndFacetFilter(facetField, filterMap.toMap))
       responsePrepare.addFacet(fieldFacet)
     })
 
     responsePrepare.setSize(1000)
+
+    println(responsePrepare.toString)
 
     val response: SearchResponse = responsePrepare.execute()
       .actionGet()

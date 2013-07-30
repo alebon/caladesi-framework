@@ -17,10 +17,15 @@
 package net.caladesiframework.elastic.testkit.embedded
 
 import net.caladesiframework.elastic.record.{ElasticMetaRecord, ElasticRecord}
-import net.caladesiframework.elastic.field.DynamicPropertiesField
+import net.caladesiframework.elastic.field.{StringField, DynamicPropertiesField}
+import net.caladesiframework.elastic.field.analyzer.{Analyzed, NotAnalyzed}
 
 class ElasticEmbeddedDynamicPropsRecord extends ElasticRecord[ElasticEmbeddedDynamicPropsRecord] {
   def meta = ElasticEmbeddedDynamicPropsRecord
+
+  object notAnalyzedStringProperty extends StringField(this) with NotAnalyzed
+
+  object analyzedStringProperty extends StringField(this) with Analyzed
 
   object dynamicProperties extends DynamicPropertiesField[ElasticEmbeddedDynamicPropsRecord](this)
 }

@@ -36,6 +36,8 @@ object ElasticFilterBuilder {
       }
     })
 
+    println(filter.toString)
+
     filter
   }
 

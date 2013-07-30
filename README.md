@@ -24,7 +24,7 @@ You can use the caladesi framework by adding the dependency to your project:
 ### SBT 0.12.3 (Simple Build Tool)
 Modify your build.sbt
 
-    libraryDependencies += "net.caladesiframework" %% "caladesi-web" % "0.5.3" % "compile"
+    libraryDependencies += "net.caladesiframework" %% "caladesi-web" % "0.5.4" % "compile"
 
 ###Maven:
 Add the framework to your pom.xml:
@@ -33,7 +33,7 @@ Add the framework to your pom.xml:
 <dependency>
   <groupId>net.caladesiframework</groupId>
   <artifactId>caladesi-web_${scala.version}</artifactId>
-  <version>0.5.3</version>
+  <version>0.5.4</version>
 </dependency>
 ```
 
@@ -41,7 +41,7 @@ Add the framework to your pom.xml:
 ```groovy
 dependencies {
     // Caladesi Framework
-    compile "net.caladesiframework:caladesi-web_$scalaVersion:0.5.3"
+    compile "net.caladesiframework:caladesi-web_$scalaVersion:0.5.4"
 }
 ```
 
