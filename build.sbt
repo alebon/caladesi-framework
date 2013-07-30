@@ -4,7 +4,7 @@ organization in ThisBuild	:= "net.caladesiframework"
 
 scalaVersion in ThisBuild       := "2.10.1"
 
-version in ThisBuild		:= "0.5.4-M2-SNAPSHOT"
+version in ThisBuild		:= "0.5.4"
 
 homepage in ThisBuild		:= Some(url("http://caladesiframework.net"))
 
