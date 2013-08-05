@@ -85,7 +85,7 @@ class ElasticEmbeddedSuiteSpec extends Specification with ElasticTestKit {
       termsFacet.getEntries.size() must_!=(0)
 
       termsFacet.getEntries.toArray foreach(entry => {
-        println("=*=" + entry.asInstanceOf[TermsFacet.Entry].getTerm)
+        //println("=*=" + entry.asInstanceOf[TermsFacet.Entry].getTerm)
       })
 
       // One doc with empty term

@@ -31,6 +31,7 @@ import org.elasticsearch.search.facet.terms.TermsFacet
 import org.elasticsearch.search.facet.FacetBuilders
 import net.caladesiframework.elastic.field.analyzer.NotAnalyzed
 import net.caladesiframework.elastic.builder.FieldSettingsBuilder
+import net.caladesiframework.elastic.field.DynamicPropertiesField
 
 case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boolean = false) {
 
@@ -100,13 +101,15 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
 
         fieldMap.toList.foreach(mapEntry => {
 
-          var analyzedParam = "analyzed"
-          if (mapEntry._2.isInstanceOf[NotAnalyzed]) {
-            analyzedParam = "not_analyzed"
+          if (!mapEntry._2.isInstanceOf[DynamicPropertiesField[_]]) {
+            var analyzedParam = "analyzed"
+            if (mapEntry._2.isInstanceOf[NotAnalyzed]) {
+              analyzedParam = "not_analyzed"
+            }
+            // Apply correct analyzer strategy
+            builder.startObject(mapEntry._2.asInstanceOf[Field[_,_]].name)
+              .field("type", "string").field("index", analyzedParam).endObject()
           }
-          // Apply correct analyzer strategy
-          builder.startObject(mapEntry._2.asInstanceOf[Field[_,_]].name)
-            .field("type", "string").field("index", analyzedParam).endObject()
         })
 
         //End properties object
@@ -115,7 +118,7 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
       // End main mappings object
       builder.endObject()
 
-      println("BUILDER::" + builder.string())
+      //println("BUILDER::" + builder.string())
 
       val request: CreateIndexRequest = Requests.createIndexRequest(indexName).settings(settings).mapping(itemType, builder)
 
@@ -158,7 +161,7 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
     mappingUpdates match {
       case Some(jsonUpdateContent) =>
         // Update mappings for dynamic properties
-        client.admin().indices().preparePutMapping(indexName).setType(itemType)
+        client.admin().indices().preparePutMapping(indexName).setType(itemType).setIgnoreConflicts(true)
           .setSource(jsonUpdateContent)
           .execute().actionGet()
       case None => // No need to update mappings, no dynamic properties defined
@@ -275,7 +278,7 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
 
     responsePrepare.setSize(1000)
 
-    println(responsePrepare.toString)
+    //println(responsePrepare.toString)
 
     val response: SearchResponse = responsePrepare.execute()
       .actionGet()

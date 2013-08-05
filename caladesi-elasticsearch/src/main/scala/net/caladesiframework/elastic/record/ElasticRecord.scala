@@ -127,7 +127,7 @@ trait ElasticRecord[RecordType] extends Record[RecordType] {
     builder.endObject()
 
     if (hasDynamicProperties) {
-      println("BUILDING DYNAMIC PROPERTIES INDEX MAPPING: " + builder.string())
+      //println("BUILDING DYNAMIC PROPERTIES INDEX MAPPING: " + builder.string())
       return Some(builder)
     } else {
       return None
