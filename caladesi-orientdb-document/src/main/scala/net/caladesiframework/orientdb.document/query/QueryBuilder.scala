@@ -20,7 +20,7 @@ import java.util.UUID
 import net.caladesiframework.orientdb.document.record.OrientRecord
 import net.caladesiframework.document.Field
 
-class QueryBuilder() {
+class QueryBuilder[QRType]() {
 
   protected var qry : String = ""
 
@@ -37,7 +37,7 @@ class QueryBuilder() {
    *
    * @param limit
    */
-  def limit(limit: Long = 10) : QueryBuilder = {
+  def limit(limit: Long = 10) : QueryBuilder[QRType] = {
     qry += " limit " + limit
     this
   }
@@ -47,7 +47,7 @@ class QueryBuilder() {
    *
    * @return
    */
-  def where(field: Field[_, _]) : QueryBuilder = {
+  def where(field: Field[_, _]) : QueryBuilder[QRType] = {
     qry += " where " + field.name
     this
   }
@@ -57,12 +57,12 @@ class QueryBuilder() {
    *
    * @return
    */
-  def toLC: QueryBuilder = {
+  def toLC: QueryBuilder[QRType] = {
     qry += ".toLowerCase()"
     this
   }
 
-  def eqs(value: Any): QueryBuilder = {
+  def eqs(value: Any): QueryBuilder[QRType] = {
     value match {
       case v: UUID => params = v.toString :: params
       case v: scala.Double => params = v.asInstanceOf[java.lang.Double] :: params
@@ -73,25 +73,25 @@ class QueryBuilder() {
     this
   }
 
-  def like(value: String): QueryBuilder = {
+  def like(value: String): QueryBuilder[QRType] = {
     params = "%" + value.toString + "%" :: params
     qry += ".toLowerCase() LIKE ?"
     this
   }
 
-  def startsLike(value: String): QueryBuilder = {
+  def startsLike(value: String): QueryBuilder[QRType] = {
     params = value.toString + "%" :: params
     qry += ".toLowerCase() LIKE ?"
     this
   }
 
-  def endsLike(value: String): QueryBuilder = {
+  def endsLike(value: String): QueryBuilder[QRType] = {
     params = "%" + value.toString :: params
     qry += ".toLowerCase() LIKE ?"
     this
   }
 
-  def in(values:AnyRef*): QueryBuilder = {
+  def in(values:AnyRef*): QueryBuilder[QRType] = {
     values foreach {
       value => {
         params = value.toString :: params
@@ -107,13 +107,13 @@ class QueryBuilder() {
    *
    * @return
    */
-  def and[FieldType](field: Field[_, _]) : QueryBuilder = {
+  def and[FieldType](field: Field[_, _]) : QueryBuilder[QRType] = {
     qry += " and " + field.name
 
     this
   }
 
-  def skip(value: Long) : QueryBuilder = {
+  def skip(value: Long) : QueryBuilder[QRType] = {
 
     qry += " skip " + value
 
@@ -123,9 +123,9 @@ class QueryBuilder() {
   /**
    * Execute the query
    */
-  def ex: List[OrientRecord[_]] = {
+  def ex: List[QRType] = {
     println("Executing query: " + qry + " with params " + params.toString())
-    prototype.get.meta.execute(this.qry, this.reverse[AnyRef](params):_*)
+    prototype.get.meta.execute(this.qry, this.reverse[AnyRef](params):_*).asInstanceOf[List[QRType]]
   }
 
   def setPrototype(record: OrientRecord[_]) = {

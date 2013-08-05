@@ -136,7 +136,7 @@ class OrientEmbeddedSuiteSpec extends Specification with OrientDocumentTestKit {
         .and(OrientEmbeddedStringRecord.stringField).eqs("tag1").ex
 
       foundRecords.size must_==(1)
-      foundRecords.head.asInstanceOf[OrientEmbeddedStringRecord].stringField.get must_== ("tag1")
+      foundRecords.head.stringField.get must_== ("tag1")
 
       foundRecords2.size must_==(1)
       foundRecords3.size must_==(0)

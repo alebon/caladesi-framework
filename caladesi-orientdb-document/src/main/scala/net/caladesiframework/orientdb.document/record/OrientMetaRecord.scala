@@ -262,8 +262,8 @@ trait OrientMetaRecord[RecordType] extends OrientRecord[RecordType] {
   /**
    * Finds entities by constructed query
    */
-  def find : QueryBuilder = {
-    val queryBuilder = new QueryBuilder()
+  def find : QueryBuilder[RecordType] = {
+    val queryBuilder = new QueryBuilder[RecordType]()
     queryBuilder.setPrototype(create.asInstanceOf[OrientRecord[_]])
     queryBuilder
   }
@@ -274,7 +274,7 @@ trait OrientMetaRecord[RecordType] extends OrientRecord[RecordType] {
    * @param qry
    * @return
    */
-  def execute(qry: String, params: AnyRef*): List[OrientRecord[_]] = connected(implicit db => {
+  def execute(qry: String, params: AnyRef*): List[RecordType] = connected(implicit db => {
 
     val oQuery = new OSQLSynchQuery[ODocument](qry)
     val result: util.ArrayList[ODocument] = db.command(oQuery).asInstanceOf[OCommandRequest].execute(params:_*)
@@ -285,7 +285,7 @@ trait OrientMetaRecord[RecordType] extends OrientRecord[RecordType] {
       list = createFromDb(iterator.next()) :: list
     }
 
-    list.asInstanceOf[List[OrientRecord[_]]]
+    list
   })
 
   /**
