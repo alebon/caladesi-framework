@@ -22,8 +22,8 @@ object Dependencies {
   lazy val scalaDepVersion   = "2.10.1"
   lazy val slf4jVersion   = "1.7.2"
   lazy val liftVersion    = "2.5"
-  lazy val orientVersion  = "1.5"
-  lazy val neo4jVersion   = "1.9"
+  lazy val orientVersion  = "1.5.0"
+  lazy val neo4jVersion   = "1.9.2"
   lazy val logbackVersion = "1.0.6"
   lazy val elasticVersion = "0.90.2"
 

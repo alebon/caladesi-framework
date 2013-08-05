@@ -89,7 +89,7 @@ trait IndexManager extends OrientGraphDbWrapper {
               index.put(field.asInstanceOf[Field[AnyRef]].value.toString, vertex)
             }
 
-            index.lazySave()
+            //index.
           case field: Field[_] =>
             // Ignore field
           case _ =>
