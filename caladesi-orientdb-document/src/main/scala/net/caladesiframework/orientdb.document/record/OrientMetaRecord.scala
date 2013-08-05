@@ -26,6 +26,25 @@ import net.caladesiframework.orientdb.config.OrientDbEmbeddedType
 import net.caladesiframework.orientdb.config.OrientDbMemoryType
 import net.caladesiframework.orientdb.config.OrientDbEmbeddedConfiguration
 import sun.reflect.generics.reflectiveObjects.NotImplementedException
+import net.caladesiframework.orientdb.document.query.QueryBuilder
+import com.orientechnologies.orient.core.record.impl.ODocument
+import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery
+import com.orientechnologies.orient.core.command.OCommandRequest
+import java.util
+import net.caladesiframework.orientdb.document.field._
+import java.util.UUID
+import net.caladesiframework.orientdb.config.OrientDbMemoryConfiguration
+import net.caladesiframework.orientdb.config.OrientDbRemoteType
+import net.caladesiframework.orientdb.config.OrientDbRemoteConfiguration
+import net.caladesiframework.orientdb.config.OrientDbEmbeddedType
+import net.caladesiframework.orientdb.config.OrientDbMemoryType
+import net.caladesiframework.orientdb.config.OrientDbEmbeddedConfiguration
+import net.caladesiframework.orientdb.config.OrientDbMemoryConfiguration
+import net.caladesiframework.orientdb.config.OrientDbRemoteType
+import net.caladesiframework.orientdb.config.OrientDbRemoteConfiguration
+import net.caladesiframework.orientdb.config.OrientDbEmbeddedType
+import net.caladesiframework.orientdb.config.OrientDbMemoryType
+import net.caladesiframework.orientdb.config.OrientDbEmbeddedConfiguration
 
 /**
  * Holds meta information and operations on a record
@@ -238,6 +257,99 @@ trait OrientMetaRecord[RecordType] extends OrientRecord[RecordType] {
       case e:Exception => throw new RuntimeException("Couldn't create DB at local store %s. Reason: %s".format(path, e.getMessage))
     }
 
+  }
+
+  /**
+   * Finds entities by constructed query
+   */
+  def find : QueryBuilder = {
+    val queryBuilder = new QueryBuilder()
+    queryBuilder.setPrototype(create.asInstanceOf[OrientRecord[_]])
+    queryBuilder
+  }
+
+  /**
+   * Executes a string query (drop any custom query in here)
+   *
+   * @param qry
+   * @return
+   */
+  def execute(qry: String, params: AnyRef*): List[OrientRecord[_]] = connected(implicit db => {
+
+    val oQuery = new OSQLSynchQuery[ODocument](qry)
+    val result: util.ArrayList[ODocument] = db.command(oQuery).asInstanceOf[OCommandRequest].execute(params:_*)
+
+    var list : List[RecordType] = Nil
+    val iterator = result.iterator()
+    while (iterator.hasNext) {
+      list = createFromDb(iterator.next()) :: list
+    }
+
+    list.asInstanceOf[List[OrientRecord[_]]]
+  })
+
+  /**
+   * Create a new record and load fields from ODocument into it
+   *
+   * @param document
+   * @return
+   */
+  protected def createFromDb(document: ODocument) = {
+    val record: RecordType = this.createRecord
+    record.asInstanceOf[OrientRecord[RecordType]].meta.initFields()
+    meta.fields foreach {
+      metaField => {
+        val fieldName = metaField._1
+
+        val m = this.getClass.getMethod(metaField._1)
+        val fieldObj: Field[_, RecordType] = m.invoke(record).asInstanceOf[Field[_, RecordType]]
+
+        fieldObj match {
+          case f: OptionalStringField[RecordType] =>
+            if (document.containsField(fieldName)) {
+              fieldObj.asInstanceOf[OptionalStringField[RecordType]].set(document.field(fieldName))
+            }
+
+          case f: OptionalBooleanField[RecordType] =>
+            if (document.containsField(fieldName)) {
+              fieldObj.asInstanceOf[OptionalBooleanField[RecordType]].set(document.field(fieldName).asInstanceOf[Boolean])
+            }
+
+          case f: OptionalUuidField[RecordType] =>
+            if (document.containsField(fieldName)) {
+              fieldObj.asInstanceOf[OptionalUuidField[RecordType]].set(UUID.fromString(document.field(fieldName)))
+            }
+
+          case f: StringField[RecordType] =>
+            if (document.containsField(fieldName)) {
+              fieldObj.asInstanceOf[StringField[RecordType]].set(document.field(fieldName))
+            } else {
+              throw new RuntimeException("Not optional string field is missing in DB, can't set")
+            }
+
+          case f: BooleanField[RecordType] =>
+            if (document.containsField(fieldName)) {
+              fieldObj.asInstanceOf[StringField[RecordType]].set(document.field(fieldName))
+            } else {
+              throw new RuntimeException("Not optional string field is missing in DB, can't set")
+            }
+
+          case f: UuidField[RecordType] =>
+            if (document.containsField(fieldName)) {
+              fieldObj.asInstanceOf[UuidField[RecordType]].set(UUID.fromString(document.field(fieldName)))
+            } else {
+              throw new RuntimeException("Not optional uuid field is missing in DB, can't set")
+            }
+
+          case _ => throw new RuntimeException("Unhandled field!")
+        }
+      }
+    }
+
+
+    // TODO
+
+    record
   }
 
 }

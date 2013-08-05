@@ -18,7 +18,7 @@ package net.caladesiframework.orientdb.document
 
 import org.specs2.mutable.Specification
 import testkit._
-import embedded.OrientEmbeddedBooleanRecord
+import net.caladesiframework.orientdb.document.testkit.embedded.{OrientEmbeddedStringRecord, OrientEmbeddedBooleanRecord}
 
 class OrientEmbeddedSuiteSpec extends Specification with OrientDocumentTestKit {
 
@@ -115,6 +115,32 @@ class OrientEmbeddedSuiteSpec extends Specification with OrientDocumentTestKit {
       booleanRecord.save
 
       booleanRecord.optionalBooleanField.getOrElse(false) must_==(false)
+    }
+  }
+
+  "Caladesi Oriendb (Embedded) Record with String fields" should {
+    "save and find records by string values properly" in OrientEmbeddedTestContext {
+
+      val stringRecord = OrientEmbeddedStringRecord.create
+      stringRecord.stringField.set("tag1")
+      stringRecord.save
+
+      val stringRecord2 = OrientEmbeddedStringRecord.create
+      stringRecord2.stringField.set("tag2")
+      stringRecord2.save
+
+      val foundRecords = OrientEmbeddedStringRecord.find.where(OrientEmbeddedStringRecord.stringField).eqs("tag1").ex
+      val foundRecords2 = OrientEmbeddedStringRecord.find.where(OrientEmbeddedStringRecord.stringField).eqs("tag2").ex
+      val foundRecords3 = OrientEmbeddedStringRecord.find
+        .where(OrientEmbeddedStringRecord.stringField).eqs("tag2")
+        .and(OrientEmbeddedStringRecord.stringField).eqs("tag1").ex
+
+      foundRecords.size must_==(1)
+      foundRecords.head.asInstanceOf[OrientEmbeddedStringRecord].stringField.get must_== ("tag1")
+
+      foundRecords2.size must_==(1)
+      foundRecords3.size must_==(0)
+      OrientEmbeddedStringRecord.count() must_==(2)
     }
   }
 

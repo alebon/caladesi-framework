@@ -23,11 +23,17 @@ class OrientEmbeddedStringRecord extends OrientRecord[OrientEmbeddedStringRecord
 
    def meta = OrientEmbeddedStringRecord
 
-   object stringField extends StringField(this)
+   object stringField extends StringField(this) {
+     override def name = "stringField"
+   }
 
-   object stringFieldWithCustomDefault extends StringField(this, "customDefault")
+   object stringFieldWithCustomDefault extends StringField(this, "customDefault") {
+     override def name = "stringFieldWithCustomDefault"
+   }
 
-   object optionalStringField extends OptionalStringField(this)
+   object optionalStringField extends OptionalStringField(this) {
+     override def name = "optionalStringField"
+   }
 
  }
 
