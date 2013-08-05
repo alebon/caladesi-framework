@@ -26,6 +26,13 @@ class OrientEmbeddedSuiteSpec extends Specification with OrientDocumentTestKit {
 
 
   "Caladesi Oriendb (Embedded) Record" should {
+    "be able to query records on an empty DB" in OrientEmbeddedTestContext {
+
+      val foundRecords = OrientEmbeddedBooleanRecord.find.where(OrientEmbeddedBooleanRecord.booleanField).eqs(true).limit(10).ex
+      foundRecords.size must_==(0)
+
+    }
+
     "be able to create records" in OrientEmbeddedTestContext {
 
       val document = OrientEmbeddedBooleanRecord.create
@@ -129,18 +136,34 @@ class OrientEmbeddedSuiteSpec extends Specification with OrientDocumentTestKit {
       stringRecord2.stringField.set("tag2")
       stringRecord2.save
 
+      val stringRecord3 = OrientEmbeddedStringRecord.create
+      stringRecord3.stringField.set("")
+      stringRecord3.save
+
       val foundRecords = OrientEmbeddedStringRecord.find.where(OrientEmbeddedStringRecord.stringField).eqs("tag1").ex
       val foundRecords2 = OrientEmbeddedStringRecord.find.where(OrientEmbeddedStringRecord.stringField).eqs("tag2").ex
       val foundRecords3 = OrientEmbeddedStringRecord.find
         .where(OrientEmbeddedStringRecord.stringField).eqs("tag2")
         .and(OrientEmbeddedStringRecord.stringField).eqs("tag1").ex
 
+      val foundRecords4 = OrientEmbeddedStringRecord.find.where(OrientEmbeddedStringRecord.stringField).in("tag1", "tag2").ex
+
       foundRecords.size must_==(1)
       foundRecords.head.stringField.get must_== ("tag1")
 
       foundRecords2.size must_==(1)
       foundRecords3.size must_==(0)
-      OrientEmbeddedStringRecord.count() must_==(2)
+      foundRecords4.size must_==(2)
+      OrientEmbeddedStringRecord.count() must_==(3)
+
+      foundRecords2.foreach(record => {
+        record.delete
+      })
+
+      // After deletion, no records with this tag should be found
+      val foundRecords2AD = OrientEmbeddedStringRecord.find.where(OrientEmbeddedStringRecord.stringField).eqs("tag2").ex
+      foundRecords2AD.size must_==(0)
+
     }
   }
 

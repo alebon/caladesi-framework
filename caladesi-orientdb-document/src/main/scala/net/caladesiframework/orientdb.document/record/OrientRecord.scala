@@ -126,5 +126,9 @@ trait OrientRecord[RecordType] extends Record[RecordType] {
     None
   })
 
+  def applyDbRecord(oDocument: ODocument) = {
+    this.dbRecord = Some(oDocument)
+  }
+
 
 }

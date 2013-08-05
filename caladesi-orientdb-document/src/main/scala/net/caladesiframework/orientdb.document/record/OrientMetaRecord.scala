@@ -221,7 +221,7 @@ trait OrientMetaRecord[RecordType] extends OrientRecord[RecordType] {
       // TODO: Refactoring to single initial call
       initLocalStore(localConfig.location)
       //ODatabaseDocumentPool.global().acquire("local:%s".format(localConfig.location), "admin", "admin")
-      new ODatabaseDocumentTx("local:%s".format(localConfig.location))
+      new ODatabaseDocumentTx("plocal:%s".format(localConfig.location))
 
     case dbType: OrientDbMemoryType =>
       val memoryConfig = meta.config.asInstanceOf[OrientDbMemoryConfiguration]
@@ -263,6 +263,11 @@ trait OrientMetaRecord[RecordType] extends OrientRecord[RecordType] {
    * Finds entities by constructed query
    */
   def find : QueryBuilder[RecordType] = {
+    // Initial class creation, allow queries on this class
+    connected(implicit db => {
+      db.getMetadata.getSchema.getOrCreateClass(meta.collectionName)
+    })
+
     val queryBuilder = new QueryBuilder[RecordType]()
     queryBuilder.setPrototype(create.asInstanceOf[OrientRecord[_]])
     queryBuilder
@@ -296,7 +301,8 @@ trait OrientMetaRecord[RecordType] extends OrientRecord[RecordType] {
    */
   protected def createFromDb(document: ODocument) = {
     val record: RecordType = this.createRecord
-    record.asInstanceOf[OrientRecord[RecordType]].meta.initFields()
+    record.asInstanceOf[OrientRecord[RecordType]].applyDbRecord(document)
+
     meta.fields foreach {
       metaField => {
         val fieldName = metaField._1
