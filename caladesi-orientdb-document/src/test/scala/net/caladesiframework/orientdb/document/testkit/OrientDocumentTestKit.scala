@@ -45,7 +45,7 @@ trait OrientDocumentTestKit {
 
   def destroyDatabase() {
     val config = OrientConfigurationRegistry.loadByName("default").asInstanceOf[OrientDbEmbeddedConfiguration]
-    val db = new ODatabaseDocumentTx("plocal::%s".format(config.location))
+    val db = new ODatabaseDocumentTx("local::%s".format(config.location))
     if (db.exists()) {
       if (db.isClosed) {
         db.open("admin", "admin")

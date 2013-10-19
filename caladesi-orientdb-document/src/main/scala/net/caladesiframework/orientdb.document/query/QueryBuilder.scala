@@ -124,7 +124,7 @@ class QueryBuilder[QRType]() {
    * Execute the query
    */
   def ex: List[QRType] = {
-    println("Executing query: " + qry + " with params " + params.toString())
+    //println("Executing query: " + qry + " with params " + params.toString())
     prototype.get.meta.execute(this.qry, this.reverse[AnyRef](params):_*).asInstanceOf[List[QRType]]
   }
 

@@ -22,10 +22,10 @@ object Dependencies {
   lazy val scalaDepVersion   = "2.10.1"
   lazy val slf4jVersion   = "1.7.2"
   lazy val liftVersion    = "2.5"
-  lazy val orientVersion  = "1.5.0"
-  lazy val neo4jVersion   = "1.9.2"
-  lazy val logbackVersion = "1.0.6"
-  lazy val elasticVersion = "0.90.2"
+  lazy val orientVersion  = "1.5.1"
+  lazy val neo4jVersion   = "1.9.4"
+  lazy val logbackVersion = "1.0.13"
+  lazy val elasticVersion = "0.90.5"
 
   // Compile scope:
   // Scope available in all classpath, transitive by default.
@@ -42,7 +42,7 @@ object Dependencies {
   lazy val neo4j_all		= "org.neo4j" % "neo4j" % neo4jVersion
 
   // Elastic search
-  lazy val elastic = "org.elasticsearch" % "elasticsearch" % elasticVersion
+  lazy val elastic = "org.elasticsearch" % "elasticsearch" % elasticVersion excludeAll( ExclusionRule(organization = "net.java.dev.jna"))
 
   // Provided scope:
   lazy val logback = "ch.qos.logback"    % "logback-classic"     % logbackVersion % "provided"
