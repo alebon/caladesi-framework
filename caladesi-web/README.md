@@ -20,7 +20,7 @@ You can use the Web Component by adding the dependency to your project:
 ### SBT 0.12.3 (Simple Build Tool)
 Modify your build.sbt
 
-    libraryDependencies += "net.caladesiframework" %% "caladesi-web" % "0.5.4" % "compile"
+    libraryDependencies += "net.caladesiframework" %% "caladesi-web" % "0.6.1" % "compile"
 
 ###Maven:
 Add the framework to your pom.xml:
@@ -29,7 +29,7 @@ Add the framework to your pom.xml:
 <dependency>
   <groupId>net.caladesiframework</groupId>
   <artifactId>caladesi-web_2.9.2</artifactId>
-  <version>0.5.4</version>
+  <version>0.6.1</version>
 </dependency>
 ```
 
@@ -37,7 +37,7 @@ Add the framework to your pom.xml:
 ```groovy
 dependencies {
     // Caladesi Framework
-    compile "net.caladesiframework:caladesi-web_2.10.1:0.5.4"
+    compile "net.caladesiframework:caladesi-web_2.10.1:0.6.1"
 }
 ```
 

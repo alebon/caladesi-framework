@@ -26,6 +26,7 @@ import net.caladesiframework.neo4j.field._
 import net.caladesiframework.neo4j.db.Neo4jConfiguration
 import net.caladesiframework.neo4j.relation.{RelationManager, Relation}
 import org.neo4j.kernel.impl.util.StringLogger
+import org.neo4j.cypher.ExecutionEngine
 
 abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   (implicit tag: scala.reflect.ClassTag[EntityType], configuration: Neo4jConfiguration)
@@ -42,6 +43,8 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
 
   // subReference Node <-- Entity OR referenceNode <-- subReference
   protected val ENTITY_RELATION : DynamicRelationshipType  = DynamicRelationshipType.withName( RELATION_NAME )
+
+  protected lazy val executionEngine : ExecutionEngine = getExecutionEngine()
 
   /**
    * Override this to define own relation name
@@ -102,6 +105,8 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
 
     RepositoryRegistry.register(this)
   }
+
+
 
   /**
    * Creates a fresh node and assigns the node data to it
@@ -278,6 +283,16 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
       // @TODO drop all entities from repository
     })
 
+  }
+
+  /**
+   * If possible, don't use this, reuse protected val executionEngine
+   *
+   * @param ds
+   * @return
+   */
+  protected def getExecutionEngine(implicit ds: Neo4jDatabaseService) : ExecutionEngine = {
+    return new ExecutionEngine(ds.graphDatabase, StringLogger.DEV_NULL)
   }
 
   /**
