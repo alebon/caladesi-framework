@@ -256,7 +256,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def count: Long = connected(implicit ds => {
-    val engine = new org.neo4j.cypher.ExecutionEngine(ds.graphDatabase, StringLogger.DEV_NULL)
+    val engine = this.executionEngine
     val result: org.neo4j.cypher.ExecutionResult = engine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN count(entity) AS countAll"
       .format(subReferenceNode.getId, ENTITY_RELATION.name) )
 
@@ -281,6 +281,18 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   }
 
   /**
+<<<<<<< Updated upstream
+=======
+   * If possible, don't use this, reuse protected val executionEngine
+   *
+   * @return
+   */
+  protected def getExecutionEngine() : ExecutionEngine = {
+    return new ExecutionEngine(this.configuration.egdsp.ds.graphDatabase, StringLogger.DEV_NULL)
+  }
+
+  /**
+>>>>>>> Stashed changes
    * Copy fields to node
    *
    * @param node
@@ -408,4 +420,5 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
       // Do something finally
     }
   }
+
 }
