@@ -26,6 +26,7 @@ import net.caladesiframework.neo4j.field._
 import net.caladesiframework.neo4j.db.Neo4jConfiguration
 import net.caladesiframework.neo4j.relation.{RelationManager, Relation}
 import org.neo4j.kernel.impl.util.StringLogger
+import org.neo4j.cypher.ExecutionEngine
 
 abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   (implicit tag: scala.reflect.ClassTag[EntityType], configuration: Neo4jConfiguration)
@@ -33,6 +34,8 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   with CRUDRepository[EntityType]
   with IndexManager
   with RelationManager {
+
+  protected lazy val executionEngine = this.getExecutionEngine()
 
   // Override to rename
   def repositoryEntityClass = create.clazz
@@ -281,8 +284,6 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   }
 
   /**
-<<<<<<< Updated upstream
-=======
    * If possible, don't use this, reuse protected val executionEngine
    *
    * @return
@@ -292,7 +293,6 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   }
 
   /**
->>>>>>> Stashed changes
    * Copy fields to node
    *
    * @param node
