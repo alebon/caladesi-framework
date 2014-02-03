@@ -26,6 +26,7 @@ import net.caladesiframework.neo4j.field._
 import net.caladesiframework.neo4j.db.Neo4jConfiguration
 import net.caladesiframework.neo4j.relation.{RelationManager, Relation}
 import org.neo4j.kernel.impl.util.StringLogger
+import org.neo4j.cypher.ExecutionEngine
 
 abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   (implicit tag: scala.reflect.ClassTag[EntityType], configuration: Neo4jConfiguration)
@@ -33,6 +34,8 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   with CRUDRepository[EntityType]
   with IndexManager
   with RelationManager {
+
+  protected lazy val executionEngine = this.getExecutionEngine()
 
   // Override to rename
   def repositoryEntityClass = create.clazz
@@ -236,15 +239,20 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def delete(entity: EntityType) = transactional[Boolean]( implicit ds => {
-    val node = entity.getUnderlyingNode
-    val relations = node.getRelationships(Direction.OUTGOING)
+    def node = entity.getUnderlyingNode
 
-    // Remove all outgoing relations
-    while (relations.iterator().hasNext) {
-      relations.iterator().next().delete()
+    // DO NOT remove incoming relations, this will break data integrity (user has to check before deletion)
+    def relationsIncoming = node.getRelationships(Direction.INCOMING)
+    if (relationsIncoming.iterator().hasNext) {
+      throw new Exception("Can not delete entity, still has incoming connections")
     }
 
-    // Please check all incoming relations in repository
+    // Remove all outgoing relations
+    val relationsOutgoing = node.getRelationships(Direction.OUTGOING)
+    while (relationsOutgoing.iterator().hasNext) {
+      relationsOutgoing.iterator().next().delete()
+    }
+
     removeFromIndex(entity)
     entity.getUnderlyingNode.delete()
     true
@@ -256,7 +264,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def count: Long = connected(implicit ds => {
-    val engine = new org.neo4j.cypher.ExecutionEngine(ds.graphDatabase, StringLogger.DEV_NULL)
+    val engine = this.executionEngine
     val result: org.neo4j.cypher.ExecutionResult = engine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN count(entity) AS countAll"
       .format(subReferenceNode.getId, ENTITY_RELATION.name) )
 
@@ -281,6 +289,15 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   }
 
   /**
+   * If possible, don't use this, reuse protected val executionEngine
+   *
+   * @return
+   */
+  protected def getExecutionEngine() : ExecutionEngine = {
+    return new ExecutionEngine(this.configuration.egdsp.ds.graphDatabase, StringLogger.DEV_NULL)
+  }
+
+  /**
    * Copy fields to node
    *
    * @param node
@@ -289,20 +306,15 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   protected def setNodeFields(node: Node, entity: EntityType)(implicit ds: Neo4jDatabaseService) = {
     entity.fields foreach {
       fieldObj => {
-        //@TODO More generic approach
         fieldObj match {
           case field: IntField =>
             node.setProperty(field.name, field.is.asInstanceOf[java.lang.Integer])
           case field: StringField =>
             node.setProperty(field.name, field.is)
-          //case field: DoubleField =>
-          //  vertex.field(field.name, field.is)
           case field: UuidField =>
             node.setProperty(field.name, field.is.toString)
           case field: LongField =>
             node.setProperty(field.name, field.is.asInstanceOf[java.lang.Long])
-          //case field:LocaleField =>
-          //  vertex.field(field.name, field.is.toString)
           case field:DateTimeField =>
             node.setProperty(field.name, field.valueToDB.asInstanceOf[java.lang.Long])
           case field:BooleanField =>
@@ -326,7 +338,6 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    */
   protected def setEntityFields(entity: EntityType, node: Node, depth: Int = 0)(implicit ds: Neo4jDatabaseService) = {
     entity.fields foreach {
-      //@TODO More generic approach
       fieldObj => {
         fieldObj match {
           case field: IntField =>
@@ -341,8 +352,6 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
             field.set(util.UUID.fromString(node.getProperty(field.name).asInstanceOf[String]))
           case field: LongField =>
             field.set(node.getProperty(field.name).toString.toLong)
-          //case field: LocaleField =>
-          //  field.set(new Locale(vertex.field(field.name)))
           case field: DateTimeField =>
             field.valueFromDB(node.getProperty(field.name))
           case field: BooleanField =>
@@ -408,4 +417,5 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
       // Do something finally
     }
   }
+
 }
