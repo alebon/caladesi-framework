@@ -18,7 +18,7 @@ package net.caladesiframework.elastic.field
 import net.caladesiframework.document.RequiredField
 
 class DynamicPropertiesField[OwnerType](ownerConstruct: OwnerType, default: Map[String, AnyRef] = Map())
-  extends RequiredField[Map[String, AnyRef], OwnerType]{
+  extends RequiredField[Map[String, _], OwnerType]{
 
   def owner = ownerConstruct
 

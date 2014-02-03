@@ -22,6 +22,7 @@ import net.caladesiframework.elastic.testkit.embedded.{ElasticEmbeddedDynamicPro
 import java.util.UUID
 import org.elasticsearch.search.facet.terms.TermsFacet
 import scala.collection.immutable.HashMap
+import org.elasticsearch.index.query.FilterBuilders
 
 class ElasticEmbeddedSuiteSpec extends Specification with ElasticTestKit {
 
@@ -119,6 +120,59 @@ class ElasticEmbeddedSuiteSpec extends Specification with ElasticTestKit {
 
       foundRecordDP must_!=(None)
       foundRecordDP.get.dynamicProperties.get.size must_==(3)
+
+      val recordDynamicProperties0 = ElasticEmbeddedDynamicPropsRecord.create
+      recordDynamicProperties0._uuid.set(UUID.randomUUID())
+      recordDynamicProperties0.dynamicProperties.set(Map("property1" -> 2, "property2" -> "test2", "property3" -> "test with words 2"))
+      recordDynamicProperties0.save
+
+      val recordDynamicProperties2 = ElasticEmbeddedDynamicPropsRecord.create
+      recordDynamicProperties2._uuid.set(UUID.randomUUID())
+      recordDynamicProperties2.dynamicProperties.set(Map("property1" -> 13, "property2" -> "test13", "property3" -> "test with words 13"))
+      recordDynamicProperties2.save
+
+      val searchBuilder = ElasticEmbeddedDynamicPropsRecord.searchBuilder
+
+      val rangeFilter = FilterBuilders.rangeFilter("property1")
+      rangeFilter.from(0)
+      rangeFilter.to(14)
+
+      val filter = FilterBuilders.andFilter()
+      filter.add(rangeFilter)
+
+      searchBuilder.setFilter(rangeFilter)
+
+      println(searchBuilder.toString)
+
+      true must_==(true)
     }
+
+    /**"be able to execute range requests" in ElasticEmbeddedTestContext {
+
+      val recordDynamicProperties = ElasticEmbeddedDynamicPropsRecord.create
+      recordDynamicProperties._uuid.set(UUID.randomUUID())
+      recordDynamicProperties.dynamicProperties.set(Map("property1" -> 2, "property2" -> "test2", "property3" -> "test with words 2"))
+      recordDynamicProperties.save
+
+      val recordDynamicProperties2 = ElasticEmbeddedDynamicPropsRecord.create
+      recordDynamicProperties2._uuid.set(UUID.randomUUID())
+      recordDynamicProperties2.dynamicProperties.set(Map("property1" -> 13, "property2" -> "test13", "property3" -> "test with words 13"))
+      recordDynamicProperties2.save
+
+      val searchBuilder = ElasticEmbeddedDynamicPropsRecord.searchBuilder
+
+      val rangeFilter = FilterBuilders.rangeFilter("property1")
+      rangeFilter.from(0)
+      rangeFilter.to(14)
+
+      val filter = FilterBuilders.andFilter()
+      filter.add(rangeFilter)
+
+      searchBuilder.setFilter(rangeFilter)
+
+      println(searchBuilder.toString)
+
+      true must_==(true)
+    }*/
   }
 }
