@@ -249,12 +249,12 @@ trait OrientMetaRecord[RecordType] extends OrientRecord[RecordType] {
    */
   private def initLocalStore(path: String) = {
     try {
-      val db: ODatabaseDocumentTx = new ODatabaseDocumentTx("local:%s".format(path))
+      val db: ODatabaseDocumentTx = new ODatabaseDocumentTx("plocal:%s".format(path))
       if (!db.exists()) {
         db.create()
       }
     } catch {
-      case e:Exception => throw new RuntimeException("Couldn't create DB at local store %s. Reason: %s".format(path, e.getMessage))
+      case e:Exception => throw new RuntimeException("Couldn't create DB at plocal store %s. Reason: %s".format(path, e.getMessage))
     }
 
   }

@@ -64,8 +64,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * Sub-Reference node of the repository
    */
   protected lazy val subReferenceNode: Node = {
-    val rel = this.configuration.egdsp.ds.graphDatabase.getReferenceNode
-      .getSingleRelationship(REPOSITORY_RELATION, Direction.OUTGOING)
+    val rel = this.configuration.egdsp.ds.graphDatabase.getNodeById(0).getSingleRelationship(REPOSITORY_RELATION, Direction.OUTGOING)
 
     if (null == rel) {
       throw new Exception("Subreference node for %s repository is missing, please init repository properly".format(REPOSITORY_NAME))
@@ -81,12 +80,12 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
     transactional(implicit ds => {
 
       // Check for Sub Reference Node existence
-      val rel = ds.graphDatabase.getReferenceNode
+      val rel = ds.graphDatabase.getNodeById(0)
         .getSingleRelationship(REPOSITORY_RELATION, Direction.OUTGOING)
       if (null == rel) {
         // Create the sub ref node
         val node = ds.graphDatabase.createNode()
-        ds.graphDatabase.getReferenceNode.createRelationshipTo(node, REPOSITORY_RELATION)
+        ds.graphDatabase.getNodeById(0).createRelationshipTo(node, REPOSITORY_RELATION)
       }
 
       create.fields foreach {
@@ -162,7 +161,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def findIdx(field: Field[_] with IndexedField, value: Any): Option[EntityType] = {
-    connected[Option[EntityType]](implicit ds => {
+    transactional[Option[EntityType]](implicit ds => {
       findSingleByIndex(field, value) match {
         case Some(node) =>
           Some(transformToEntity(node, 1))
@@ -191,7 +190,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def findIdxAll(field: Field[_] with IndexedField, values: List[String]): List[EntityType] = {
-    connected[List[EntityType]](implicit ds => {
+    transactional[List[EntityType]](implicit ds => {
       findAllByIndexSet(field, values).map(node => transformToEntity(node))
     })
   }

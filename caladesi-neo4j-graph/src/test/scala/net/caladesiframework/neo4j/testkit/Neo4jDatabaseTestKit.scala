@@ -42,7 +42,7 @@ trait Neo4jDatabaseTestKit {
 
 object Neo4jStore {
 
-  val ds = new EmbeddedGraphDatabaseServiceProvider {
+  lazy val ds = new EmbeddedGraphDatabaseServiceProvider {
     /**
      * directory where to store the data files
      */

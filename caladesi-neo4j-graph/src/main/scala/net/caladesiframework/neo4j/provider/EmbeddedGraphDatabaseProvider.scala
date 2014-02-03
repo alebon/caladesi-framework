@@ -14,6 +14,8 @@ import org.neo4j.kernel.EmbeddedGraphDatabase
 import net.caladesiframework.neo4j.db.{DatabaseServiceImpl, Neo4jDatabaseService}
 import java.util.{HashMap => jMap}
 import org.neo4j.graphdb.GraphDatabaseService
+import org.neo4j.graphdb.factory.{GraphDatabaseSettings, GraphDatabaseFactory}
+import org.neo4j.graphdb.config.Setting
 
 /**
  * provides a specific Database Service
@@ -36,12 +38,12 @@ trait EmbeddedGraphDatabaseServiceProvider extends GraphDatabaseServiceProvider 
    * using an instance of an embedded graph database
    */
   val ds: Neo4jDatabaseService = {
-    import collection.JavaConversions.mapAsJavaMap
 
-
+    val databaseService = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(neo4jStoreDir)
+      .setConfig(GraphDatabaseSettings.allow_store_upgrade, "true")
 
     DatabaseServiceImpl(
-      new EmbeddedGraphDatabase(neo4jStoreDir, new jMap[String, String](configParams))
+      databaseService.newGraphDatabase()
     )
   }
 
