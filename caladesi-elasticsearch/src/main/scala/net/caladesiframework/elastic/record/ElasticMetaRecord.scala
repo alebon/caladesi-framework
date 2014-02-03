@@ -21,8 +21,8 @@ import net.caladesiframework.document.Field
 import net.caladesiframework.elastic.field.{DynamicPropertiesField, StringField, UuidField}
 import java.util.UUID
 import org.elasticsearch.search.facet.terms.TermsFacet
-import org.elasticsearch.index.query.QueryBuilders
-import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.index.query.{FilterBuilders, QueryBuilders}
+import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
 import scala.collection.immutable.HashMap
 import scala.collection.mutable
 import org.elasticsearch.search.facet.Facets
@@ -232,6 +232,37 @@ trait ElasticMetaRecord[RecordType] extends ElasticRecord[RecordType] {
    */
   def getFacetsForField(field: Field[_, _]): TermsFacet = {
     provider.executeFacetForFieldQuery(field.name, this.indexName, this.itemTypeName)
+  }
+
+  /**
+   * Provider for the current record
+   *
+   * @return
+   */
+  def getProvider(): ElasticProvider = {
+    this.provider
+  }
+
+  /**
+   * Returns a ready-to-use search builder for the specified meta record
+   *
+   * @return
+   */
+  def searchBuilder: SearchRequestBuilder = {
+    this.provider.getSearchRequestBuilderForRecord(this)
+  }
+
+  /**
+   * Executes a prepared search
+   *
+   * @param searchBuilder
+   * @return
+   */
+  def getResults(searchBuilder: SearchRequestBuilder) = {
+    val response: SearchResponse = searchBuilder.execute()
+      .actionGet()
+
+    response
   }
 
   /**

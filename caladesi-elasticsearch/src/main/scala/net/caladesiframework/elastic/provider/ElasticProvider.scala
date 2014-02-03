@@ -22,7 +22,7 @@ import org.elasticsearch.action.admin.cluster.health.{ClusterHealthRequest, Clus
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest
 import org.elasticsearch.client.Requests
 import org.elasticsearch.action.get.GetResponse
-import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
 import org.elasticsearch.common.xcontent.{XContentFactory, XContentBuilder}
 import net.caladesiframework.document.Field
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
@@ -32,6 +32,7 @@ import org.elasticsearch.search.facet.FacetBuilders
 import net.caladesiframework.elastic.field.analyzer.NotAnalyzed
 import net.caladesiframework.elastic.builder.FieldSettingsBuilder
 import net.caladesiframework.elastic.field.DynamicPropertiesField
+import net.caladesiframework.elastic.record.{ElasticMetaRecord, ElasticRecord}
 
 case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boolean = false) {
 
@@ -303,6 +304,19 @@ case class ElasticProvider(nodeName: String, path: String, useHttpConnector: Boo
       .execute().actionGet()
 
     response.getFacets().facet(fieldName + "Facet")
+  }
+
+  /**
+   * Returns a search request builder that can be used for searching
+   *
+   * @param record
+   * @return
+   */
+  def getSearchRequestBuilderForRecord(record: ElasticMetaRecord[_]): SearchRequestBuilder = {
+    val responsePrepare = client.prepareSearch(record.indexName)
+      .setTypes(record.itemTypeName)
+
+    responsePrepare
   }
 
   /**
