@@ -21,7 +21,7 @@ import net.caladesiframework.neo4j.index.{IndexManager, IndexedField}
 import net.caladesiframework.neo4j.graph.entity.Neo4jGraphEntity
 import net.caladesiframework.neo4j.db.Neo4jDatabaseService
 import net.caladesiframework.neo4j.repository.{RepositoryRegistry, CRUDRepository}
-import org.neo4j.graphdb.{Direction, DynamicRelationshipType, Node}
+import org.neo4j.graphdb.{NotFoundException, Direction, DynamicRelationshipType, Node}
 import net.caladesiframework.neo4j.field._
 import net.caladesiframework.neo4j.db.Neo4jConfiguration
 import net.caladesiframework.neo4j.relation.{RelationManager, Relation}
@@ -61,10 +61,27 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   def REPOSITORY_NAME = RELATION_NAME + "_SUB_REF"
 
   /**
+   * Root Node of the graph
+   */
+  protected lazy val rootNode: Node = transactional(implicit ds => {
+    var rootNode: Node = null
+    try {
+      rootNode = ds.graphDatabase.getNodeById(0)
+    } catch {
+      case NotFoundException =>
+        rootNode = ds.graphDatabase.createNode()
+      case t: Throwable =>
+        throw t
+    }
+
+    rootNode
+  })
+
+  /**
    * Sub-Reference node of the repository
    */
   protected lazy val subReferenceNode: Node = {
-    val rel = this.configuration.egdsp.ds.graphDatabase.getNodeById(0).getSingleRelationship(REPOSITORY_RELATION, Direction.OUTGOING)
+    val rel = rootNode.getSingleRelationship(REPOSITORY_RELATION, Direction.OUTGOING)
 
     if (null == rel) {
       throw new Exception("Subreference node for %s repository is missing, please init repository properly".format(REPOSITORY_NAME))
@@ -80,12 +97,11 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
     transactional(implicit ds => {
 
       // Check for Sub Reference Node existence
-      val rel = ds.graphDatabase.getNodeById(0)
-        .getSingleRelationship(REPOSITORY_RELATION, Direction.OUTGOING)
+      val rel = rootNode.getSingleRelationship(REPOSITORY_RELATION, Direction.OUTGOING)
       if (null == rel) {
         // Create the sub ref node
         val node = ds.graphDatabase.createNode()
-        ds.graphDatabase.getNodeById(0).createRelationshipTo(node, REPOSITORY_RELATION)
+        rootNode.createRelationshipTo(node, REPOSITORY_RELATION)
       }
 
       create.fields foreach {
@@ -178,7 +194,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def findIdxAll(field: Field[_] with IndexedField, value: Any): List[EntityType] = {
-    connected[List[EntityType]](implicit ds => {
+    transactional[List[EntityType]](implicit ds => {
       findAllByIndex(field, value).map(node => transformToEntity(node))
     })
   }
@@ -203,8 +219,8 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def find(skip: Long = 0L, limit : Long = 10): List[EntityType] = transactional(implicit ds => {
-    val engine = new org.neo4j.cypher.ExecutionEngine(ds.graphDatabase, StringLogger.DEV_NULL)
-    val result: org.neo4j.cypher.ExecutionResult = engine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN entity SKIP %s LIMIT %s"
+    val memoEngine = this.getExecutionEngine()
+    val result: org.neo4j.cypher.ExecutionResult = memoEngine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN entity SKIP %s LIMIT %s"
       .format(subReferenceNode.getId, ENTITY_RELATION.name, skip, limit) )
 
     //println("Executing query: " + "START n=node(%s) MATCH n<-[:%s]-entity RETURN entity SKIP %s LIMIT %s"
@@ -262,7 +278,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    *
    * @return
    */
-  def count: Long = connected(implicit ds => {
+  def count: Long = transactional(implicit ds => {
     val engine = this.executionEngine
     val result: org.neo4j.cypher.ExecutionResult = engine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN count(entity) AS countAll"
       .format(subReferenceNode.getId, ENTITY_RELATION.name) )
@@ -393,18 +409,11 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
         transaction.failure
         throw new Exception("Failure during execution (%s) : %s - STACKTRACE: %s".format(e.getClass, e.getMessage, e.getStackTraceString))
     } finally {
-      transaction.finish
+      transaction.close()
     }
   }
 
-  /**
-   * Opens the db, performs execution and closes connection
-   *
-   * @param f
-   * @tparam T
-   * @return
-   */
-  def connected[T <: Any](f: Neo4jDatabaseService => T) : T = {
+  /**def connected[T <: Any](f: Neo4jDatabaseService => T) : T = {
 
     try {
       val ret = f(this.configuration.egdsp.ds)
@@ -415,6 +424,6 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
     } finally {
       // Do something finally
     }
-  }
+  }*/
 
 }

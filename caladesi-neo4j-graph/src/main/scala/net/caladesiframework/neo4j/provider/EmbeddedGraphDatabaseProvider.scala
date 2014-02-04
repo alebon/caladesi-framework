@@ -42,6 +42,7 @@ trait EmbeddedGraphDatabaseServiceProvider extends GraphDatabaseServiceProvider 
     val databaseService = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(neo4jStoreDir)
       .setConfig(GraphDatabaseSettings.allow_store_upgrade, "true")
 
+
     DatabaseServiceImpl(
       databaseService.newGraphDatabase()
     )
