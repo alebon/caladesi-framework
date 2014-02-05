@@ -68,7 +68,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
     try {
       rootNode = ds.graphDatabase.getNodeById(0)
     } catch {
-      case NotFoundException =>
+      case e: NotFoundException =>
         rootNode = ds.graphDatabase.createNode()
       case t: Throwable =>
         throw t
@@ -219,8 +219,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def find(skip: Long = 0L, limit : Long = 10): List[EntityType] = transactional(implicit ds => {
-    val memoEngine = this.getExecutionEngine()
-    val result: org.neo4j.cypher.ExecutionResult = memoEngine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN entity SKIP %s LIMIT %s"
+    val result: org.neo4j.cypher.ExecutionResult = this.executionEngine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN entity SKIP %s LIMIT %s"
       .format(subReferenceNode.getId, ENTITY_RELATION.name, skip, limit) )
 
     //println("Executing query: " + "START n=node(%s) MATCH n<-[:%s]-entity RETURN entity SKIP %s LIMIT %s"
