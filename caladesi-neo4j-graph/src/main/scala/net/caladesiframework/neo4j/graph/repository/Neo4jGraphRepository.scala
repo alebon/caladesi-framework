@@ -335,6 +335,11 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
             node.setProperty(field.name, field.is)
           case field: DoubleField =>
             node.setProperty(field.name, field.is)
+          case field: OptionalDateTimeField =>
+            field.value match {
+              case Some(calendar) => node.setProperty(field.name, field.valueToDB.asInstanceOf[java.lang.Long])
+              case None => node.removeProperty(field.name)
+            }
           case field:Relation =>
             handleRelation(node, field)
           case _ =>
@@ -372,6 +377,12 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
             field.set(node.getProperty(field.name).toString.toBoolean)
           case field: DoubleField =>
             field.set(node.getProperty(field.name).asInstanceOf[Double])
+          case field: OptionalDateTimeField =>
+            if (node.hasProperty(field.name)) {
+              field.valueFromDB(node.getProperty(field.name).asInstanceOf[Long])
+            } else {
+              field.set(None)
+            }
           case field:Relation =>
             if (depth > 0) {
               // Load relation
