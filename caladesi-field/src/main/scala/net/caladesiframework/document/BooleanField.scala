@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.neo4j.provider
+package net.caladesiframework.document
 
-import net.caladesiframework.neo4j.db.Neo4jDatabaseService
+class BooleanField[OwnerType](ownerConstruct: OwnerType, default: Boolean = false) extends RequiredField[Boolean, OwnerType]{
 
-/**
- * Interface for a GraphDatabaseServiceProvider
- * must be implemented by and Graph Database Service Provider
- */
-trait GraphDatabaseServiceProvider {
-  val ds: Neo4jDatabaseService
+  def owner = ownerConstruct
+
+  def defaultValue = default
+}
+
+class OptionalBooleanField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Boolean, OwnerType] {
+
+  def owner = ownerConstruct
+
+  def defaultValue = None
+
 }

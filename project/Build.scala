@@ -94,7 +94,7 @@ object BuildDef extends Build {
             settings = Project.defaultSettings)
       .settings(description := "Caladesi Framework Neo4j Graph",
                 libraryDependencies ++= Seq(neo4j_all, slf4j_api, specs2, junit))
-      .dependsOn(common)
+      .dependsOn(common, field, repository, record)
 
   lazy val elasticsearch =
     Project(id = "caladesi-elasticsearch",

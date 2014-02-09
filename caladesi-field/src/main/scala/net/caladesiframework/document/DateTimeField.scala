@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.neo4j.provider
+package net.caladesiframework.document
 
-import net.caladesiframework.neo4j.db.Neo4jDatabaseService
+import java.util.Calendar
 
-/**
- * Interface for a GraphDatabaseServiceProvider
- * must be implemented by and Graph Database Service Provider
- */
-trait GraphDatabaseServiceProvider {
-  val ds: Neo4jDatabaseService
+class DateTimeField[OwnerType](ownerConstruct: OwnerType, default: Calendar = Calendar.getInstance()) extends RequiredField[Calendar, OwnerType]{
+
+  def owner = ownerConstruct
+
+  def defaultValue = default
+}
+
+class OptionalDateTimeField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Calendar, OwnerType] {
+
+  def owner = ownerConstruct
+
+  def defaultValue = None
 }

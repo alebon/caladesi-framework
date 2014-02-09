@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.neo4j.provider
+package net.caladesiframework.document
 
-import net.caladesiframework.neo4j.db.Neo4jDatabaseService
+class DoubleField[OwnerType](ownerConstruct: OwnerType, default: Double = 0.0) extends RequiredField[Double, OwnerType]{
 
-/**
- * Interface for a GraphDatabaseServiceProvider
- * must be implemented by and Graph Database Service Provider
- */
-trait GraphDatabaseServiceProvider {
-  val ds: Neo4jDatabaseService
+  def owner = ownerConstruct
+
+  def defaultValue = default
+}
+
+class OptionalDoubleField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Double, OwnerType] {
+
+  def owner = ownerConstruct
+
+  def defaultValue = None
 }

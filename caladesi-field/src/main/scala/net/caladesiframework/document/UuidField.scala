@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.neo4j.provider
+package net.caladesiframework.document
 
-import net.caladesiframework.neo4j.db.Neo4jDatabaseService
+import java.util.UUID
 
-/**
- * Interface for a GraphDatabaseServiceProvider
- * must be implemented by and Graph Database Service Provider
- */
-trait GraphDatabaseServiceProvider {
-  val ds: Neo4jDatabaseService
+class UuidField[OwnerType](ownerConstruct: OwnerType, default: UUID = UUID.randomUUID()) extends RequiredField[UUID, OwnerType]{
+
+  def owner = ownerConstruct
+
+  def defaultValue = default
 }
+
+class OptionalUuidField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[UUID, OwnerType] {
+
+  def owner = ownerConstruct
+
+  def defaultValue = None
+}
+
