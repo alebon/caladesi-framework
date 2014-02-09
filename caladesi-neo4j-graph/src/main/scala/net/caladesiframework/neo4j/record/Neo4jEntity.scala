@@ -24,12 +24,11 @@ import net.caladesiframework.neo4j.graph.entity.Neo4jGraphEntity
 import net.caladesiframework.neo4j.index.IndexManager
 
 
-trait Neo4jRecord [RecordType] extends Record[RecordType]
-  with Neo4jGraphEntity[RecordType]
+trait Neo4jEntity [RecordType] extends Record[RecordType]
   with IndexManager {
   self: RecordType =>
 
-  def meta: Neo4jMetaRecord[RecordType]
+  def meta: Neo4jMetaEntity[RecordType]
 
   private [this] var dbRecord: Option[Node] = None
 
@@ -40,6 +39,8 @@ trait Neo4jRecord [RecordType] extends Record[RecordType]
       None
     }
   }
+
+  def getUnderlyingNode = dbRecord
 
   def applyDbRecord(node: Node) = {
     this.dbRecord = Some(node)
@@ -92,7 +93,7 @@ trait Neo4jRecord [RecordType] extends Record[RecordType]
           relationsOutgoing.iterator().next().delete()
         }
 
-        removeFromIndex(this.asInstanceOf[Neo4jGraphEntity])
+        removeFromIndex(this)
         node.delete()
         true
 

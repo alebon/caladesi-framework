@@ -20,7 +20,6 @@ import net.caladesiframework.neo4j.field.Field
 import net.caladesiframework.neo4j.db.Neo4jDatabaseService
 import net.caladesiframework.neo4j.graph.entity.Neo4jGraphEntity
 import java.util.{HashMap => jMap}
-import java.util
 import org.neo4j.graphdb.Node
 import org.neo4j.graphdb.index.IndexHits
 import org.neo4j.index.lucene.QueryContext

@@ -20,7 +20,7 @@ import net.caladesiframework.document.Field
 import org.neo4j.cypher.ExecutionEngine
 import org.neo4j.kernel.impl.util.StringLogger
 
-trait Neo4jMetaRecord[RecordType] extends Neo4jRecord[RecordType] {
+trait Neo4jMetaEntity[RecordType] extends Neo4jEntity[RecordType] {
   self: RecordType =>
 
   def databaseIdentifier: String = "default"

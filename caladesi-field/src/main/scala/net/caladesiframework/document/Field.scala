@@ -18,6 +18,8 @@ package net.caladesiframework.document
 
 trait Field[FieldType, OwnerType] {
 
+  protected var value: FieldType
+
   private var fieldName: String = null
 
   def name: String = fieldName
@@ -27,6 +29,14 @@ trait Field[FieldType, OwnerType] {
 
   def applyName(name: String) = {
     this.fieldName = name
+  }
+
+  def get = {
+    this.value
+  }
+
+  def set(value: FieldType): Unit = {
+    this.value = value
   }
 }
 
@@ -40,7 +50,7 @@ trait OptionalField[FieldType, OwnerType] extends Field[FieldType, OwnerType] {
 
   protected var value: Option[FieldType] = None
 
-  def set(value: FieldType) = {
+  override def set(value: FieldType) = {
     this.value = Some(value)
   }
 
@@ -53,6 +63,10 @@ trait OptionalField[FieldType, OwnerType] extends Field[FieldType, OwnerType] {
       return alternativeValue
     }
     return this.value.get
+  }
+
+  override def get = {
+    this.value.get
   }
 
   def hasValue: Boolean = {
