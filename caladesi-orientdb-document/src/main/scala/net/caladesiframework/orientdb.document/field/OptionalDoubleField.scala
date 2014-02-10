@@ -21,4 +21,6 @@ import net.caladesiframework.document.OptionalField
 class OptionalDoubleField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Double, OwnerType]{
 
   def owner = ownerConstruct
+
+  protected var value: Double = _
 }

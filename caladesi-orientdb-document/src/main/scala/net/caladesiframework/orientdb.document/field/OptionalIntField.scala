@@ -21,4 +21,6 @@ import net.caladesiframework.document.OptionalField
 class OptionalIntField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Int, OwnerType]{
 
   def owner = ownerConstruct
+
+  protected var value: Int = _
 }

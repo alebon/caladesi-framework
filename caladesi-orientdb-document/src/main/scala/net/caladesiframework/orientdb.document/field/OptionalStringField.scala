@@ -21,4 +21,6 @@ import net.caladesiframework.document.OptionalField
 class OptionalStringField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[String, OwnerType]{
 
   def owner = ownerConstruct
+
+  protected var value: String = _
 }

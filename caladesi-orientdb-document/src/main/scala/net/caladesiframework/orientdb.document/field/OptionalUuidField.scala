@@ -22,4 +22,6 @@ import java.util.UUID
 class OptionalUuidField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[UUID, OwnerType]{
 
   def owner = ownerConstruct
+
+  protected var value: UUID = _
 }

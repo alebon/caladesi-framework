@@ -4,6 +4,9 @@ import net.caladesiframework.document.{OptionalField, RequiredField, Field}
 import net.caladesiframework.neo4j.record.Neo4jEntity
 import net.caladesiframework.neo4j.db.Neo4jDatabaseService
 import java.util.{HashMap => jMap}
+import org.neo4j.graphdb.Node
+import org.apache.lucene.queryParser.QueryParser
+import org.neo4j.graphdb.index.IndexHits
 
 trait Index {
 
@@ -72,6 +75,26 @@ trait Index {
           case _ =>
             // Ignore field
         }
+    }
+  }
+
+  /**
+   * Searched in index for node
+   *
+   * @param field
+   * @param value
+   * @param ds
+   * @return
+   */
+  def findSingleByIndex(field: Field[_,_] with IndexedField, value: Any)(implicit ds: Neo4jDatabaseService): Option[Node] = {
+    val indexName = Naming().indexName(field, field.owner.asInstanceOf[Neo4jEntity[_]])
+    val idxForNode = ds.graphDatabase.index().forNodes(indexName)
+
+    idxForNode.query(field.name, QueryParser.escape(value.asInstanceOf[String])) match {
+      case hits: IndexHits[Node] if (hits.size() > 0) =>
+        Some(hits.next())
+      case _ =>
+        None
     }
   }
 

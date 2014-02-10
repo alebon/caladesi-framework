@@ -21,7 +21,7 @@ import net.caladesiframework.document._
 import scala.Some
 import java.util.{Calendar, UUID}
 import net.caladesiframework.neo4j.graph.entity.Neo4jGraphEntity
-import net.caladesiframework.neo4j.index.{Index, IndexManager}
+import net.caladesiframework.neo4j.index.{IndexedField, Index, IndexManager}
 
 
 trait Neo4jEntity[RecordType] extends Record[RecordType]
@@ -71,13 +71,49 @@ trait Neo4jEntity[RecordType] extends Record[RecordType]
     })
   }
 
+  def find(uuid: String): Option[RecordType] = {
+    meta.inSyncTrx[Option[RecordType]](implicit ds => {
+      findSingleByIndex(this.getFieldByName("_uuid").get.asInstanceOf[Field[_,_] with IndexedField], uuid) match {
+        case Some(node) =>
+          Some(this.meta.transformToEntity(node, 1))
+        case None =>
+          None
+      }
+    })
+  }
+
+  protected def getFieldByName(name: String): Option[Field[_,_]] = {
+    this.getClass.getDeclaredFields foreach {
+      field => {
+        field.getType.getMethods foreach {
+
+          // If field contains a method for initialization, call it and add field to meta fields
+          method => {
+            if  (method.getName.equals("initField")) {
+              field.setAccessible(true)
+              val m = this.getClass.getMethod(field.getName.replace("$module", ""))
+
+              val fieldObj: Field[_, RecordType] = m.invoke(this).asInstanceOf[Field[_, RecordType]]
+
+              // Return the field if it matches the name
+              if (fieldObj.name != null && fieldObj.name.equals(name)) {
+                return Some(fieldObj)
+              }
+            }
+          }
+        }
+
+      }
+    }
+    None
+  }
+
   /**
    * Removes entity from db
    *
-   * @param entity
    * @return
    */
-  def delete(entity: RecordType) = meta.inSyncTrx[Boolean]( implicit ds => {
+  override def delete = meta.inSyncTrx[Boolean]( implicit ds => {
     this.dbRecord match {
       case Some(node) =>
 

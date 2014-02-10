@@ -21,4 +21,6 @@ import net.caladesiframework.document.OptionalField
 class OptionalLongField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Long, OwnerType]{
 
   def owner = ownerConstruct
+
+  protected var value: Long = _
 }

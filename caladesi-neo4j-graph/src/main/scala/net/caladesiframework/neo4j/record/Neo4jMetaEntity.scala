@@ -16,9 +16,10 @@
 package net.caladesiframework.neo4j.record
 
 import net.caladesiframework.neo4j.db.{Neo4jConfigurationRegistry, Neo4jDatabaseService}
-import net.caladesiframework.document.Field
+import net.caladesiframework.document._
 import org.neo4j.cypher.ExecutionEngine
 import org.neo4j.kernel.impl.util.StringLogger
+import org.neo4j.graphdb.Node
 
 trait Neo4jMetaEntity[RecordType] extends Neo4jEntity[RecordType] {
   self: RecordType =>
@@ -55,6 +56,70 @@ trait Neo4jMetaEntity[RecordType] extends Neo4jEntity[RecordType] {
     //}
 
     record
+  }
+
+  /**
+   * Creates a fresh node and assigns the node data to it
+   *
+   * @param node
+   * @return
+   */
+  def createEntityFromNode(node: Node, depth: Int = 1)(implicit ds: Neo4jDatabaseService) : RecordType = {
+    return setEntityFields(create, node, depth)
+  }
+
+  protected def setEntityFields(entity: RecordType, node: Node, depth: Int = 1): RecordType = {
+
+    this.fields foreach {fieldEntry => {
+      if (node.hasProperty(fieldEntry._2.name)) {
+
+        // Shortcuts
+        def fieldObj = fieldEntry._2
+        def nodeProp = node.getProperty(fieldObj.name)
+
+        // Match field and set proper value
+        fieldObj match {
+          // STRING
+          case field: StringField[_] =>
+            field.asInstanceOf[StringField[RecordType]].set(nodeProp.asInstanceOf[String])
+          case field: OptionalStringField[_] =>
+            field.asInstanceOf[OptionalStringField[RecordType]].set(nodeProp.asInstanceOf[String])
+
+          // INT
+          case field: IntField[_] =>
+            field.asInstanceOf[IntField[_]].set(nodeProp.asInstanceOf[Int])
+          case field: OptionalIntField[_] =>
+            field.asInstanceOf[OptionalIntField[RecordType]].set(nodeProp.asInstanceOf[Int])
+
+          // LONG
+          case field: LongField[_] =>
+            field.asInstanceOf[LongField[_]].set(nodeProp.asInstanceOf[Long])
+          case field: OptionalLongField[_] =>
+            field.asInstanceOf[OptionalLongField[_]].set(nodeProp.asInstanceOf[Long])
+
+          // BOOLEAN
+          case field: BooleanField[_] =>
+            field.asInstanceOf[BooleanField[_]].set(nodeProp.asInstanceOf[Boolean])
+          case field: OptionalBooleanField[_] =>
+            field.asInstanceOf[OptionalBooleanField[_]].set(nodeProp.asInstanceOf[Boolean])
+
+          // ERROR
+          case _ =>
+            throw new Exception("Unknown field type")
+        }
+      } else {
+        // No value and optional field -> Reset optional field
+        // Value and not optional -> throw exception
+        fieldEntry._2 match {
+          case field: OptionalField[_,_] =>
+            field.reset
+          case field: RequiredField[_,_] =>
+            throw new Exception("Required value for '%s' is not defined on node".format(fieldEntry._2.name))
+        }
+      }
+    }}
+
+    entity
   }
 
   private def initFields(record: Any) = {
