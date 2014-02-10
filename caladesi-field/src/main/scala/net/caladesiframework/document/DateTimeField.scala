@@ -22,7 +22,7 @@ class DateTimeField[OwnerType](ownerConstruct: OwnerType, default: Calendar = Ca
 
   def owner = ownerConstruct
 
-  def defaultValue = default
+  override def defaultValue = default
 }
 
 class OptionalDateTimeField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Calendar, OwnerType] {
@@ -30,4 +30,6 @@ class OptionalDateTimeField[OwnerType](ownerConstruct: OwnerType) extends Option
   def owner = ownerConstruct
 
   def defaultValue = None
+
+  protected var value: Calendar = _
 }

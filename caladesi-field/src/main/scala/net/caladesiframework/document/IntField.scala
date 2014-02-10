@@ -20,7 +20,7 @@ class IntField[OwnerType](ownerConstruct: OwnerType, default: Int = 0) extends R
 
   def owner = ownerConstruct
 
-  def defaultValue = default
+  override def defaultValue = default
 }
 
 class OptionalIntField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Int, OwnerType] {
@@ -28,4 +28,6 @@ class OptionalIntField[OwnerType](ownerConstruct: OwnerType) extends OptionalFie
   def owner = ownerConstruct
 
   def defaultValue = None
+
+  protected var value: Int = _
 }

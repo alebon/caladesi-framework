@@ -20,7 +20,7 @@ class BooleanField[OwnerType](ownerConstruct: OwnerType, default: Boolean = fals
 
   def owner = ownerConstruct
 
-  def defaultValue = default
+  override def defaultValue = default
 }
 
 class OptionalBooleanField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Boolean, OwnerType] {
@@ -29,4 +29,5 @@ class OptionalBooleanField[OwnerType](ownerConstruct: OwnerType) extends Optiona
 
   def defaultValue = None
 
+  protected var value: Boolean = _
 }

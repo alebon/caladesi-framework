@@ -14,8 +14,8 @@ trait Index {
    * @param ds
    * @return
    */
-  def checkFieldIndex(field: Field with IndexedField)(implicit ds: Neo4jDatabaseService) = {
-    val indexName = NamingStrategy().indexName(field, field.owner.asInstanceOf[Neo4jEntity])
+  def checkFieldIndex(field: Field[_,_] with IndexedField)(implicit ds: Neo4jDatabaseService) = {
+    val indexName = Naming().indexName(field, field.owner.asInstanceOf[Neo4jEntity[_]])
 
     if (!ds.graphDatabase.index().existsForNodes(indexName)) {
 
@@ -23,9 +23,9 @@ trait Index {
 
       // Create the index
       field match {
-        case field: Field with UniqueIndexed =>
+        case field: Field[_,_] with UniqueIndexed =>
           idx.forNodes(indexName)
-        case field: Field with FulltextIndexed =>
+        case field: Field[_,_] with FulltextIndexed =>
           val idxParams = new jMap[String, String]()
           idxParams.put("type", "fulltext")
 
@@ -42,24 +42,24 @@ trait Index {
    * @param ds
    * @return
    */
-  def updateIndex(entity: Neo4jEntity, reIndex: Boolean = true)(implicit ds: Neo4jDatabaseService)  = {
+  def updateIndex(entity: Neo4jEntity[_], reIndex: Boolean = true)(implicit ds: Neo4jDatabaseService)  = {
     val idx = ds.graphDatabase.index()
 
-    entity.meta.fields.asInstanceOf[List[Field]] foreach {
+    entity.meta.fields.asInstanceOf[List[Field[_,_]]] foreach {
 
       // Create the index
       field =>
 
-        val indexName = NamingStrategy().indexName(field, entity)
+        val indexName = Naming().indexName(field, entity)
 
         field match {
-          case field: RequiredField with IndexedField =>
+          case field: RequiredField[_,_] with IndexedField =>
             val nodeIdx = idx.forNodes(indexName)
             if (null != nodeIdx) {
               nodeIdx.remove(entity.getUnderlyingNode.get, field.name)
               nodeIdx.add(entity.getUnderlyingNode.get, field.name, field.get)
             }
-          case field: OptionalField with IndexedField =>
+          case field: OptionalField[_,_] with IndexedField =>
             val nodeIdx = idx.forNodes(indexName)
             if (null != nodeIdx) {
               nodeIdx.remove(entity.getUnderlyingNode.get, field.name)
@@ -75,15 +75,38 @@ trait Index {
     }
   }
 
+  /**
+   * Removes all entries for the entity
+   *
+   * @param entity
+   * @param ds
+   * @return
+   */
+  def removeFromIndex(entity: Neo4jEntity[_])(implicit ds: Neo4jDatabaseService) = {
+    entity.meta.fields foreach {
+      field => {
+        field match {
+          case field: Field[_, Neo4jEntity[_]] with IndexedField =>
+            val indexName = Naming().indexName(field, entity)
+            val idxForNode = ds.graphDatabase.index().forNodes(indexName)
+            idxForNode.remove(entity.getUnderlyingNode.get)
+          case _ =>
+            // ignore it
+        }
+      }
+    }
+
+  }
+
 }
 
-sealed case class NamingStrategy() {
+sealed case class Naming() {
 
-  def indexName(field: Field, entity: Neo4jEntity): String = {
+  def indexName(field: Field[_,_], entity: Neo4jEntity[_]): String = {
     field match {
-      case field: Field with FulltextIndexed =>
+      case field: Field[_,_] with FulltextIndexed =>
         "idx:fulltext_%s_%s".format(entity.meta.label, field.name)
-      case field: Field with UniqueIndexed =>
+      case field: Field[_,_] with UniqueIndexed =>
         "idx:exact_%s_%s".format(entity.meta.label, field.name)
     }
 

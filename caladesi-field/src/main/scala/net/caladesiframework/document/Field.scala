@@ -48,29 +48,29 @@ trait Field[FieldType, OwnerType] {
  */
 trait OptionalField[FieldType, OwnerType] extends Field[FieldType, OwnerType] {
 
-  protected var value: Option[FieldType] = None
+  protected var valueOption: Option[FieldType] = None
 
   override def set(value: FieldType) = {
-    this.value = Some(value)
+    this.valueOption = Some(value)
   }
 
   def reset = {
-    this.value = None
+    this.valueOption = None
   }
 
   def getOrElse(alternativeValue: FieldType): FieldType = {
-    if (this.value.isEmpty) {
+    if (this.valueOption.isEmpty) {
       return alternativeValue
     }
-    return this.value.get
+    return this.valueOption.get
   }
 
   override def get = {
-    this.value.get
+    this.valueOption.get
   }
 
   def hasValue: Boolean = {
-    if (this.value.isEmpty) {
+    if (this.valueOption.isEmpty) {
       return false
     }
     true
@@ -80,15 +80,7 @@ trait OptionalField[FieldType, OwnerType] extends Field[FieldType, OwnerType] {
 
 trait RequiredField[FieldType, OwnerType] extends Field[FieldType, OwnerType] {
 
-  protected var value: FieldType = defaultValue
-
   def defaultValue: FieldType
 
-  def set(value: FieldType) = {
-    this.value = value
-  }
-
-  def get: FieldType = {
-    this.value
-  }
+  override protected var value: FieldType = defaultValue
 }

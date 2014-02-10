@@ -22,7 +22,7 @@ class UuidField[OwnerType](ownerConstruct: OwnerType, default: UUID = UUID.rando
 
   def owner = ownerConstruct
 
-  def defaultValue = default
+  override def defaultValue = default
 }
 
 class OptionalUuidField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[UUID, OwnerType] {
@@ -30,5 +30,7 @@ class OptionalUuidField[OwnerType](ownerConstruct: OwnerType) extends OptionalFi
   def owner = ownerConstruct
 
   def defaultValue = None
+
+  protected var value: UUID = _
 }
 

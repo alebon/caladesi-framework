@@ -20,7 +20,7 @@ class LongField[OwnerType](ownerConstruct: OwnerType, default: Long = 0L) extend
 
   def owner = ownerConstruct
 
-  def defaultValue = default
+  override def defaultValue = default
 }
 
 class OptionalLongField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Long, OwnerType] {
@@ -28,4 +28,6 @@ class OptionalLongField[OwnerType](ownerConstruct: OwnerType) extends OptionalFi
   def owner = ownerConstruct
 
   def defaultValue = None
+
+  protected var value: Long = _
 }

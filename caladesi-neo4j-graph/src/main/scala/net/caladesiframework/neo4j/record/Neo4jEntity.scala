@@ -21,11 +21,11 @@ import net.caladesiframework.document._
 import scala.Some
 import java.util.{Calendar, UUID}
 import net.caladesiframework.neo4j.graph.entity.Neo4jGraphEntity
-import net.caladesiframework.neo4j.index.IndexManager
+import net.caladesiframework.neo4j.index.{Index, IndexManager}
 
 
-trait Neo4jEntity [RecordType] extends Record[RecordType]
-  with IndexManager {
+trait Neo4jEntity[RecordType] extends Record[RecordType]
+  with Index {
   self: RecordType =>
 
   def meta: Neo4jMetaEntity[RecordType]

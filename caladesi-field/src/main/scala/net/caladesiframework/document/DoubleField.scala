@@ -20,7 +20,7 @@ class DoubleField[OwnerType](ownerConstruct: OwnerType, default: Double = 0.0) e
 
   def owner = ownerConstruct
 
-  def defaultValue = default
+  override def defaultValue = default
 }
 
 class OptionalDoubleField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Double, OwnerType] {
@@ -28,4 +28,6 @@ class OptionalDoubleField[OwnerType](ownerConstruct: OwnerType) extends Optional
   def owner = ownerConstruct
 
   def defaultValue = None
+
+  protected var value: Double = _
 }

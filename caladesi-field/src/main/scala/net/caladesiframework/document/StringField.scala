@@ -20,7 +20,7 @@ class StringField[OwnerType](ownerConstruct: OwnerType, default: String = "undef
 
   def owner = ownerConstruct
 
-  def defaultValue = default
+  override def defaultValue = default
 }
 
 class OptionalStringField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[String, OwnerType] {
@@ -28,4 +28,6 @@ class OptionalStringField[OwnerType](ownerConstruct: OwnerType) extends Optional
   def owner = ownerConstruct
 
   def defaultValue = None
+
+  protected var value: String = _
 }
