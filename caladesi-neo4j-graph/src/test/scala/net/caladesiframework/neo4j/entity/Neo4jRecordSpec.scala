@@ -3,6 +3,7 @@ package net.caladesiframework.neo4j.entity
 import org.specs2.mutable.SpecificationWithJUnit
 import net.caladesiframework.neo4j.testkit.Neo4jDatabaseTestKit
 import net.caladesiframework.neo4j.record.Neo4jEntity
+import net.caladesiframework.neo4j.testkit.record.TestEntity
 
 class Neo4jRecordSpec extends SpecificationWithJUnit
   with Neo4jDatabaseTestKit {
@@ -14,7 +15,7 @@ class Neo4jRecordSpec extends SpecificationWithJUnit
 
     "init itself properly" in {
 
-      val entity =
+      val entity = TestEntity.createRecord
 
       true must_==(true)
     }

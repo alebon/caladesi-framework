@@ -49,13 +49,12 @@ trait RelationManager {
     field: Relation)(implicit db: Neo4jDatabaseService) = {
 
     field match {
-      case fld: RelatedToMany[RelatedEntityType] =>
-        handleRelatedToMany(node, fld)
-      case fld: RelatedToOne[RelatedEntityType] =>
-        handleRelatedToOne(node, fld)
-      case fld: OptionalRelatedToOne[RelatedEntityType] =>
-        handleOptionalRelatedToOne(node, fld)
-      //case fld: RelatedToMany[RelatedEntityType] =>
+      case fld: RelatedToMany[_] =>
+        handleRelatedToMany(node, fld.asInstanceOf[RelatedToMany[RelatedEntityType]])
+      case fld: RelatedToOne[_] =>
+        handleRelatedToOne(node, fld.asInstanceOf[RelatedToOne[RelatedEntityType]])
+      case fld: OptionalRelatedToOne[_] =>
+        handleOptionalRelatedToOne(node, fld.asInstanceOf[OptionalRelatedToOne[RelatedEntityType]])
       case _ =>
         throw new Exception("Can't handle this relation type")
     }
@@ -208,29 +207,29 @@ trait RelationManager {
     val relType = DynamicRelationshipType.withName( relationName(field) )
 
     field match {
-      case fld: RelatedToMany[RelatedEntity] =>
+      case fld: RelatedToMany[_] =>
         val targetRepo =  RepositoryRegistry.get(fld.targetClazz.clazz)
         val relations = node.getRelationships(relType, Direction.OUTGOING)
         while (relations.iterator().hasNext) {
           val relation = relations.iterator().next()
-          fld.put(targetRepo.createFromNode(relation.getEndNode, depth))
+          fld.asInstanceOf[RelatedToMany[RelatedEntity]].put(targetRepo.createFromNode(relation.getEndNode, depth))
         }
 
-      case fld: OptionalRelatedToOne[RelatedEntity] =>
+      case fld: OptionalRelatedToOne[_] =>
         val rel = node.getSingleRelationship(relType, Direction.OUTGOING)
 
         if (rel != null) {
           val targetRepo =  RepositoryRegistry.get(fld.targetClazz.clazz)
-          fld.set(targetRepo.createFromNode(rel.getEndNode, depth))
+          fld.asInstanceOf[OptionalRelatedToOne[RelatedEntity]].set(targetRepo.createFromNode(rel.getEndNode, depth))
         } else {
-          fld.clear
+          fld.asInstanceOf[OptionalRelatedToOne[RelatedEntity]].clear
         }
 
-      case fld: RelatedToOne[RelatedEntity] =>
+      case fld: RelatedToOne[_] =>
         val rel = node.getSingleRelationship(relType, Direction.OUTGOING)
 
         val targetRepo =  RepositoryRegistry.get(fld.defaultValue.clazz)
-        field.set(targetRepo.createFromNode(rel.getEndNode, depth))
+        field.asInstanceOf[RelatedToOne[RelatedEntity]].set(targetRepo.createFromNode(rel.getEndNode, depth))
     }
 
   }

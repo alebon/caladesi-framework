@@ -75,12 +75,14 @@ trait Neo4jEntity[RecordType] extends Record[RecordType]
     meta.inSyncTrx[Option[RecordType]](implicit ds => {
       findSingleByIndex(this.getFieldByName("_uuid").get.asInstanceOf[Field[_,_] with IndexedField], uuid) match {
         case Some(node) =>
-          Some(this.meta.transformToEntity(node, 1))
+          Some(this.meta.createEntityFromNode(node, 1))
         case None =>
           None
       }
     })
   }
+
+  def create = meta.createRecord
 
   protected def getFieldByName(name: String): Option[Field[_,_]] = {
     this.getClass.getDeclaredFields foreach {
