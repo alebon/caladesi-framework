@@ -15,7 +15,7 @@
  */
 package net.caladesiframework.elastic.field
 
-import net.caladesiframework.document.RequiredField
+import net.caladesiframework.field.RequiredField
 
 class StringField[OwnerType](ownerConstruct: OwnerType, default: String = "undefined") extends RequiredField[String, OwnerType]{
 

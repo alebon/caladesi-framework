@@ -16,7 +16,7 @@
 
 package net.caladesiframework.orientdb.document.field
 
-import net.caladesiframework.document.RequiredField
+import net.caladesiframework.field.RequiredField
 
 class DoubleField[OwnerType](ownerConstruct: OwnerType, default: Double = 0.0) extends RequiredField[Double, OwnerType]{
 

@@ -17,7 +17,7 @@
 package net.caladesiframework.elastic.field
 
 import java.util.UUID
-import net.caladesiframework.document.RequiredField
+import net.caladesiframework.field.RequiredField
 
 class UuidField[OwnerType](ownerConstruct: OwnerType, default: UUID = UUID.randomUUID()) extends RequiredField[UUID, OwnerType]{
 

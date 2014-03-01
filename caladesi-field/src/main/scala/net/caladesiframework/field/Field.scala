@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.document
+package net.caladesiframework.field
 
 trait Field[FieldType, OwnerType] {
 
@@ -31,7 +31,7 @@ trait Field[FieldType, OwnerType] {
     this.fieldName = name
   }
 
-  def get = {
+  def get: FieldType = {
     this.value
   }
 

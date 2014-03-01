@@ -19,7 +19,7 @@ package net.caladesiframework.elastic.record
 import net.caladesiframework.record.Record
 import net.caladesiframework.elastic.{DefaultElasticProviderIdentifier, ElasticProviderIdentifier}
 import net.caladesiframework.elastic.field.{DynamicPropertiesField, StringField, UuidField}
-import net.caladesiframework.document.Field
+import net.caladesiframework.field.Field
 import org.elasticsearch.common.xcontent.{XContentFactory, XContentBuilder}
 import net.caladesiframework.elastic.field.analyzer.NotAnalyzed
 

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.document
+package net.caladesiframework.field
 
-class IntField[OwnerType](ownerConstruct: OwnerType, default: Int = 0) extends RequiredField[Int, OwnerType]{
+class StringField[OwnerType](ownerConstruct: OwnerType, default: String = "undefined") extends RequiredField[String, OwnerType]{
 
   def owner = ownerConstruct
 
   override def defaultValue = default
 }
 
-class OptionalIntField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Int, OwnerType] {
+class OptionalStringField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[String, OwnerType] {
 
   def owner = ownerConstruct
 
   def defaultValue = None
 
-  protected var value: Int = _
+  protected var value: String = _
 }

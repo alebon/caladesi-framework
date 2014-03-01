@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package net.caladesiframework.document
+package net.caladesiframework.field
 
-class LongField[OwnerType](ownerConstruct: OwnerType, default: Long = 0L) extends RequiredField[Long, OwnerType]{
+import java.util.UUID
+
+class UuidField[OwnerType](ownerConstruct: OwnerType, default: UUID = UUID.randomUUID()) extends RequiredField[UUID, OwnerType]{
 
   def owner = ownerConstruct
 
   override def defaultValue = default
 }
 
-class OptionalLongField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Long, OwnerType] {
+class OptionalUuidField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[UUID, OwnerType] {
 
   def owner = ownerConstruct
 
   def defaultValue = None
 
-  protected var value: Long = _
+  protected var value: UUID = _
 }
+

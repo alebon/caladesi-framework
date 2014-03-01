@@ -1,6 +1,6 @@
 package net.caladesiframework.neo4j.index
 
-import net.caladesiframework.document.{OptionalField, RequiredField, Field}
+import net.caladesiframework.field.{OptionalField, RequiredField, Field}
 import net.caladesiframework.neo4j.record.Neo4jEntity
 import net.caladesiframework.neo4j.db.Neo4jDatabaseService
 import java.util.{HashMap => jMap}

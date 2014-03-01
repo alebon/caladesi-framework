@@ -18,7 +18,7 @@ package net.caladesiframework.orientdb.document.record
 
 import net.caladesiframework.record.Record
 import com.orientechnologies.orient.core.record.impl.ODocument
-import net.caladesiframework.document.Field
+import net.caladesiframework.field.Field
 import net.caladesiframework.orientdb.document.field._
 import scala.Some
 import java.util.UUID

@@ -16,7 +16,7 @@
 
 package net.caladesiframework.orientdb.document.field
 
-import net.caladesiframework.document.RequiredField
+import net.caladesiframework.field.RequiredField
 
 class IntField[OwnerType](ownerConstruct: OwnerType, default: Int = 0) extends RequiredField[Int, OwnerType]{
 

@@ -16,7 +16,7 @@
 
 package net.caladesiframework.orientdb.document.field
 
-import net.caladesiframework.document.OptionalField
+import net.caladesiframework.field.OptionalField
 
 class OptionalLongField[OwnerType](ownerConstruct: OwnerType) extends OptionalField[Long, OwnerType]{
 

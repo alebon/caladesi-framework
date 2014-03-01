@@ -15,7 +15,7 @@
  */
 package net.caladesiframework.elastic.field
 
-import net.caladesiframework.document.RequiredField
+import net.caladesiframework.field.RequiredField
 
 class DynamicPropertiesField[OwnerType](ownerConstruct: OwnerType, default: Map[String, AnyRef] = Map())
   extends RequiredField[Map[String, _], OwnerType]{

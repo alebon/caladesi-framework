@@ -16,7 +16,7 @@
 
 package net.caladesiframework.orientdb.document.field
 
-import net.caladesiframework.document.RequiredField
+import net.caladesiframework.field.RequiredField
 import java.util.UUID
 
 class UuidField[OwnerType](ownerConstruct: OwnerType, default: UUID = UUID.randomUUID()) extends RequiredField[UUID, OwnerType]{

@@ -24,7 +24,7 @@ import org.elasticsearch.client.Requests
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
 import org.elasticsearch.common.xcontent.{XContentFactory, XContentBuilder}
-import net.caladesiframework.document.Field
+import net.caladesiframework.field.Field
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
 import org.elasticsearch.index.query.{FilterBuilders, QueryBuilders}
 import org.elasticsearch.search.facet.terms.TermsFacet

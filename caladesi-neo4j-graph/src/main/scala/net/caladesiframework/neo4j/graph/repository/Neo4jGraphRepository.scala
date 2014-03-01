@@ -27,6 +27,10 @@ import net.caladesiframework.neo4j.db.Neo4jConfiguration
 import net.caladesiframework.neo4j.relation.{RelationManager, Relation}
 import org.neo4j.kernel.impl.util.StringLogger
 import org.neo4j.cypher.ExecutionEngine
+import org.neo4j.tooling.GlobalGraphOperations
+import org.neo4j.helpers.collection.IteratorUtil
+import org.neo4j.kernel.GraphDatabaseAPI
+import org.neo4j.kernel.impl.core.NodeManager
 
 abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   (implicit tag: scala.reflect.ClassTag[EntityType], configuration: Neo4jConfiguration)
@@ -63,7 +67,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
   /**
    * Root Node of the graph
    */
-  protected lazy val rootNode: Node = transactional(implicit ds => {
+  protected lazy val rootNode: Node = readTx(implicit ds => {
     var rootNode: Node = null
     try {
       rootNode = ds.graphDatabase.getNodeById(0)
@@ -94,7 +98,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * Creates the correct SubRefs and Index if missing
    */
   def init = {
-    transactional(implicit ds => {
+    writeTx(implicit ds => {
 
       // Check for Sub Reference Node existence
       val rel = rootNode.getSingleRelationship(REPOSITORY_RELATION, Direction.OUTGOING)
@@ -152,10 +156,11 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    */
   def update(entity: EntityType) = {
 
-    transactional(implicit ds => {
+    writeTx(implicit ds => {
       var node : Node = null
       if (!entity.hasInternalId()) {
         node = ds.graphDatabase.createNode()
+
         node.createRelationshipTo(subReferenceNode, ENTITY_RELATION)
         entity.setUnderlyingNode(node)
       } else {
@@ -177,7 +182,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def findIdx(field: Field[_] with IndexedField, value: Any): Option[EntityType] = {
-    transactional[Option[EntityType]](implicit ds => {
+    readTx[Option[EntityType]](implicit ds => {
       findSingleByIndex(field, value) match {
         case Some(node) =>
           Some(transformToEntity(node, 1))
@@ -194,7 +199,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def findIdxAll(field: Field[_] with IndexedField, value: Any): List[EntityType] = {
-    transactional[List[EntityType]](implicit ds => {
+    readTx[List[EntityType]](implicit ds => {
       findAllByIndex(field, value).map(node => transformToEntity(node))
     })
   }
@@ -206,7 +211,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @return
    */
   def findIdxAll(field: Field[_] with IndexedField, values: List[String]): List[EntityType] = {
-    transactional[List[EntityType]](implicit ds => {
+    readTx[List[EntityType]](implicit ds => {
       findAllByIndexSet(field, values).map(node => transformToEntity(node))
     })
   }
@@ -218,7 +223,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @param limit
    * @return
    */
-  def find(skip: Long = 0L, limit : Long = 10): List[EntityType] = transactional(implicit ds => {
+  def find(skip: Long = 0L, limit : Long = 10): List[EntityType] = readTx(implicit ds => {
     val result: org.neo4j.cypher.ExecutionResult = this.executionEngine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN entity SKIP %s LIMIT %s"
       .format(subReferenceNode.getId, ENTITY_RELATION.name, skip, limit) )
 
@@ -242,7 +247,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @param list
    * @return
    */
-  def update(list: List[EntityType]) = transactional(implicit db => {
+  def update(list: List[EntityType]) = writeTx(implicit db => {
     throw new Exception("Operation not supported yet")
   })
 
@@ -252,7 +257,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @param entity
    * @return
    */
-  def delete(entity: EntityType) = transactional[Boolean]( implicit ds => {
+  def delete(entity: EntityType) = writeTx[Boolean]( implicit ds => {
     def node = entity.getUnderlyingNode
 
     // DO NOT remove incoming relations, this will break data integrity (user has to check before deletion)
@@ -277,7 +282,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    *
    * @return
    */
-  def count: Long = transactional(implicit ds => {
+  def count: Long = readTx(implicit ds => {
     val engine = this.executionEngine
     val result: org.neo4j.cypher.ExecutionResult = engine.execute( "START n=node(%s) MATCH n<-[:%s]-entity RETURN count(entity) AS countAll"
       .format(subReferenceNode.getId, ENTITY_RELATION.name) )
@@ -296,7 +301,7 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * Drops all entities in the repository (use with care)
    */
   def drop : Unit = {
-    transactional(implicit db => {
+    writeTx(implicit db => {
       // @TODO drop all entities from repository
     })
 
@@ -406,9 +411,39 @@ abstract class Neo4jGraphRepository[EntityType <: Neo4jGraphEntity]
    * @tparam T
    * @return
    */
-  def transactional[T <: Any](f: Neo4jDatabaseService => T) : T = {
+  def readTx[T <: Any](f: Neo4jDatabaseService => T) : T = {
 
-    val transaction = synchronized { this.configuration.egdsp.ds.graphDatabase.beginTx() }
+    val transaction = this.configuration.egdsp.ds.graphDatabase.beginTx()
+
+    try {
+      val ret = f(this.configuration.egdsp.ds)
+      transaction.success
+      return ret
+    } catch {
+      case e:Exception =>
+        transaction.failure
+        throw new Exception("Failure during execution (%s) : %s - STACKTRACE: %s".format(e.getClass, e.getMessage, e.getStackTraceString))
+    } finally {
+      transaction.close()
+    }
+  }
+
+  /**
+   * Opens the db, performs execution
+   *
+   * @param f
+   * @tparam T
+   * @return
+   */
+  def writeTx[T <: Any](f: Neo4jDatabaseService => T) : T = {
+
+    val transaction = synchronized {
+      val transaction = this.configuration.egdsp.ds.graphDatabase.beginTx()
+
+      // Acquire write LOCK?
+
+      transaction
+    }
 
     try {
       val ret = f(this.configuration.egdsp.ds)

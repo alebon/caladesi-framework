@@ -17,22 +17,21 @@ package net.caladesiframework.neo4j.record
 
 import net.caladesiframework.record.Record
 import org.neo4j.graphdb.{Direction, Label, Node}
-import net.caladesiframework.document._
+import net.caladesiframework.field._
 import scala.Some
 import java.util.{Calendar, UUID}
 import net.caladesiframework.neo4j.graph.entity.Neo4jGraphEntity
 import net.caladesiframework.neo4j.index.{IndexedField, Index, IndexManager}
 
 
-trait Neo4jEntity[RecordType] extends Record[RecordType]
-  with Index {
+trait Neo4jEntity[RecordType] {
   self: RecordType =>
 
   def meta: Neo4jMetaEntity[RecordType]
 
   private [this] var dbRecord: Option[Node] = None
 
-  override def internalId = {
+  def internalId = {
     if (!dbRecord.isEmpty) {
       Some(dbRecord.get.getId.toString)
     } else {
@@ -73,12 +72,13 @@ trait Neo4jEntity[RecordType] extends Record[RecordType]
 
   def find(uuid: String): Option[RecordType] = {
     meta.inSyncTrx[Option[RecordType]](implicit ds => {
-      findSingleByIndex(this.getFieldByName("_uuid").get.asInstanceOf[Field[_,_] with IndexedField], uuid) match {
+      None
+      /**findSingleByIndex(this.getFieldByName("_uuid").get.asInstanceOf[Field[_,_] with IndexedField], uuid) match {
         case Some(node) =>
           Some(this.meta.createEntityFromNode(node, 1))
         case None =>
           None
-      }
+      }*/
     })
   }
 
@@ -115,7 +115,7 @@ trait Neo4jEntity[RecordType] extends Record[RecordType]
    *
    * @return
    */
-  override def delete = meta.inSyncTrx[Boolean]( implicit ds => {
+  def delete = meta.inSyncTrx[Boolean]( implicit ds => {
     this.dbRecord match {
       case Some(node) =>
 
@@ -131,7 +131,7 @@ trait Neo4jEntity[RecordType] extends Record[RecordType]
           relationsOutgoing.iterator().next().delete()
         }
 
-        removeFromIndex(this)
+        //removeFromIndex(this)
         node.delete()
         true
 

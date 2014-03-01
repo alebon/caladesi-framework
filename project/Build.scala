@@ -26,7 +26,7 @@ object BuildDef extends Build {
 
   lazy val root = Project(id = "caladesi-framework",
                           base = file("."))
-                    .aggregate(common, field, repository, record, web, orientdbcommon, orientdbdocument, /**orientdbgraph,*/ neo4jgraph, elasticsearch)
+                    .aggregate(common, field, repository, record, web, orientdbcommon, orientdbdocument, /**orientdbgraph,*/ neo4jgraph, elasticsearch, neo4j)
                     .settings(publishArtifact := false)
 
   lazy val common =
@@ -95,6 +95,14 @@ object BuildDef extends Build {
       .settings(description := "Caladesi Framework Neo4j Graph",
                 libraryDependencies ++= Seq(neo4j_all, slf4j_api, specs2, junit))
       .dependsOn(common, field, repository, record)
+
+  lazy val neo4j =
+    Project(id = "caladesi-neo4j",
+      base = file("caladesi-neo4j"),
+      settings = Project.defaultSettings)
+      .settings(description := "Caladesi Framework Neo4j Graph",
+      libraryDependencies ++= Seq(neo4j_all, slf4j_api, specs2, junit))
+      .dependsOn(common, field)
 
   lazy val elasticsearch =
     Project(id = "caladesi-elasticsearch",

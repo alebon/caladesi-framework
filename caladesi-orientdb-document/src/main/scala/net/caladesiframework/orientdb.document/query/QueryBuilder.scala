@@ -18,7 +18,7 @@ package net.caladesiframework.orientdb.document.query
 
 import java.util.UUID
 import net.caladesiframework.orientdb.document.record.OrientRecord
-import net.caladesiframework.document.Field
+import net.caladesiframework.field.Field
 
 class QueryBuilder[QRType]() {
 

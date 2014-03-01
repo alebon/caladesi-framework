@@ -16,7 +16,7 @@
 package net.caladesiframework.neo4j.record
 
 import net.caladesiframework.neo4j.db.{Neo4jConfigurationRegistry, Neo4jDatabaseService}
-import net.caladesiframework.document._
+import net.caladesiframework.field._
 import org.neo4j.cypher.ExecutionEngine
 import org.neo4j.kernel.impl.util.StringLogger
 import org.neo4j.graphdb.Node

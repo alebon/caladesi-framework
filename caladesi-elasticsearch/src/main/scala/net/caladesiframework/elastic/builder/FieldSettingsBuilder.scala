@@ -10,7 +10,7 @@
 
 package net.caladesiframework.elastic.builder
 
-import net.caladesiframework.document.Field
+import net.caladesiframework.field.Field
 import net.caladesiframework.elastic.field.analyzer.{NotAnalyzed, Analyzed}
 
 class FieldSettingsBuilder {

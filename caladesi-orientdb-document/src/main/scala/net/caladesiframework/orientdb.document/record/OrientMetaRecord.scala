@@ -16,7 +16,7 @@
 
 package net.caladesiframework.orientdb.document.record
 
-import net.caladesiframework.document.Field
+import net.caladesiframework.field.Field
 import net.caladesiframework.orientdb.config._
 import com.orientechnologies.orient.core.db.document.{ODatabaseDocumentTx, ODatabaseDocumentPool, ODatabaseDocument}
 import com.orientechnologies.orient.core.tx.OTransaction

@@ -16,7 +16,7 @@
 
 package net.caladesiframework.orientdb.document.field
 
-import net.caladesiframework.document.RequiredField
+import net.caladesiframework.field.RequiredField
 
 class BooleanField[OwnerType](ownerConstruct: OwnerType, default: Boolean = false) extends RequiredField[Boolean, OwnerType]{
 

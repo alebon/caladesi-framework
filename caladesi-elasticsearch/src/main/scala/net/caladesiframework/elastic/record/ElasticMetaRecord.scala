@@ -17,7 +17,7 @@
 package net.caladesiframework.elastic.record
 
 import net.caladesiframework.elastic.provider.{Elastic, ElasticProvider}
-import net.caladesiframework.document.Field
+import net.caladesiframework.field.Field
 import net.caladesiframework.elastic.field.{DynamicPropertiesField, StringField, UuidField}
 import java.util.UUID
 import org.elasticsearch.search.facet.terms.TermsFacet
